@@ -106,7 +106,6 @@
 								</option>
 								<option id="ilg.gnumcueclipse.managedbuild.cross.riscv.option.c.linker.nostart" name="Do not use standard start files (-nostartfiles)" superClass="ilg.gnumcueclipse.managedbuild.cross.riscv.option.c.linker.nostart" useByScannerDiscovery="false" value="true" valueType="boolean"/>
 								<option IS_BUILTIN_EMPTY="false" IS_VALUE_EMPTY="false" id="ilg.gnumcueclipse.managedbuild.cross.riscv.option.c.linker.paths" name="Library search path (-L)" superClass="ilg.gnumcueclipse.managedbuild.cross.riscv.option.c.linker.paths" useByScannerDiscovery="false" valueType="libPaths">
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/algorithm/audio_alg/lc3/gcc10}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/proj_lib}&quot;"/>
 								</option>
 								<option IS_BUILTIN_EMPTY="false" IS_VALUE_EMPTY="false" id="ilg.gnumcueclipse.managedbuild.cross.riscv.option.c.linker.libs" name="Libraries (-l)" superClass="ilg.gnumcueclipse.managedbuild.cross.riscv.option.c.linker.libs" useByScannerDiscovery="false" valueType="libs">
@@ -231,7 +230,7 @@
 						</toolChain>
 					</folderInfo>
 					<sourceEntries>
-						<entry excluding="boot/TL721X|drivers/TL721X|drivers/TL321X|boot/TL321X|drivers/B96|boot/B96|vendor/ble_controller|vendor/product_cis_source|vendor/product_cis_sink|vendor/product_bis_source|vendor/product_bis_sink|algorithm/audio_alg|algorithm/lc3/gcc7|vendor/cis_peripheral|vendor/cis_central|vendor/internal_test|vendor/acl_peripheral_demo|vendor/acl_connection_demo|vendor/acl_central_demo|vendor/audio_broadcast_assistant|vendor/audio_broadcast_source|vendor/audio_broadcast_sink|vendor/audio_unicast_server|vendor/audio_unicast_client|boot/B91|drivers/B91|vendor/BQB_controller|3rd-party|src/boot.c|div_mod.S" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name=""/>
+						<entry excluding="vendor/2p4g_tpll|vendor/2p4g_gen_fsk|vendor/2p4g_feature_test|boot/TL721X|drivers/TL721X|drivers/TL321X|boot/TL321X|drivers/B96|boot/B96|vendor/ble_controller|vendor/product_cis_source|vendor/product_cis_sink|vendor/product_bis_source|vendor/product_bis_sink|algorithm/audio_alg|algorithm/lc3/gcc7|vendor/cis_peripheral|vendor/cis_central|vendor/internal_test|vendor/acl_peripheral_demo|vendor/acl_connection_demo|vendor/acl_central_demo|vendor/audio_broadcast_assistant|vendor/audio_broadcast_source|vendor/audio_broadcast_sink|vendor/audio_unicast_server|vendor/audio_unicast_client|boot/B91|drivers/B91|vendor/BQB_controller|3rd-party|src/boot.c|div_mod.S" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name=""/>
 					</sourceEntries>
 				</configuration>
 			</storageModule>
@@ -343,7 +342,6 @@
 								</option>
 								<option id="ilg.gnumcueclipse.managedbuild.cross.riscv.option.c.linker.nostart" name="Do not use standard start files (-nostartfiles)" superClass="ilg.gnumcueclipse.managedbuild.cross.riscv.option.c.linker.nostart" useByScannerDiscovery="false" value="true" valueType="boolean"/>
 								<option IS_BUILTIN_EMPTY="false" IS_VALUE_EMPTY="false" id="ilg.gnumcueclipse.managedbuild.cross.riscv.option.c.linker.paths" name="Library search path (-L)" superClass="ilg.gnumcueclipse.managedbuild.cross.riscv.option.c.linker.paths" useByScannerDiscovery="false" valueType="libPaths">
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/algorithm/audio_alg/lc3/gcc10}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/proj_lib}&quot;"/>
 								</option>
 								<option IS_BUILTIN_EMPTY="false" IS_VALUE_EMPTY="false" id="ilg.gnumcueclipse.managedbuild.cross.riscv.option.c.linker.libs" name="Libraries (-l)" superClass="ilg.gnumcueclipse.managedbuild.cross.riscv.option.c.linker.libs" useByScannerDiscovery="false" valueType="libs">
@@ -407,7 +405,7 @@
 						</toolChain>
 					</folderInfo>
 					<sourceEntries>
-						<entry excluding="boot/TL721X|drivers/TL721X|drivers/TL321X|boot/TL321X|drivers/B96|boot/B96|vendor/feature_test|vendor/ble_controller|vendor/product_cis_source|vendor/product_cis_sink|vendor/product_bis_source|vendor/product_bis_sink|algorithm/audio_alg|algorithm/lc3/gcc7|vendor/broadcast_sender|vendor/broadcast_receiver|vendor/cis_peripheral|vendor/cis_central|vendor/feature_demo|vendor/internal_test|vendor/acl_peripheral_demo|vendor/acl_central_demo|vendor/audio_broadcast_assistant|vendor/audio_broadcast_source|vendor/audio_broadcast_sink|vendor/audio_unicast_server|vendor/audio_unicast_client|boot/B91|drivers/B91|vendor/BQB_controller|src/boot.c|div_mod.S|usbstd" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name=""/>
+						<entry excluding="vendor/2p4g_tpll|vendor/2p4g_gen_fsk|vendor/2p4g_feature_test|3rd-party|boot/TL721X|drivers/TL721X|drivers/TL321X|boot/TL321X|drivers/B96|boot/B96|vendor/feature_test|vendor/ble_controller|vendor/product_cis_source|vendor/product_cis_sink|vendor/product_bis_source|vendor/product_bis_sink|algorithm/audio_alg|algorithm/lc3/gcc7|vendor/broadcast_sender|vendor/broadcast_receiver|vendor/cis_peripheral|vendor/cis_central|vendor/feature_demo|vendor/internal_test|vendor/acl_peripheral_demo|vendor/acl_central_demo|vendor/audio_broadcast_assistant|vendor/audio_broadcast_source|vendor/audio_broadcast_sink|vendor/audio_unicast_server|vendor/audio_unicast_client|boot/B91|drivers/B91|vendor/BQB_controller|src/boot.c|div_mod.S|usbstd" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name=""/>
 					</sourceEntries>
 				</configuration>
 			</storageModule>
@@ -520,7 +518,6 @@
 								</option>
 								<option id="ilg.gnumcueclipse.managedbuild.cross.riscv.option.c.linker.nostart" name="Do not use standard start files (-nostartfiles)" superClass="ilg.gnumcueclipse.managedbuild.cross.riscv.option.c.linker.nostart" useByScannerDiscovery="false" value="true" valueType="boolean"/>
 								<option IS_BUILTIN_EMPTY="false" IS_VALUE_EMPTY="false" id="ilg.gnumcueclipse.managedbuild.cross.riscv.option.c.linker.paths" name="Library search path (-L)" superClass="ilg.gnumcueclipse.managedbuild.cross.riscv.option.c.linker.paths" useByScannerDiscovery="false" valueType="libPaths">
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/algorithm/audio_alg/lc3/gcc10}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/proj_lib}&quot;"/>
 								</option>
 								<option IS_BUILTIN_EMPTY="false" IS_VALUE_EMPTY="false" id="ilg.gnumcueclipse.managedbuild.cross.riscv.option.c.linker.libs" name="Libraries (-l)" superClass="ilg.gnumcueclipse.managedbuild.cross.riscv.option.c.linker.libs" useByScannerDiscovery="false" valueType="libs">
@@ -584,7 +581,7 @@
 						</toolChain>
 					</folderInfo>
 					<sourceEntries>
-						<entry excluding="boot/TL721X|drivers/TL721X|drivers/TL321X|boot/TL321X|drivers/B96|boot/B96|vendor/feature_test|vendor/ble_controller|vendor/product_cis_source|vendor/product_cis_sink|vendor/product_bis_source|vendor/product_bis_sink|algorithm/audio_alg|algorithm/lc3/gcc7|vendor/cis_peripheral|vendor/cis_central|vendor/feature_demo|vendor/internal_test|vendor/acl_peripheral_demo|vendor/acl_connection_demo|vendor/audio_broadcast_assistant|vendor/audio_broadcast_source|vendor/audio_broadcast_sink|vendor/audio_unicast_server|vendor/audio_unicast_client|boot/B91|drivers/B91|vendor/BQB_controller|3rd-party|src/boot.c|div_mod.S|usbstd" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name=""/>
+						<entry excluding="vendor/2p4g_tpll|vendor/2p4g_gen_fsk|vendor/2p4g_feature_test|boot/TL721X|drivers/TL721X|drivers/TL321X|boot/TL321X|drivers/B96|boot/B96|vendor/feature_test|vendor/ble_controller|vendor/product_cis_source|vendor/product_cis_sink|vendor/product_bis_source|vendor/product_bis_sink|algorithm/audio_alg|algorithm/lc3/gcc7|vendor/cis_peripheral|vendor/cis_central|vendor/feature_demo|vendor/internal_test|vendor/acl_peripheral_demo|vendor/acl_connection_demo|vendor/audio_broadcast_assistant|vendor/audio_broadcast_source|vendor/audio_broadcast_sink|vendor/audio_unicast_server|vendor/audio_unicast_client|boot/B91|drivers/B91|vendor/BQB_controller|3rd-party|src/boot.c|div_mod.S|usbstd" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name=""/>
 					</sourceEntries>
 				</configuration>
 			</storageModule>
@@ -697,7 +694,6 @@
 								</option>
 								<option id="ilg.gnumcueclipse.managedbuild.cross.riscv.option.c.linker.nostart" name="Do not use standard start files (-nostartfiles)" superClass="ilg.gnumcueclipse.managedbuild.cross.riscv.option.c.linker.nostart" useByScannerDiscovery="false" value="true" valueType="boolean"/>
 								<option IS_BUILTIN_EMPTY="false" IS_VALUE_EMPTY="false" id="ilg.gnumcueclipse.managedbuild.cross.riscv.option.c.linker.paths" name="Library search path (-L)" superClass="ilg.gnumcueclipse.managedbuild.cross.riscv.option.c.linker.paths" useByScannerDiscovery="false" valueType="libPaths">
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/algorithm/audio_alg/lc3/gcc10}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/proj_lib}&quot;"/>
 								</option>
 								<option IS_BUILTIN_EMPTY="false" IS_VALUE_EMPTY="false" id="ilg.gnumcueclipse.managedbuild.cross.riscv.option.c.linker.libs" name="Libraries (-l)" superClass="ilg.gnumcueclipse.managedbuild.cross.riscv.option.c.linker.libs" useByScannerDiscovery="false" valueType="libs">
@@ -761,7 +757,7 @@
 						</toolChain>
 					</folderInfo>
 					<sourceEntries>
-						<entry excluding="boot/TL721X|drivers/TL721X|drivers/TL321X|boot/TL321X|drivers/B96|boot/B96|vendor/feature_test|vendor/ble_controller|vendor/product_cis_source|vendor/product_cis_sink|vendor/product_bis_source|vendor/product_bis_sink|algorithm/audio_alg|algorithm/lc3/gcc7|vendor/cis_peripheral|vendor/cis_central|vendor/feature_demo|vendor/internal_test|vendor/acl_connection_demo|vendor/acl_central_demo|vendor/audio_broadcast_assistant|vendor/audio_broadcast_source|vendor/audio_broadcast_sink|vendor/audio_unicast_server|vendor/audio_unicast_client|boot/B91|drivers/B91|vendor/BQB_controller|src/boot.c|div_mod.S|usbstd" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name=""/>
+						<entry excluding="vendor/2p4g_tpll|vendor/2p4g_gen_fsk|vendor/2p4g_feature_test|3rd-party|boot/TL721X|drivers/TL721X|drivers/TL321X|boot/TL321X|drivers/B96|boot/B96|vendor/feature_test|vendor/ble_controller|vendor/product_cis_source|vendor/product_cis_sink|vendor/product_bis_source|vendor/product_bis_sink|algorithm/audio_alg|algorithm/lc3/gcc7|vendor/cis_peripheral|vendor/cis_central|vendor/feature_demo|vendor/internal_test|vendor/acl_connection_demo|vendor/acl_central_demo|vendor/audio_broadcast_assistant|vendor/audio_broadcast_source|vendor/audio_broadcast_sink|vendor/audio_unicast_server|vendor/audio_unicast_client|boot/B91|drivers/B91|vendor/BQB_controller|src/boot.c|div_mod.S|usbstd" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name=""/>
 					</sourceEntries>
 				</configuration>
 			</storageModule>

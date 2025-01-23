@@ -27,13 +27,9 @@
 #include "feature_config.h"
 
 
-
-
-
-
-#if(FEATURE_TEST_MODE == TEST_LL_MD)
+#if (FEATURE_TEST_MODE == TEST_LL_MD)
     #include "feature_ll_more_data/app_config.h"
-#elif(FEATURE_TEST_MODE == TEST_2M_CODED_PHY_CONNECTION)
+#elif (FEATURE_TEST_MODE == TEST_2M_CODED_PHY_CONNECTION)
     #include "feature_2M_coded_phy/app_config.h"
 #elif (FEATURE_TEST_MODE == TEST_LL_DLE)
     #include "feature_dle/app_config.h"
@@ -58,9 +54,8 @@
 #elif (FEATURE_TEST_MODE == TEST_FEATURE_BACKUP)
     #include "feature_backup/app_config.h"
 #elif (FEATURE_TEST_MODE == TEST_SMP)
-   #include "feature_smp/app_config.h"
+    #include "feature_smp/app_config.h"
 #elif (FEATURE_TEST_MODE == TEST_L2CAP_COC)
     #include "feature_l2cap_coc/app_config.h"
 #else
 #endif
-

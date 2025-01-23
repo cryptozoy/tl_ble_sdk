@@ -25,7 +25,6 @@
 #define BLE_CONTROLLER_H_
 
 
-
 #include "stack/ble/ble_common.h"
 #include "stack/ble/ble_format.h"
 

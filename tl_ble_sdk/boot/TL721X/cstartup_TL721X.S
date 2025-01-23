@@ -22,6 +22,8 @@
  *
  *******************************************************************************************************/
 
+#include "user_config.h"
+
 /**
  * @brief   Set "DP_THROUGH_SWIRE_DIS" as "1" to disable the "dp_through_swire" function. Set "DP_THROUGH_SWIRE_DIS" as "0" to enable the "dp_through_swire" function.
  *          Risk description:
@@ -31,29 +33,38 @@
  *          1. During fixture production, burning a firmware program that disables the "dp_through_swire"function into unprogrammed chip will cause the problem that chip can not be burned again due to swire communication failure.
  *          2. Burning a firmware program that disables the "dp_through_swire" function with BDT tool may result in failure of debugging due to swire communication failure.
  *          If developers evaluate that the above scheme (set "DP_THROUGH_SWIRE_DIS" as "1") cannot be used, they can only set "DP_THROUGH_SWIRE_DIS" to "0" to enable the "dp_through_swire" function. However, be careful not to make DP and DM pin trigger "dp_through_swire" timing.
+ *          In USB applications, 1. calling the usb_set_pin(1) interface (equivalent to usb_set_pin_en) will re-enable the dp_through_swire function 2. calling the usb_set_pin(0) interface will disable the dp_through_swire function.
  */
 #ifndef DP_THROUGH_SWIRE_DIS
 #define DP_THROUGH_SWIRE_DIS      1
 #endif
 
-#include "user_config.h"
+/* If using Andes toolchain, these two Macro are defined in it's toolchain */
+/* If using std gcc toolchain, these two core registers(not standard risc-v core registers)
+    should be defined here. */
+#ifdef STD_GCC
+#define mmisc_ctl  0x7D0
+#define mcache_ctl 0x7CA
+#endif
 
-.extern pm_retention_register_recover
+.extern gpio_shutdown_flashcode_for_asm
+.extern gpio_shutdown_ramcode_for_asm
 
 //According to the current internal seal flash model of Telink RISC-V MCU, the maximum time between the flash awakening and the operating flash is 20us, which leaves some margin and is set to 25us.
 //When adding flash later, if tRES1 is greater than 25us, this waiting time needs to be updated. (flash tRES1, which can be viewed in the comments of the variable flash_support_mid.)
 //(add by weihua.zhang 20230811)
 #define EFUSE_LOAD_AND_FLASH_WAKEUP_LOOP_NUM        320 //25us
+#define FLASH_LOOP_NUM_TEST                         0
 
 //The default driver configuration is 128K to ensure that the default driver configuration can work properly on all models.
 //In actual use, please configure the sram size according to your own model, otherwise the efficiency will be affected.
 //the most efficient use is:
 //IRAM is used to store code, DRAM is used to store data, if the data-related segments are stored in IRAM, the efficiency will be affected.
 //(add by weihua.zhang, confirmed by kaixin.chen and shujuan.chu 20230725)
-#define SRAM_128K      1    //128KSRAM, 128KB-IRAM(96KB-Retention)/0KB-DRAM
-#define SRAM_256K      2    //256KSRAM, 256KB-IRAM(96KB-Retention)/0KB-DRAM
-#define SRAM_384K      3    //384KSRAM, 256KB-IRAM(96KB-Retention)/128KB-DRAM
-#define SRAM_512K      4    //512KSRAM, 256KB-IRAM(96KB-Retention)/256KB-DRAM
+#define SRAM_128K      1    //128KSRAM, 128KB-IRAM(128KB-Retention)/0KB-DRAM
+#define SRAM_256K      2    //256KSRAM, 256KB-IRAM(256KB-Retention)/0KB-DRAM
+#define SRAM_384K      3    //384KSRAM, 256KB-IRAM(256KB-Retention)/128KB-DRAM
+#define SRAM_512K      4    //512KSRAM, 256KB-IRAM(256KB-Retention)/256KB-DRAM
 #define SRAM_SIZE      SRAM_128K
 
 #if (SRAM_SIZE == SRAM_256K)
@@ -116,8 +127,7 @@ _RESET_ENTRY:
     .org 0x17        //correspond to "SECURE_BOOT_FLAG_ADDR" in mcu_boot.h
     .byte (0x5A)
  #endif
-
-    //free the 6th ~ 7th byte to store the crc type of the bin file
+ 
     .org 0x18
     .word (BIN_SIZE)
 
@@ -174,13 +184,19 @@ _START:
 #if DP_THROUGH_SWIRE_DIS
     lui     t0, 0x80100
     addi    t0 , t0 , 0x700
-    li      t1, 0x40
-    sb      t1, 0x501(t0)  //0x80100c01 -> 0x40  <7>: 0 swire_usb_dis <6>:read-only bit
+    li      t1, 0x00
+    sb      t1, 0x501(t0)  //0x80100c01 -> 0x00  <7>: 0 swire_usb_dis 
 #endif
 
     /* Initialize stack pointer */
     la     t0, _STACK_TOP
     mv     sp, t0
+
+#if 1
+    /* gpio shutdown to decrease current. for power on or deep this function was in flash code segment. */
+    la     t0, gpio_shutdown_flashcode_for_asm
+    jalr   t0
+#endif
 
 #ifdef __nds_execit
     /* Initialize EXEC.IT table */
@@ -319,7 +335,9 @@ _IRESET_ENTRY:
     /* Decide whether this is an NMI or cold reset */
     j       _ISTART
 
-    .org 0x22
+    /* BLE SDK use: change from 0x22 to 0x24 */
+    .org 0x24
+
 _ISTART:
 #if 0
     // add debug, PB4 output 1
@@ -328,7 +346,7 @@ _ISTART:
     li      t1, 0xef
     li      t2, 0x10
     sb      t1, 0x482(t0)       //0x80140c12  PB oen     =  0xef
-    sb      t2, 0x48c(t0)       //0x80140c1c  PB output  =  0x10
+    sb      t2, 0x48c(t0)       //0x80140c1c  PB set     =  0x10
 #endif
 
     /* timer rst enable. */
@@ -355,9 +373,22 @@ _ISTART:
     la     gp, __global_pointer$
     .option pop
 
+#if DP_THROUGH_SWIRE_DIS
+    lui     t0, 0x80100
+    addi    t0 , t0 , 0x700
+    li      t1, 0x00
+    sb      t1, 0x501(t0)  //0x80100c01 -> 0x00  <7>: 0 swire_usb_dis 
+#endif
+
     /* Initialize stack pointer */
     la     t0, _STACK_TOP
     mv     sp, t0
+
+#if 1
+    /* gpio shutdown to decrease current. for retention this function was in ram segment which can be called early. */
+    la     t0, gpio_shutdown_ramcode_for_asm
+    jalr   t0
+#endif
 
 #ifdef __nds_execit
     /* Initialize EXEC.IT table */
@@ -430,13 +461,44 @@ _MSPI_WAIT_2:
     li      t1, 0x0a
     sb      t1, 0x78c(t0)       //xip_enable        :0xA3FFFF1c = 0x0a
 
+#if FLASH_LOOP_NUM_TEST
+    // add debug, PB4 output 1
+    lui     t0, 0x80140
+    addi    t0, t0, 0x790
+    li      t1, 0xef
+    li      t2, 0x10
+    sb      t1, 0x482(t0)       //0x80140c12  PB oen     =  0xef
+    sb      t2, 0x48c(t0)       //0x80140c1c  PB set     =  0x10
+#endif
+
     /*flash wakeup need delay about 20us */
-    /*efuse load need delay about 0us */
+    /*efuse load need delay about 44us */
     li      t0, 0
     li      t1, EFUSE_LOAD_AND_FLASH_WAKEUP_LOOP_NUM
 _WAIT_EFUSE_LOAD_AND_FLASH_WAKEUP_FINISH:
     addi    t0, t0, 1
     bgeu    t1, t0, _WAIT_EFUSE_LOAD_AND_FLASH_WAKEUP_FINISH
+
+    lui     t0, 0x80140
+    lb      t2, 0x307(t0)      //0x80140307[bit0]:OTP_STATUS-busy
+    andi    t2, t2, 0x01
+    li      t1, 0x00
+    beq     t1, t2, _WAIT_EFUSE_LOAD_AND_FLASH_WAKEUP_FINISH_END
+
+    li      t0, 0
+    li      t1, EFUSE_LOAD_AND_FLASH_WAKEUP_LOOP_NUM
+_WAIT_EFUSE_LOAD_AND_FLASH_WAKEUP_FINISH_2:
+    addi    t0, t0, 1
+    bgeu    t1, t0, _WAIT_EFUSE_LOAD_AND_FLASH_WAKEUP_FINISH_2
+_WAIT_EFUSE_LOAD_AND_FLASH_WAKEUP_FINISH_END:
+
+#if FLASH_LOOP_NUM_TEST
+    // add debug, PB4 output 0
+    lui     t0, 0x80140
+    addi    t0, t0, 0x790
+    li      t2, 0x10
+    sb      t2, 0x48d(t0)       //0x80140c1d  PB clear   =  0x10
+#endif
 
 _MULTI_ADDRESS_BEGIN:
     lui     t0, 0xA3FFF

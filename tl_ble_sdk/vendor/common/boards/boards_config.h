@@ -25,21 +25,21 @@
 
 ///////////////////////Board Select Configuration ///////////////////////////////
 #ifndef BOARD_951X_EVK_C1T213A20
-#define BOARD_951X_EVK_C1T213A20                        0x213A20      //
+    #define BOARD_951X_EVK_C1T213A20 0x213A20 //
 #endif
 
 #ifndef BOARD_952X_EVK_C1T266A20
-#define BOARD_952X_EVK_C1T266A20                        0x266A20     //
+    #define BOARD_952X_EVK_C1T266A20 0x266A20 //
 #endif
 
 #ifndef BOARD_721X_EVK_C1T315A20
-#define BOARD_721X_EVK_C1T315A20                        0x315A20
+    #define BOARD_721X_EVK_C1T315A20 0x315A20
 #endif
 
 #ifndef BOARD_321X_EVK_C1T331A20
-#define BOARD_321X_EVK_C1T331A20                        0x331A20
+    #define BOARD_321X_EVK_C1T331A20 0x331A20
 #endif
 
 #ifndef BOARD_321X_EVK_C1T335A20
-#define BOARD_321X_EVK_C1T335A20                        0x335A20
+    #define BOARD_321X_EVK_C1T335A20 0x335A20
 #endif

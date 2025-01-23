@@ -1,3 +1,584 @@
+## V3.4.0(PR)
+
+### Version
+
+* SDK Version: tl_platform_sdk V3.4.0
+* Chip Version
+  - TLSR921x/TLSR951x(B91)(A0/A1/A2),TLSR922x/TLSR952x(B92)(A3/A4),TL721X(A2),TL321X(A1/A2)
+* Hardware EVK Version
+  * TLSR951x(B91): C1T213A20
+  * TLSR952x(B92): C1T266A20
+  * TL721X: C1T315A20
+  * TL321X: C1T335A20
+* Toolchain Version
+  - TLSR921x/TLSR951x(B91): gcc7(TL32 ELF MCULIB V5F GCC7.4 (riscv32-elf-gcc)) ( IDE: [telink_v323_rds](https://wiki.telink-semi.cn/tools_and_sdk/Tools/IDE/telink_v323_rds_official_windows.zip) )
+  - TLSR922x/TLSR952x(B92): gcc12(TL32 ELF MCULIB V5F GCC12.2 (riscv32-elf-gcc))( IDE: [TelinkIoTStudio_V2024.8](https://wiki.telink-semi.cn/tools_and_sdk/Tools/IoTStudio/TelinkIoTStudio_V2024.8.zip) )
+  - TL721x: gcc12(TL32 ELF MCULIB V5F GCC12.2 (riscv32-elf-gcc))( IDE: [TelinkIoTStudio_V2024.8](https://wiki.telink-semi.cn/tools_and_sdk/Tools/IoTStudio/TelinkIoTStudio_V2024.8.zip) )
+  - TL321x: gcc12(TL32 ELF MCULIB V5 GCC12.2 (riscv32-elf-gcc))( IDE: [TelinkIoTStudio_V2024.8](https://wiki.telink-semi.cn/tools_and_sdk/Tools/IoTStudio/TelinkIoTStudio_V2024.8.zip) )
+
+<hr style="border-bottom:2.5px solid rgb(146, 240, 161)">
+
+### Note
+
+* **adc**
+  * (TL321X)Only the M channel is reserved, the L/R channel is not open for public use.(merge_requests/@1509)
+* **ALL**
+  * (TL321X)Features are compatible on A1/A2, switch to A2 if you need to test performance.(merge_requests/@1517)
+  
+### Bug Fixes
+
+* **IR_Learn**
+  * (TL321x/TL721x)Fix the issue where the IR_Learn module's idle level is low during IR_Learn simulation reception, resulting in the first edge not being captured.(merge_requests/@1494)
+* **rf** 
+  * (tl321x)Fixed an issue that could cause RF to work abnormally when PA2 is used as an input function.(merge_requests/@1489)
+* **UART** 
+  * (TL721x/TL321x)Fixed bug where the uart_receive_dma interface rx done did not take effect.(merge_requests/@1507)
+* **ADC** 
+  * (TL321x)Disable dwa, because enabling dwa affects adc performance.(merge_requests/@1516)
+  * (TL321x)Add a comment reminding that in vbat mode 192k, the first code needs to be discarded.(merge_requests/@1516)
+  * (TL321x)Clear the fifo before starting adc sampling to prevent residual values in the fifo from affecting the sampling results.(merge_requests/@1516)
+  
+### Features
+
+* **USB audio demo**
+  * (TL321X/TL721x) Add USB audio microphone and speaker demo.(merge_requests/@1496)
+* **USB**
+  * (TLSR921x/TLSR951x/TLSR922x/TLSR952x/TL721x/TL321x) Add usb_hardware_remote_wakeup() and usb_software_remote_wakeup() interface to wakeup the host in sleep state.(merge_requests/@1502)
+* **USB mouse/keyboard demo**
+  * (TLSR921x/TLSR951x/TLSR922x/TLSR952x/TL721x/TL321x) Add remote wakeup function in mouse and keyboard demo.(merge_requests/@1502)
+* **calibration**
+  * (TL321X) Add interface user_check_ieee_addr() to check the legitimacy of ieee address, interface user_get_efuse_ieee_addr() to get the ieee address in efuse, and interface user_get_ieee_addr() to get the address in flash or efuse, calibration_func() add read ieee address in flash or efuse function.(merge_requests/@1505)
+* **efuse**
+  * (TL321x) Add the interface efuse_get_ieee_addr().(merge_requests/@1505)
+* **rf**
+  * (TL721X) Added rf_set_rx_dcoc_cali_by_sw interface to switch rx DCOC software calibration to optimise rf_mode_init execution time(This interface is only available in scenarios where only tx is used, not rx)(merge_requests/@1506)
+* **adc**
+  * (TL721X)PB0 works fine and is open. PD0 and PD1 are open for public use, but not recommended, with an error of 50-100mv, and are still being debugged internally.(merge_requests/@1509)
+
+### Refactoring
+
+* **flash**
+  * (B92) Change xx_MID1460c8 and xx_MID1560c8 to xx_MID1460C8 and xx_MID1560C8 to maintain consistency and be more standardized.(merge_requests/@1503)
+
+### BREAKING CHANGES
+
+* **rf**
+  * (TL321X)Update rf_power_Level_list to adapt to the latest RF configuration(merge_requests/@1495)
+  * (TL721X)The rf_mode_init() function has added an RF Rx DCOC software calibration scheme to solve the problem of poor Rx sensitivity 
+            performance in some chips with large DC-offset.The execution time of this function will be longer, you can check the function 
+            comment for the specific time.Due to the use of software DCOC's calibration scheme, it is not necessary and not allowed to use 
+            rf_get_dcoc_cal_val and rf_set_dcoc_cal_val for processing in the fast settle function,Therefore, the above two interfaces were 
+            deleted.(merge_requests/@1506)
+  * (TL721X/TL321X)In order to fix TX drift and bandedge issues; the preamble len for all modes has been updated, and the 
+                   'rf_tx_fast_settle_time_e' has been modified to update the settling time for each level of TX fastsettle. 
+                    (merge_requests/@1511)
+
+### Performance Improvements
+
+* **rf**
+  * (TL721X)rf_mode_init() function uses dcoc software calibration to minimize the DC-offset of the chip, in order to improve the chip's out-of-band immunity (interference including DC-offset). 
+            DC-offset will be larger chip sensitivity performance back to the normal range.(merge_requests/@1506)
+
+
+## V3.4.0(PR)
+
+### 版本
+
+* SDK 版本: tl_platform_sdk V3.4.0
+* 芯片版本
+  - TLSR921x/TLSR951x(B91)(A0/A1/A2),TLSR922x/TLSR952x(B92)(A3/A4),TL721X(A2),TL321X(A1/A2)
+* 硬件评估板版本
+  * TLSR951x(B91): C1T213A20
+  * TLSR952x(B92): C1T266A20
+  * TL721X: C1T315A20
+  * TL321X: C1T335A20
+* 工具链版本
+  - TLSR921x/TLSR951x(B91): gcc7(TL32 ELF MCULIB V5F GCC7.4 (riscv32-elf-gcc)) ( IDE: [telink_v323_rds](https://wiki.telink-semi.cn/tools_and_sdk/Tools/IDE/telink_v323_rds_official_windows.zip) )
+  - TLSR922x/TLSR952x(B92): gcc12(TL32 ELF MCULIB V5F GCC12.2 (riscv32-elf-gcc))( IDE: [TelinkIoTStudio_V2024.8](https://wiki.telink-semi.cn/tools_and_sdk/Tools/IoTStudio/TelinkIoTStudio_V2024.8.zip) )
+  - TL721x: gcc12(TL32 ELF MCULIB V5F GCC12.2 (riscv32-elf-gcc))( IDE: [TelinkIoTStudio_V2024.8](https://wiki.telink-semi.cn/tools_and_sdk/Tools/IoTStudio/TelinkIoTStudio_V2024.8.zip) )
+  - TL321x: gcc12(TL32 ELF MCULIB V5 GCC12.2 (riscv32-elf-gcc))( IDE: [TelinkIoTStudio_V2024.8](https://wiki.telink-semi.cn/tools_and_sdk/Tools/IoTStudio/TelinkIoTStudio_V2024.8.zip) )
+
+<hr style="border-bottom:2.5px solid rgb(146, 240, 161)">
+
+### Note
+
+* **adc**
+  * (TL321X)仅保留M通道，L/R通道不对外开放。(merge_requests/@1509)
+* **ALL**
+  * (TL321X)功能可以在 A1/A2 上兼容，如果需要测试性能，请切换到 A2。(merge_requests/@1517)
+  
+### Bug Fixes
+
+* **IR_Learn**
+  * (TL321x/TL721x)修复IR_Learn模拟接收的时候，IR_Learn模块的空闲电平是低电平，导致第一个沿无法捕获的问题。(merge_requests/@1494)
+* **rf** 
+  * (tl321x)修复了PA2作为输入功能使用时，可能导致RF工作异常的问题。(merge_requests/@1489)
+* **UART** 
+  * (TL721x/TL321x)修复了 uart_receive_dma 接口 rx done 不生效的 bug。(merge_requests/@1507)
+* **ADC** 
+  * (TL321x)禁用dwa，因为启用dwa会影响adc性能。(merge_requests/@1516)
+  * (TL321x)添加注释提醒在vbat模式192k下，需要丢弃第一个code。(merge_requests/@1516)
+  * (TL321x)在启动adc采样之前清fifo，防止fifo中残留的值影响采样结果。(merge_requests/@1516)
+  
+### Features
+
+* **USB audio demo**
+  * (TL321X/TL721x) 添加USB audio microphone和speaker demo。(merge_requests/@1496)
+* **USB**
+  * (TLSR921x/TLSR951x/TLSR922x/TLSR952x/TL721x/TL321x) 新增 usb_hardware_remote_wakeup() 和 usb_software_remote_wakeup()接口来唤醒睡眠中的主机。(merge_requests/@1502)
+* **USB mouse/keyboard demo**
+  * (TLSR921x/TLSR951x/TLSR922x/TLSR952x/TL721x/TL321x) 在 mouse 和 keyboard demo中增加远程唤醒功能。(merge_requests/@1502)
+* **calibration**
+  * (TL321x) 添加检查ieee地址合法性接口user_check_ieee_addr()，获取efuse中的ieee地址接口user_get_efuse_ieee_addr()和获取flash或efuse地址的接口user_get_ieee_addr()，calibration_func()添加读flash或efuse中ieee地址功能。(merge_requests/@1505)
+* **efuse**
+  * (TL321x) 添加接口efuse_get_ieee_addr()。(merge_requests/@1505)
+* **rf**
+  * (TL721X) 添加了rf_set_rx_dcoc_cali_by_sw接口开关rx DCOC软件校准，以优化rf_mode_init执行时间（该接口在只用tx，不用rx的场景，才可以使用）(merge_requests/@1506)
+* **adc**
+  * (TL721X)PB0可以正常使用，已开放。PD0、PD1已对外开放，但不建议使用，误差在50-100mv，内部还在debug中。(merge_requests/@1509)
+  
+### Refactoring
+
+* **flash**
+  * (B92) 为了更规范且和其他芯片保持一致性，将xx_MID1460c8和xx_MID1560c8修改为xx_MID1460C8和xx_MID1560C8。(merge_requests/@1503)
+
+### BREAKING CHANGES
+
+* **rf**
+  * (TL321X)更新rf_power_Level_list以适配最新RF配置(merge_requests/@1495)
+  * (TL721X)rf_mode_init()函数中新增了rf rx dcoc软件校准方案来解决部分DC-offset较大的芯片 rx sensitivity性能差的问题，该函数执行时间会变长，具体时间可以查看函数注释。因为使用了软件dcoc的校准方案，
+           所以在fast settle功能中，不需要并且也不允许再用rf_get_dcoc_cal_val和rf_set_dcoc_cal_val进行处理，固删除了上述两个接口。(merge_requests/@1506)
+  * (TL721X/TL321X) 为了修复TX drift 以及bandedge问题，更新所有模式的preamble len;同时修改'rf_tx_fast_settle_time_e',更新TX fastsettle 各个档位的settle时间(merge_requests/@1511)
+
+### Performance Improvements
+
+* **rf**
+  * (TL721X)rf_mode_init()函数使用dcoc 软件校准来使芯片获得最小的DC-offset,以此来提高芯片的带外抗干扰能力（干扰包括DC-offset）。将DC-offset较大的芯片sensitivity性能恢复到正常范围。(merge_requests/@1506)
+
+
+## V3.3.2
+
+### Version
+
+* SDK version: tl_platform_sdk V3.3.2
+* This version of the SDK supports TLSR921x/TLSR951x(B91)(A0/A1/A2),TLSR922x/TLSR952x(B92)(A3/A4),TL721X(A2),TL321X(A0) chips.
+* Hardware EVK Version
+  * TLSR951x(B91): C1T213A20
+  * TLSR952x(B92): C1T266A20
+  * TL721X: C1T315A20
+  * TL321X: C1T335A20
+* Toolchain version
+  - TLSR921x/TLSR951x(B91): gcc7(TL32 ELF MCULIB V5F GCC7.4 (riscv32-elf-gcc))
+  - TLSR922x/TLSR952x(B92): gcc12(TL32 ELF MCULIB V5F GCC12.2 (riscv32-elf-gcc))
+  - TL721x: gcc12(TL32 ELF MCULIB V5F GCC12.2 (riscv32-elf-gcc))
+  - TL321x: gcc12(TL32 ELF MCULIB V5 GCC12.2 (riscv32-elf-gcc))
+
+### Bug Fixes
+
+* **rf**
+  * (B92)Fixed the configuration error of the rf_rx_fast_settle_dis interface.(merge_requests/@1493)
+
+### Features
+
+* N/A
+
+### Refactoring
+
+* N/A
+
+### BREAKING CHANGES
+
+* N/A
+
+### Performance Improvements
+
+* N/A
+
+### 版本
+
+* SDK版本: tl_platform_sdk V3.3.2
+* 此版本SDK支持 TLSR921x/TLSR951x(B91)(A0/A1/A2),TLSR922x/TLSR952x(B92)(A3/A4),TL721X(A2),TL321X(A0) 芯片。
+* 硬件评估板版本
+  * TLSR951x(B91): C1T213A20
+  * TLSR952x(B92): C1T266A20
+  * TL721X: C1T315A20
+  * TL321X: C1T335A20
+* 工具链版本
+  - TLSR921x/TLSR951x(B91): gcc7(TL32 ELF MCULIB V5F GCC7.4 (riscv32-elf-gcc))
+  - TLSR922x/TLSR952x(B92): gcc12(TL32 ELF MCULIB V5F GCC12.2 (riscv32-elf-gcc))
+  - TL721x: gcc12(TL32 ELF MCULIB V5F GCC12.2 (riscv32-elf-gcc))
+  - TL321x: gcc12(TL32 ELF MCULIB V5 GCC12.2 (riscv32-elf-gcc))
+
+### Bug Fixes
+
+* **rf**
+  * (B92)修复rf_rx_fast_settle_dis接口配置错误。(merge_requests/@1493)
+
+### Features
+
+* N/A
+
+### Refactoring
+
+* N/A
+
+### BREAKING CHANGES
+
+* N/A
+
+### Performance Improvements
+
+* N/A
+
+---
+
+## V3.3.1
+
+### Version
+
+* SDK version: tl_platform_sdk V3.3.1
+* This version of the SDK supports TLSR921x/TLSR951x(B91)(A0/A1/A2),TLSR922x/TLSR952x(B92)(A3/A4),TL721X(A2),TL321X(A0) chips.
+* Hardware EVK Version
+  * TLSR951x(B91): C1T213A20
+  * TLSR952x(B92): C1T266A20
+  * TL721X: C1T315A20
+  * TL321X: C1T335A20
+* Toolchain version
+  - TLSR921x/TLSR951x(B91): gcc7(TL32 ELF MCULIB V5F GCC7.4 (riscv32-elf-gcc))
+  - TLSR922x/TLSR952x(B92): gcc12(TL32 ELF MCULIB V5F GCC12.2 (riscv32-elf-gcc))
+  - TL721x: gcc12(TL32 ELF MCULIB V5F GCC12.2 (riscv32-elf-gcc))
+  - TL321x: gcc12(TL32 ELF MCULIB V5 GCC12.2 (riscv32-elf-gcc))
+
+### Bug Fixes
+
+* N/A
+
+### Features
+
+* N/A
+
+### Refactoring
+
+* **code format**
+  * (B91/B92/TL321X/TL721x)For the sake of consistency in the code style of the company's projects, all .c and .h code is formatted uniformly, except for the 3rd-patry directory.(merge_requests/@1487)
+
+
+### BREAKING CHANGES
+
+* N/A
+
+### Performance Improvements
+
+* N/A
+
+### 版本
+
+* SDK版本: tl_platform_sdk V3.3.1
+* 此版本SDK支持 TLSR921x/TLSR951x(B91)(A0/A1/A2),TLSR922x/TLSR952x(B92)(A3/A4),TL721X(A2),TL321X(A0) 芯片。
+* 硬件评估板版本
+  * TLSR951x(B91): C1T213A20
+  * TLSR952x(B92): C1T266A20
+  * TL721X: C1T315A20
+  * TL321X: C1T335A20
+* 工具链版本
+  - TLSR921x/TLSR951x(B91): gcc7(TL32 ELF MCULIB V5F GCC7.4 (riscv32-elf-gcc))
+  - TLSR922x/TLSR952x(B92): gcc12(TL32 ELF MCULIB V5F GCC12.2 (riscv32-elf-gcc))
+  - TL721x: gcc12(TL32 ELF MCULIB V5F GCC12.2 (riscv32-elf-gcc))
+  - TL321x: gcc12(TL32 ELF MCULIB V5 GCC12.2 (riscv32-elf-gcc))
+
+### Bug Fixes
+
+* N/A
+
+### Features
+
+* N/A
+
+### Refactoring
+
+* **code format**
+  * (B91/B92/TL321X/TL721x)为了公司项目代码风格保持一致，除 3rd-patry 目录外，将所有 .c 和 .h 代码统一格式化.(merge_requests/@1487)
+
+### BREAKING CHANGES
+
+* N/A
+
+### Performance Improvements
+
+* N/A
+
+---
+
+## V3.3.0
+
+### Version
+
+* SDK version: tl_platform_sdk V3.3.0
+* This version of the SDK supports TLSR921x/TLSR951x(B91)(A0/A1/A2),TLSR922x/TLSR952x(B92)(A3/A4),TL721X(A2),TL321X(A0) chips.
+* Hardware EVK Version
+  * TLSR951x(B91): C1T213A20
+  * TLSR952x(B92): C1T266A20
+  * TL721X: C1T315A20
+  * TL321X: C1T335A20
+* Toolchain version
+  - TLSR921x/TLSR951x(B91): gcc7(TL32 ELF MCULIB V5F GCC7.4 (riscv32-elf-gcc))
+  - TLSR922x/TLSR952x(B92): gcc12(TL32 ELF MCULIB V5F GCC12.2 (riscv32-elf-gcc))
+  - TL721x: gcc12(TL32 ELF MCULIB V5F GCC12.2 (riscv32-elf-gcc))
+  - TL321x: gcc12(TL32 ELF MCULIB V5 GCC12.2 (riscv32-elf-gcc))
+
+### Bug Fixes
+
+* **aes**
+  * (B91/B92)Solved the problem that the aes modified the e0 address pointer, causing the BT communication to be abnormal.(merge_requests/@1273)
+* **pm**
+  * (TL721X)Solves an issue where users cannot sleep and wake up normally when all interrupt priorities such as PM are initialized to 0 during initialization.(merge_requests/@1332)
+  * (TL321x)Solved the issue of possible SRAM loss when entering suspend sleep after deep retention sleep. (merge_requests/@1480)
+* **sys** 
+  * (TL721X)The problem of frequency deviation caused by too short reservation of crystal starting time is solved.(merge_requests/@1332)
+* **ske** 
+  * (TL321X/TL721x)Addressed the issue where the software did not check the busy signal bit before writing to the SKE register, leading to data errors caused by repeated software triggering of calculations before the SKE computation was complete.（merge_requests/@1331, merge_requests/@1340）
+* **audio**
+  * (B91)Fixed the problem that i2s pin input function could not be used because gpio_shutdown(GPIO_ALL) was called during initialization.(merge_requests/@1351)
+  * (TL721x/TL321x)Fix BUFFER_TO_LINEOUT demo waveform distortion issue.(merge_requests/@1472)
+* **rf**
+  * (B91/B92)Fixed an issue where incorrect configuration during the enable and disable of fast settle caused the settle process to deviate from the expected behavior, potentially leading to a degradation in RF performance.(merge_requests/@1354)
+* **adc**
+  * (TL721x)1.A2 test PB0 PD1 PD2 three pins capture voltage performance slightly worse than other pins, so remove. 2.Test found that enabling dwa affects adc performance so don't use this feature. 3.pre_scale = 1/4 Fixed on A2, already open.(merge_requests/@1428,merge_requests/@1445)
+* **clock**
+  * (B91/B92)Fixed PLL crash caused by failure to vibrate. If the PLL starts abnormally, restart it. Use PM_ANA_REG_POWER_ON_CLR_BUF0[bit3-6] to check whether the reset caused by abnormal PLL starts occurs. Use drv_get_error_code to query the exception source. Note that the exception source is lost after each reset. You need to read and save the error source at the application layer in advance.(merge_requests/@1268)(merge_requests/@1438)
+* **sys** 
+  * (tl721x)The problem is solved because the efuse load is not completed, which leads to the instability of ram limit and the error of program handling.(merge_requests/@1454)
+* **spi**
+  * (B91/B92/TL721x/TL321x)Fix spi_master_write_read_full_duplex function exception issue. (merge_requests/@1465)
+
+### Features
+
+* **pm**
+  * (TL721x)Add pm_set_dvdd function to support core and sram voltage adjustment.(merge_requests/@1276)
+* **pke**
+  * (TL721x)Add ed25519 algorithm driver and demo.(merge_requests/@1289)
+* **audio**
+  * (TL721x)Add TL721x audio dmic to i2s case.(merge_requests/@1345)
+  * (B91)Added audio i2sin to i2sout case.(merge_requests/@1351)
+  * (TL721x)Add audio_reset_audio_clk interface to change codec clk.(merge_requests/@1418)
+  * (TL321x) Add audio driver and demo.(merge_requests/@1367)
+  * (TL721x/TL321x) Add spi_txdma_req_after_cmd_en,spi_txdma_req_after_cmd_dis interface.(merge_requests/@1472)。
+* **hash**
+  * (TL321x)Add HASH_Demo_v1.1.8 for TL321x.(merge_requests/@1349)
+* **pke**
+  * (TL321x)Add ed25519 and c25519 algorithm and PKE_Demo_v1.1.8 for TL321x.(merge_requests/@1340, merge_requests/@1349)
+* **ske**
+  * (TL321x)Update v1.1.9 for SKE_Demo.(merge_requests/@1364)
+  * (TL721x)SKE_Demo is changed to v1.1.9.(merge_requests/@1364)
+* **rf**
+  * (B91/B92/TL7518)Added "rf_set_tx_wait_time" and "rf_set_rx_wait_time" interfaces to configure tx wait time and rx wait time.(merge_requests/@1403)
+  * (B91/B92/TL721x/TL321x) Adapted the fast settle mode switching feature, added the following interfaces: rf_tx_fast_settle_get_cal_val, rf_tx_fast_settle_set_cal_val, rf_rx_fast_settle_get_cal_val, and rf_rx_fast_settle_set_cal_val. Removed the global variable g_fast_settle_cal_val and introduced the global pointer variable g_fast_settle_cal_val_ptr.(merge_requests/@1416)(merge_requests/@1432)(merge_requests/@1439)
+  * (TL321X) Enable software dcoc and add rf_set_rx_dcoc_cali_by_sw interfaces for customers to control the software dcoc on/off.(merge_requests/@1435)
+  * (TL721X/TL321X) Add interfaces "rf_dma_chn_en" and "rf_dma_chn_dis"(merge_requests/@1483)
+* **pke**
+  * (TL721x)Add x25519 algorithm driver and demo.(merge_requests/@1421)
+* **lpc**
+  * (TL721X/TL321X) Add lpc driver and demo.(merge_requests/@1279)
+* **adc**
+  * (TL321x/TL721x)Add the ADC_GPIO_SAMPLE_VBAT mode to indirectly sample vbat voltage through gpio.(merge_requests/@1445)
+* **calibration**
+  * (TL721x) Add interface user_check_ieee_addr() to check the legitimacy of ieee address, interface user_get_otp_ieee_addr() to get the ieee address in otp, and interface user_get_ieee_addr() to get the address in flash or otp, calibration_func() add read ieee address in flash or otp function.(merge_requests/@1440)
+* **otp**
+  * (TL721x)Add the interface otp_get_ieee_addr().(merge_requests/@1440)
+* **DUT_Demo** 
+  * (B92)Add DUT_Demo and users can develop fixture test programs according to their own needs.(merge_requests/@1384)
+* **EMI_BQB_DEMO**
+  * (B91/B92/TL721x/TL321x) Adapted the fast settle mode switching feature.(merge_requests/@1416)(merge_requests/@1432)(merge_requests/@1439)
+* **RF_DEMO**
+  * (B91/B92/TL721x/TL321x) Adapted the fast settle mode switching feature.(merge_requests/@1416)(merge_requests/@1432)(merge_requests/@1439)
+
+### Refactoring
+
+* **usb**
+  * (B91/B92/TL721X/TL321X)Add enum type-casting to GPIO pin in usb_set_pin() to prevent compilation errors.(merge_requests/@1321)
+  * (B91) tinyusb port file add parameter checking.(merge_requests/@1472)
+* **uart**
+  * (B92)uart_get_dma_rev_data_len: Optimize the interface logic to return the dma-configured receive length when the transmit length is greater than the receive length. (merge_requests/@1338)
+* **adc**
+  * (TL721X/TL321X)Revert adc_input_pin_e to adc_input_pin_def_e for compatibility with B92.(merge_requests/@1339)
+* **plic** 
+  * (B91/B92/TL721x/TL321x)Remove the clock_32k_init and calibration interfaces from the mtime_clk_init interface and put them in the demo to be called as needed.（merge_requests/@1394）
+* **rf**
+  * (TL721X/TL321X)Optimized the interfaces of "rf_set_tx_wait_time" and "rf_set_rx_wait_time" and updated relevant comments.(merge_requests/@1403)
+  * (B91/B92/TL721x/TL321x) Adapted the fast settle mode switching feature and updated the following interfaces: rf_set_chn, rf_rx_fast_settle_update_cal_val, rf_tx_fast_settle_update_cal_val and rf_set_rccal_cal_val(Excluding B91/B92).(merge_requests/@1416)(merge_requests/@1432)(merge_requests/@1439)
+* **audio**
+  * (TL721x)Adjust the audio sample rate arrays and enum, remove 8.02k sample rate.(merge_requests/@1415)
+  * (TL721X)Modify reg_fifo_th_irq register bit comments.(merge_requests/@1401)
+* **adc**
+  * (TL721x)According to ATE Big Data, ADC_GPIO_VREF_DEFAULT_VALUE was changed from 1175 to 1220, ADC_GPIO_VREF_OFFSET_DEFAULT_VALUE was changed from 0 to 8, ADC_VBAT_VREF_DEFAULT_VALUE was changed from 1175 to 1220. ADC_VBAT_VREF_OFFSET_DEFAULT_VALUE was changed from 0 to 15 to be more in line with most chips.(merge_requests/@1445)
+  * (TL321x)According to ATE Big Data, ADC_GPIO_VREF_DEFAULT_VALUE was changed from 1175 to 1202, ADC_GPIO_VREF_OFFSET_DEFAULT_VALUE was changed from 0 to 7, ADC_VBAT_VREF_DEFAULT_VALUE was changed from 1175 to 1207. ADC_VBAT_VREF_OFFSET_DEFAULT_VALUE was changed from 0 to -7, which is more in line with most chips.(merge_requests/@1445)
+* **pke**  
+  * (TL321X)Remove duplicate declarations, delete the pke_utility.h file.(merge_requests/@1444)
+* **lib**
+  * (B92)The file analog.c and the interface sys_set_dcdc_1pP4_ldo_2p0() are encapsulated into library files.(merge_requests/@1195,merge_requests/@1268)
+* **gpio**
+  * (B91/B92/TL721x/TL321x)add comments: Do not recommended that two or more GPIOs be set to the same interrupt source, as the interrupt is uncertain if triggered at the same time.(merge_requests/@1470)
+
+### BREAKING CHANGES 
+
+* **uart**
+  * (TL721x/TL321x)uart_set_rx_timeout: For compatibility, change it to uart_set_rx_timeout_with_exp.(merge_requests/@1338)
+* **audio**
+  * (TL721X)Adjusted the parameter's position of audio_rx_dma_chain_init and audio_tx_dma_chain_init to make their function prototypes consistent with other chips.(merge_requests/@1342)
+  * (B91)Fixed i2s pin definition in audio_i2s_set_pin interface. Swapped adc_dat and dac_dat, adc_lr and dac_lr.(merge_requests/@1351)
+  * (TL721X)Change the name of the audio_i2s_set_mclk interface to audio_set_codec_clk_as_mclk, and the name of the audio_aclk_debug_set_mclk interface to audio_set_debug_clk_as_mclk, and add the following function to gpio_func_e function in gpio_func_e.(merge_requests/@1401)
+* **spi**  
+  * (TL321x)gspi_cs_pin_en: Interface formal parameter type changed from gpio_pin_e to gpio_func_pin_e.(merge_requests/@1320)
+  * (TL321x)In order to keep the value of GSPI_MODULE in enumeration variable spi_sel_e consistent with other chips, GSPI_MODULE=0 is modified to GSPI_MODULE=1, involving the interface as follows:spi_hw_fsm_reset/spi_set_error_timeout/ spi_get_error_timeout_code/gspi_timeout_handler/spi_master_send_cmd/spi_write/spi_read/spi_master_write/spi_master_write_read/spi_master_write_plus/spi_master_write_repeat/spi_master_write_repeat_plus/spi_master_read_plus/spi_master_write_read_plus.(merge_requests/@1355)
+* **rf**
+  * (TL721X):In order to fix the issue of TX drift failure in 2M mode under high TX power, increase the preamble length of 2M mode to 7 bytes.(merge_requests/@1431)
+* **sys**
+  * (TL721x/TL321x)In the new version, after calling sys_init(), if you want to get the value of g_pm_status_info.mcu_status or call pm_get_reboot_event() to get related information, you won't be able to. The application layer needs to call pm_update_status_info() to obtain it. The new usage method is as follows:After calling sys_init(), call pm_update_status_info(), and you can get the value of g_pm_status_info.mcu_status. Additionally, the reboot classifications have been changed as follows:1.Two new statuses have been added to g_pm_status_info.mcu_status: MCU_HW_REBOOT_TIMER_WATCHDOG and MCU_HW_REBOOT_32K_WATCHDOG.2.The meaning of MCU_STATUS_REBOOT_BACK has changed. Previously, it included both software reboots and watchdog reboots. In the new version, MCU_STATUS_REBOOT_BACK only represents software reboots. The functions pm_get_reboot_event() and pm_get_deep_retention_flag() have been removed.(merge_requests/@1268)
+* **adc**
+  * (TL721x)The A2 chip changes the adc reference voltage 0p9 to 1p2 for gpio sampling, so the enumeration name is changed: ADC_VREF_0P9V->ADC_VREF_GPIO_1P2V,ADC_VREF_1P2V->ADC_VREF_VBAT_1P2V.(merge_requests/@1445)
+  * (TL721x)A2 chip multi-channel sampling has the problem of inter-channel interference, so this function is not open to the public.(merge_requests/@1445)
+
+### Performance Improvements
+* **rf**
+  * (TL321X)Modify the rf_set_xx_xx_mode() function configuration to improve the bandage performance of 2M phy mode.(merge_requests/@1296)
+  * (TL721X)Modify the configuration of the rf_mode_init() function to improve the performance of fdev.(merge_requests/@1326)
+
+
+### 版本
+
+* SDK版本: tl_platform_sdk V3.3.0
+* 此版本SDK支持 TLSR921x/TLSR951x(B91)(A0/A1/A2),TLSR922x/TLSR952x(B92)(A3/A4),TL721X(A2),TL321X(A0) 芯片。
+* 硬件评估板版本
+  * TLSR951x(B91): C1T213A20
+  * TLSR952x(B92): C1T266A20
+  * TL721X: C1T315A20
+  * TL321X: C1T335A20
+* 工具链版本
+  - TLSR921x/TLSR951x(B91): gcc7(TL32 ELF MCULIB V5F GCC7.4 (riscv32-elf-gcc))
+  - TLSR922x/TLSR952x(B92): gcc12(TL32 ELF MCULIB V5F GCC12.2 (riscv32-elf-gcc))
+  - TL721x: gcc12(TL32 ELF MCULIB V5F GCC12.2 (riscv32-elf-gcc))
+  - TL321x: gcc12(TL32 ELF MCULIB V5 GCC12.2 (riscv32-elf-gcc))
+
+### Bug Fixes
+
+* **aes** 
+  * (B91/B92)解决了因为aes修改了e0的地址指针，导致BT通信异常的问题。(merge_requests/@1273)
+* **pm** 
+  * (TL721X)解决了当用户在初始化中，把PM等所有中断优先级初始化成0时，不能正常睡眠唤醒的问题。(merge_requests/@1332)
+  * (TL321x)解决了deep retention模式唤醒后再进入suspend模式可能造成的RAM未完全保持问题。 (merge_requests/@1480)
+* **sys** 
+  * (TL721X)解决了因为晶体起振时间预留太短导致的频偏问题。(merge_requests/@1332)
+* **ske** 
+  * (TL321X/TL721x)解决了ske在写寄存器之前没有查看busy信号位，导致的ske计算还未完成时软件重复触发计算从而数据出错的问题。（merge_requests/@1331, merge_requests/@1340）
+* **audio**
+  * (B91)修复了初始化调用gpio_shutdown(GPIO_ALL)后，i2s pin输入功能无法使用问题。(merge_requests/@1351)
+  * (TL721x/TL321x)修复 BUFFER_TO_LINEOUT demo 波形失真的问题。(merge_requests/@1472)
+* **rf**
+  * (B91/B92)修复了由于fast settle使能和退出时的错误配置，导致settle过程与预期不符，从而可能引发RF性能下降的问题。(merge_requests/@1354)
+* **adc**
+  * (TL721x)1.A2测试PB0 PD1 PD2三引脚采集电压性能略差于其他引脚，因此删除。2.测试发现使能dwa影响adc性能，所以不使用此特性。3.pre_scale = 1/4 在A2 上修复，已开放。(merge_requests/@1428,merge_requests/@1445)
+* **clock** 
+  * (B91/B92)解决PLL起振失败导致死机的问题。 PLL起振异常则重启，占用PM_ANA_REG_POWER_ON_CLR_BUF0[bit3-6]查询是否发生过PLL起振异常等导致的复位。通过接口drv_get_error_code查询异常来源，注意异常来源每次复位后会丢失，需要应用层提前读取保存。(merge_requests/@1268)(merge_requests/@1438)
+* **sys** 
+  * (tl721x)解决了因为efuse load未完成，导致ram限制不稳定，程序搬运出错，导致的死机隐患。(merge_requests/@1454)
+* **spi**
+  * (B91/B92/TL721x/TL321x)修复spi_master_write_read_full_duplex功能异常问题。 (merge_requests/@1465)
+
+### Features
+
+* **pm**
+  * (TL721x)添加pm_set_dvdd接口以支持CORE和SRAM电压调节。(merge_requests/@1276)
+* **pke**
+  * (TL721x)添加ed25519算法驱动和demo。(merge_requests/@1289)
+* **audio**
+  * (TL721x)增加了TL721x audio dmic in i2s out的case。(merge_requests/@1345)
+  * (B91)新增了audio i2sin to i2sout的用例。(merge_requests/@1351)
+  * (TL721x)增加了audio_reset_audio_clk接口，用于改变codec的时钟。(merge_requests/@1418)
+  * (TL321x) 添加audio相关驱动和demo.(merge_requests/@1367)。
+  * (TL721x/TL321x) 添加spi_txdma_req_after_cmd_en,spi_txdma_req_after_cmd_dis接口。(merge_requests/@1472)。
+* **hash**
+  * (TL321x)添加HASH_Demo_v1.1.8。(merge_requests/@1349)
+* **pke**
+  * (TL321x)添加ed25519和c25519算法驱动以及PKE_Demo_v1.1.8。(merge_requests/@1340, merge_requests/@1349)
+* **ske**
+  * (TL321x)更新v1.1.9 SKE_Demo.(merge_requests/@1364)
+  * (TL721x)将SKE_Demo更新到v1.1.9.(merge_requests/@1364)
+* **rf**
+  * (B91/B92/TL7518)增加了"rf_set_tx_wait_time" 和"rf_set_rx_wait_time"接口配置tx wait时间和rx wait时间(merge_requests/@1403)
+  * (B91/B92/TL721x/TL321x)适配fast settle模式切换功能，新增接口rf_tx_fast_settle_get_cal_val、rf_tx_fast_settle_set_cal_val、rf_rx_fast_settle_get_cal_val、rf_rx_fast_settle_set_cal_val；删除全局变量g_fast_settle_cal_val，新增全局指针变量g_fast_settle_cal_val_ptr。(merge_requests/@1416)(merge_requests/@1432)(merge_requests/@1439)
+  * (TL321X)使能软件dcoc并添加rf_set_rx_dcoc_cali_by_sw接口供客户控制软件dcoc开关。(merge_requests/@1435)
+  * (TL721X/TL321X)增加了"rf_dma_chn_en" 和 "rf_dma_chn_dis"接口(merge_requests/@1483)
+* **pke**
+  * (TL721x)添加ed25519算法驱动和demo。(merge_requests/@1421)
+* **lpc**
+  * (TL721X/TL321X) 添加LPC相关驱动和demo。(merge_requests/@1279)
+* **adc**
+  * (TL321x/TL721x)增加ADC_GPIO_SAMPLE_VBAT模式通过gpio间接采样vbat电压。(merge_requests/@1445)
+* **calibration**
+  * (TL721x)添加检查ieee地址合法性接口user_check_ieee_addr()，获取otp中的ieee地址接口user_get_otp_ieee_addr()和获取flash或otp地址的接口user_get_ieee_addr()，calibration_func()添加读flash或otp中ieee地址功能。(merge_requests/@1440)
+* **otp**
+  * (TL721x)添加接口otp_get_ieee_addr()。(merge_requests/@1440)
+* **DUT_Demo** 
+  * (B92)新增DUT_Demo并且用户可根据自身需要开发夹具测试程序。(merge_requests/@1384) 
+* **EMI_BQB_DEMO**
+  * (B91/B92/TL721x/TL321x)fast settle 适配模式切换功能。(merge_requests/@1416)(merge_requests/@1432)(merge_requests/@1439)
+* **RF_DEMO**
+  * (B91/B92/TL721x/TL321x)fast settle 适配模式切换功能。(merge_requests/@1416)(merge_requests/@1432)(merge_requests/@1439)
+
+### Refactoring
+
+* **usb**
+  * (B91/B92/TL721X/TL321X)在usb_set_pin()中增加GPIO pin的枚举类型转换防止编译报错。(merge_requests/@1321)
+  * (B91) tinyusb 移植文件添加参数检查。(merge_requests/@1472)
+* **uart**
+  * (B92)uart_get_dma_rev_data_len: 优化接口逻辑，当发送长度大于接收长度时，则返回dma配置的接受长度。(merge_requests/@1338)
+* **adc**
+  * (TL721X/TL321X)将 adc_input_pin_e 恢复为 adc_input_pin_def_e，以便与 B92 兼容。(merge_requests/@1339)
+* **plic** 
+  * (B91/B92/TL721x/TL321x)将mtime_clk_init接口中的clock_32k_init和clock_cal接口移除，放到demo按需要调用。（merge_requests/@1394）
+* **rf**
+  * (TL721X/TL321X)优化了"rf_set_tx_wait_time"和"rf_set_rx_wait_time"接口并更新了相关注释(merge_requests/@1403)
+  * (B91/B92/TL721x/TL321x)适配fast settle模式切换功能，更新接口rf_set_chn、rf_rx_fast_settle_update_cal_val、rf_tx_fast_settle_update_cal_val、rf_set_rccal_cal_val(B91/TLSR922x/TLSR952x除外)。(merge_requests/@1416)(merge_requests/@1432)(merge_requests/@1439)
+* **audio**
+  * (TL721x)调整audio采样率数组和枚举，删除了8.02k采样率。(merge_requests/@1415)
+  * (TL721X)修改reg_fifo_th_irq寄存器bit位注释。(merge_requests/@1401)
+* **adc**
+  * (TL721x)根据ATE大数据统计，ADC_GPIO_VREF_DEFAULT_VALUE由1175改为1220，ADC_GPIO_VREF_OFFSET_DEFAULT_VALUE由0改为8，ADC_VBAT_VREF_DEFAULT_VALUE由1175改为1220，ADC_VBAT_VREF_OFFSET_DEFAULT_VALUE由0改为15，更符合大多数芯片的要求。(merge_requests/@1445)
+  * (TL321x)根据ATE大数据统计，ADC_GPIO_VREF_DEFAULT_VALUE由1175改为1202，ADC_GPIO_VREF_OFFSET_DEFAULT_VALUE由0改为7，ADC_VBAT_VREF_DEFAULT_VALUE由1175改为1207，ADC_VBAT_VREF_OFFSET_DEFAULT_VALUE由0改为-7，更符合大多数芯片的要求。(merge_requests/@1445)
+* **pke**  
+  * (TL321X)去掉重复的声明，删掉pke_utility.h文件。(merge_requests/@1444)
+* **lib**
+  * (B92)文件analog.c和接口sys_set_dcdc_1pP4_ldo_2p0()封装成库文件。(merge_requests/@1195,merge_requests/@1268)
+* **gpio**
+  * (B91/B92/TL721x/TL321x)添加注释: 不推荐两个或多个GPIO设置成同一种中断源，如果同时触发了中断，中断的情况是不确定的。(merge_requests/@1470)
+
+### BREAKING CHANGES 
+
+* **uart**
+  * (TL721x/TL321x)uart_set_rx_timeout: 为了兼容,将其改为uart_set_rx_timeout_with_exp。(merge_requests/@1338)
+* **audio**
+  * (TL721X)调整了audio_rx_dma_chain_init和audio_tx_dma_chain_init的参数位置，使其函数原型与其他芯片一致。(merge_requests/@1342)
+  * (B91)在audio_i2s_set_pin接口中，修正了i2s pin定义，互换了adc_dat和dac_dat，adc_lr和dac_lr。（merge_requests/@1351）
+  * (TL721X)将audio_i2s_set_mclk接口名称修改为audio_set_codec_clk_as_mclk，将audio_aclk_debug_set_mclk接口名称修改为audio_set_debug_clk_as_mclk， 并在gpio_func_e添加相应的function 。(merge_requests/@1401)
+* **spi**  
+  * (TL321x)gspi_cs_pin_en: 接口形参类型修改，从gpio_pin_e类型修改为gpio_func_pin_e类型 。(merge_requests/@1320)
+  * (TL321x) 为了枚举变量spi_sel_e中 GSPI_MODULE的和其他芯片保持一致，将GSPI_MODULE=0修改成GSPI_MODULE=1，相应的修改涉及如下接口：spi_hw_fsm_reset/spi_set_error_timeout/spi_get_error_timeout_code/gspi_timeout_handler/spi_master_send_cmd/spi_write/spi_read/spi_master_write/spi_master_write_read/spi_master_write_plus/spi_master_write_repeat/spi_master_write_repeat_plus/ spi_master_read_plus/spi_master_write_read_plus。(merge_requests/@1355)
+* **rf**
+  * (TL721X):为修复高 tx power下 2M 模式 tx drift 测试failed 问题,将2M模式的preamble length增加到7byte(merge_requests/@1431)
+* **sys**
+  * (TL721x/TL321x)新的版本调用sys_init()之后，如果想要获取g_pm_status_info.mcu_status的值，或者调用pm_get_reboot_event（）获取相关信息，获取不到了。需要应用层自己调用pm_update_status_info()获取。新的使用方法如下：调用sys_init()后再调用pm_update_status_info()，即可获得g_pm_status_info.mcu_status的值。同时，之前的reboot分类也做了如下变更：1.g_pm_status_info.mcu_status新增两个状态：MCU_HW_REBOOT_TIMER_WATCHDOG 、MCU_HW_REBOOT_32K_WATCHDOG2.MCU_STATUS_REBOOT_BACK的含义和以前不一样了，以前是包含软件重启和watchdog重启。现在的版本MCU_STATUS_REBOOT_BACK仅仅代表软件重启。删除了pm_get_reboot_event()/pm_get_deep_retention_flag()函数。(merge_requests/@1268)
+* **adc**
+  * (TL721x)A2芯片将adc的参考电压0p9档位修改为专供gpio采样使用的1p2档位,所以将枚举名进行修改：ADC_VREF_0P9V->ADC_VREF_GPIO_1P2V,ADC_VREF_1P2V->ADC_VREF_VBAT_1P2V。(merge_requests/@1445)
+  * (TL721x)A2芯片多通道采样存在通道间干扰的问题，所以不对外开放此功能(merge_requests/@1445)
+
+### Performance Improvements
+
+* **rf**
+  * (TL321X)修改rf_set_xx_xx_mode()函数的配置以提升2M phy下模式的bandage性能。(merge_requests/@1296)
+  * (TL721x)修改 rf_mode_init()函数的配置，以提高 fdev 的性能。（merge_requests/@1326）
+
+---
+
 ## V3.2.0
 
 ### Version
@@ -17,126 +598,126 @@
   - TL321x: gcc12(TL32 ELF MCULIB V5 GCC12.2 (riscv32-elf-gcc))
 
 ### Note
-* (B92/TL721x/TL321x) Update toolchains from V5.3.0 to V5.3.x(http://192.168.48.36/src/driver/tl_platform_src/merge_requests/1175)
-* (B91/B92/TL721X/TL321X) Add usb_set_pin() interface, in USB application can choose to enable or disable dp_through_swire function, for compatibility usb_set_pin_en() is defined as usb_set_pin(1) and comments were added to cstartup.S.(http://192.168.48.36/src/driver/tl_platform_src/merge_requests/1249)
+* (B92/TL721x/TL321x) Update toolchains from V5.3.0 to V5.3.x(merge_requests/@1175)
+* (B91/B92/TL721X/TL321X) Add usb_set_pin() interface, in USB application can choose to enable or disable dp_through_swire function, for compatibility usb_set_pin_en() is defined as usb_set_pin(1) and comments were added to cstartup.S.(merge_requests/@1249)
 
 ### BREAKING CHANGES
 
 * **sys**
-  * (TL321X)Add power_mode parameter into sys_init(A0 version only support LDO, A1 version support both LDO and DCDC_LDO) and update sys_init to adapt the chip A1 version.(http://192.168.48.36/src/driver/tl_platform_src/merge_requests/1218)
-  * (TL721x/TL321x)In the new version, after calling sys_init(), if you want to get the value of g_pm_status_info.mcu_status or call pm_get_reboot_event() to get related information, you won't be able to. The application layer needs to call pm_update_status_info() to obtain it. The new usage method is as follows:After calling sys_init(), call pm_update_status_info(), and you can get the value of g_pm_status_info.mcu_status and call pm_get_sw_reboot_event to check the reason for the software reboot.Additionally, the reboot classifications have been changed as follows:1.Two new statuses have been added to g_pm_status_info.mcu_status: MCU_HW_REBOOT_TIMER_WATCHDOG and MCU_HW_REBOOT_32K_WATCHDOG.2.The meaning of MCU_STATUS_REBOOT_BACK has changed. Previously, it included both software reboots and watchdog reboots. In the new version, MCU_STATUS_REBOOT_BACK only represents software reboots. If you want to know the specific reason for a software reboot, you can call pm_get_sw_reboot_event to check. The functions pm_get_reboot_event() and pm_get_deep_retention_flag() have been removed.(http://192.168.48.36/src/driver/tl_platform_src/merge_requests/1195,http://192.168.48.36/src/driver/tl_platform_src/merge_requests/1213)
-  * (TL721x/TL321x)Previously, the reasons for software reboots could coexist in multiple situations. To save register bits for future expansion, the new version only saves the reason for the most recent software reboot. Therefore, if you want to save all software reboot reasons, the upper application needs to save them after each initialization to prevent losing the history of reboot reasons.(http://192.168.48.36/src/driver/tl_platform_src/merge_requests/1195,http://192.168.48.36/src/driver/tl_platform_src/merge_requests/1213)
-  * (TL721x/TL321x)Function name changes:sys_set_power_mode -> pm_set_power_mode, sys_set_vbat_type -> pm_set_vbat_type.(http://192.168.48.36/src/driver/tl_platform_src/merge_requests/1195,http://192.168.48.36/src/driver/tl_platform_src/merge_requests/1213)
+  * (TL321X)Add power_mode parameter into sys_init(A0 version only support LDO, A1 version support both LDO and DCDC_LDO) and update sys_init to adapt the chip A1 version.(merge_requests/@1218)
+  * (TL721x/TL321x)In the new version, after calling sys_init(), if you want to get the value of g_pm_status_info.mcu_status or call pm_get_reboot_event() to get related information, you won't be able to. The application layer needs to call pm_update_status_info() to obtain it. The new usage method is as follows:After calling sys_init(), call pm_update_status_info(), and you can get the value of g_pm_status_info.mcu_status and call pm_get_sw_reboot_event to check the reason for the software reboot.Additionally, the reboot classifications have been changed as follows:1.Two new statuses have been added to g_pm_status_info.mcu_status: MCU_HW_REBOOT_TIMER_WATCHDOG and MCU_HW_REBOOT_32K_WATCHDOG.2.The meaning of MCU_STATUS_REBOOT_BACK has changed. Previously, it included both software reboots and watchdog reboots. In the new version, MCU_STATUS_REBOOT_BACK only represents software reboots. If you want to know the specific reason for a software reboot, you can call pm_get_sw_reboot_event to check. The functions pm_get_reboot_event() and pm_get_deep_retention_flag() have been removed.(merge_requests/@1195,merge_requests/@1213)
+  * (TL721x/TL321x)Previously, the reasons for software reboots could coexist in multiple situations. To save register bits for future expansion, the new version only saves the reason for the most recent software reboot. Therefore, if you want to save all software reboot reasons, the upper application needs to save them after each initialization to prevent losing the history of reboot reasons.(merge_requests/@1195,merge_requests/@1213)
+  * (TL721x/TL321x)Function name changes:sys_set_power_mode -> pm_set_power_mode, sys_set_vbat_type -> pm_set_vbat_type.(merge_requests/@1195,merge_requests/@1213)
 * **dma**
-  * (B92/TL321x/TL721x) Change the interface for setting the interrupt mode of linked list DMA from dma_set_llp_int_mode to dma_set_llp_irq_mode, and unify the enumeration type of the interrupt mode to dma_llp_irq_mode_e.(http://192.168.48.36/src/driver/tl_platform_src/merge_requests/1229)
+  * (B92/TL321x/TL721x) Change the interface for setting the interrupt mode of linked list DMA from dma_set_llp_int_mode to dma_set_llp_irq_mode, and unify the enumeration type of the interrupt mode to dma_llp_irq_mode_e.(merge_requests/@1229)
 * **audio**
-  * (B92) Change audio_set_i2s_align_en,audio_set_i2s_align_dis interface name to audio_i2s_align_en,audio_i2s_align_dis.(http://192.168.48.36/src/driver/tl_platform_src/merge_requests/1144).
+  * (B92) Change audio_set_i2s_align_en,audio_set_i2s_align_dis interface name to audio_i2s_align_en,audio_i2s_align_dis.(merge_requests/@1144).
 * **emi**
-  * (B91/B92/TL721X/TL321X)Modify the emi. c rf_comtinue_made_run interface to add configurable packet data types and adjust the correspondence between command values and data types from (0: pbrs9 1: 0xf0 2:0x55) to (0: pbrs9 1: 0x0f 2:0x55 3: 0xaa 4:0xf0 5:0x00 6:0xff)(http://192.168.48.36/src/driver/tl_platform_src/merge_requests/1247)
-  * (B91/B92/TL721X/TL321X)Renaming the original supported mode of the rf_mode parameter of the functions rf_emi_tx_continue_update_data rf_emi_rx_setup rf_emi_tx_burst_loop and rf_emi_tx_burst_setup RF_MODE_BLE_2M to RF_MODE_BLE_2M_NO_PN (the new name is closer to its mode)(http://192.168.48.36/src/driver/tl_platform_src/merge_requests/1247)
+  * (B91/B92/TL721X/TL321X)Modify the emi. c rf_comtinue_made_run interface to add configurable packet data types and adjust the correspondence between command values and data types from (0: pbrs9 1: 0xf0 2:0x55) to (0: pbrs9 1: 0x0f 2:0x55 3: 0xaa 4:0xf0 5:0x00 6:0xff)(merge_requests/@1247)
+  * (B91/B92/TL721X/TL321X)Renaming the original supported mode of the rf_mode parameter of the functions rf_emi_tx_continue_update_data rf_emi_rx_setup rf_emi_tx_burst_loop and rf_emi_tx_burst_setup RF_MODE_BLE_2M to RF_MODE_BLE_2M_NO_PN (the new name is closer to its mode)(merge_requests/@1247)
 * **adc**
-  * (TL721x/TL321x)ADC DMA mode is optimized from round-robin mode to DMA interrupt mode to read data, which improves the efficiency of code running, and at the same time rename adc_get_sample_status_dma()/adc_clr_sample_status_dma()/adc_set_dma_trig_num() to adc_get_irq_status_dma()/adc_clr _irq_status_dma()/adc_set_rx_fifo_trig_cnt(), deleted adc_get_code_dma().(http://192.168.48.36/src/driver/tl_platform_src/merge_requests/1246)
+  * (TL721x/TL321x)ADC DMA mode is optimized from round-robin mode to DMA interrupt mode to read data, which improves the efficiency of code running, and at the same time rename adc_get_sample_status_dma()/adc_clr_sample_status_dma()/adc_set_dma_trig_num() to adc_get_irq_status_dma()/adc_clr _irq_status_dma()/adc_set_rx_fifo_trig_cnt(), deleted adc_get_code_dma().(merge_requests/@1246)
 
 ### Features
 
 * **flash**
-  * (TL321x)add new flash P25Q40SU/P25Q16SU.(http://192.168.48.36/src/driver/tl_platform_src/merge_requests/1171)
+  * (TL321x)add new flash P25Q40SU/P25Q16SU.(merge_requests/@1171)
 * **Secure_Boot_Demo**
-  * (TL721x/TL321x) Add Secure_Boot_Demo, compile the demo to generate runtime descriptors, etc. bin.(http://192.168.48.36/src/driver/tl_platform_src/merge_requests/1184)
+  * (TL721x/TL321x) Add Secure_Boot_Demo, compile the demo to generate runtime descriptors, etc. bin.(merge_requests/@1184)
 * **Toolchain**
   * (B91/B92/TL321x/TL721x):In order to support open source toolchains compilation (if using an open source toolchain, this macro 'STD_GCC' needs to be opened, and currently support Zephyr toolchain compilation), the following modifications are made:
     1. Use assembler language to implement interfaces for reading and writing CSR registers, without using the functions in nds_intrinsic.h (which is a header file in the Andes toolchain);
-    2. Add a new file core_reg.h and copy CSR registers from nds_intrinsic.h to core_reg.h.(http://192.168.48.36/src/driver/tl_platform_src/merge_requests/1181)
+    2. Add a new file core_reg.h and copy CSR registers from nds_intrinsic.h to core_reg.h.(merge_requests/@1181)
 * **Trap**
-  * (B91/B92/TL321x/TL721x)Add new interfaces plic_irqs_preprocess_for_wfi() and plic_irqs_postprocess_for_wfi() to configure the interrupts related to entering and exiting WFI mode, respectively, and provide sample code(http://192.168.48.36/src/driver/tl_platform_src/merge_requests/1186).
+  * (B91/B92/TL321x/TL721x)Add new interfaces plic_irqs_preprocess_for_wfi() and plic_irqs_postprocess_for_wfi() to configure the interrupts related to entering and exiting WFI mode, respectively, and provide sample code(merge_requests/@1186).
 * **efuse**
-  * (B92):Added efuse_get_chip_status interface to read the status of JTAG, SWS, and boot mode.(http://192.168.48.36/src/driver/tl_platform_src/merge_requests/1223)
-  * (TL321x) Added efuse_get_chip_id interface.(http://192.168.48.36/src/driver/tl_platform_src/merge_requests/1075)
+  * (B92):Added efuse_get_chip_status interface to read the status of JTAG, SWS, and boot mode.(merge_requests/@1223)
+  * (TL321x) Added efuse_get_chip_id interface.(merge_requests/@1075)
 * **IR_LEARN_Demo**
-  * (TL721x/TL321x) Add IR_LEARN_Demo and driver files.(http://192.168.48.36/src/driver/tl_platform_src/merge_requests/1214).
+  * (TL721x/TL321x) Add IR_LEARN_Demo and driver files.(merge_requests/@1214).
 * **audio**
-  * (TL721x) Adding audio related drivers and demos.(http://192.168.48.36/src/driver/tl_platform_src/merge_requests/1144)。
+  * (TL721x) Adding audio related drivers and demos.(merge_requests/@1144)。
 * **USB Demo**
-  * (B91/B92/TL321x/TL721x) added print demo into USB_Demo.(http://192.168.48.36/src/driver/tl_platform_src/merge_requests/1230)
+  * (B91/B92/TL321x/TL721x) added print demo into USB_Demo.(merge_requests/@1230)
 * **link**
-  * (TL721x/TL321x)Add flash code segment for link and _attribute_flash_code_sec_noinline_ into compiler.h.(http://192.168.48.36/src/driver/tl_platform_src/merge_requests/1243)
-  * (B91/B92/TL721X/TL321X)Added the rf_certification_cfg data segment for rf certification related configuration.(http://192.168.48.36/src/driver/tl_platform_src/merge_requests/1175)
+  * (TL721x/TL321x)Add flash code segment for link and _attribute_flash_code_sec_noinline_ into compiler.h.(merge_requests/@1243)
+  * (B91/B92/TL721X/TL321X)Added the rf_certification_cfg data segment for rf certification related configuration.(merge_requests/@1175)
 * **common**
-  * (B91/B92/TL721x/TL321X):To prevent power leakage, add gpio_shutdown(GPIO_ALL) to platform_init() to configure all GPIOs (except SWS and MSPI) to a high resistance state.(http://192.168.48.36/src/driver/tl_platform_src/merge_requests/1226)
+  * (B91/B92/TL721x/TL321X):To prevent power leakage, add gpio_shutdown(GPIO_ALL) to platform_init() to configure all GPIOs (except SWS and MSPI) to a high resistance state.(merge_requests/@1226)
 * **Jtag**
-  * (B92/TL321x/TL721x): Add jtag configuration interface jtag_sdp_set_pin(), two-wire and four-wire enable interfaces jtag_set_pin_en() and sdp_set_pin_en().(http://192.168.48.36/src/driver/tl_platform_src/merge_requests/1226)
+  * (B92/TL321x/TL721x): Add jtag configuration interface jtag_sdp_set_pin(), two-wire and four-wire enable interfaces jtag_set_pin_en() and sdp_set_pin_en().(merge_requests/@1226)
 * **emi**
-  * (B91/B92/TL721X/TL321X)Added rf_phy_test_prbs15() interface for generating prbs15 type data(http://192.168.48.36/src/driver/tl_platform_src/merge_requests/1247)
+  * (B91/B92/TL721X/TL321X)Added rf_phy_test_prbs15() interface for generating prbs15 type data(merge_requests/@1247)
 * **calibration**
-  * (TL721X/TL321X)Added calibration_func(),user_calib_freq_offset() calibration interface.(http://192.168.48.36/src/driver/tl_platform_src/merge_requests/1247)
+  * (TL721X/TL321X)Added calibration_func(),user_calib_freq_offset() calibration interface.(merge_requests/@1247)
 * **rf**
-  * (B91/B92/TL721X/TL321X)Add rf_set_power_level_singletone interface, remove rf_set_power_level_index_singletone interface from emi.c(http://192.168.48.36/src/driver/tl_platform_src/merge_requests/1247)
+  * (B91/B92/TL721X/TL321X)Add rf_set_power_level_singletone interface, remove rf_set_power_level_index_singletone interface from emi.c(merge_requests/@1247)
 * **S**
-  * (B91/B92/TL721X/TL321X)Added the starting address 0x10 related to RF_Certification configuration and defined the starting address of _RF_CCERTIFICATION_CFG_LMA_START(http://192.168.48.36/src/driver/tl_platform_src/merge_requests/1175)
+  * (B91/B92/TL721X/TL321X)Added the starting address 0x10 related to RF_Certification configuration and defined the starting address of _RF_CCERTIFICATION_CFG_LMA_START(merge_requests/@1175)
 * **adc**
-  * (TL721x/TL321x):add adc_start_sample_nodma() , adc_stop_sample_nodma(), adc_get_irq_status(), adc_clr_irq_status() and adc_set_scan_chn_dis().(http://192.168.48.36/src/driver/tl_platform_src/merge_requests/1246)
+  * (TL721x/TL321x):add adc_start_sample_nodma() , adc_stop_sample_nodma(), adc_get_irq_status(), adc_clr_irq_status() and adc_set_scan_chn_dis().(merge_requests/@1246)
 
 ### Bug Fixes
 
 * **flash**
-  * (TL721x)Fix flash default protected area(Changed from unprotected to protect half of the flash area).(http://192.168.48.36/src/driver/tl_platform_src/merge_requests/1188)
+  * (TL721x)Fix flash default protected area(Changed from unprotected to protect half of the flash area).(merge_requests/@1188)
 * **rf**
-  * (TL321x)Fix rf_power_level_index_e enumeration value error problem.(http://192.168.48.36/src/driver/tl_platform_src/merge_requests/1194)
-  * (TL721x/TL321x)Due to the removal of reg_bb_dma_rx_rptr, the interface rf_get_rx_packet_addr in rf_common.c has been updated to replace reg_bb_dma_rx_rptr with reg_rf_dma_rx_rptr.(http://192.168.48.36/src/driver/tl_platform_src/merge_requests/1207)
-  * (TL721x/TL321x)Fixed the issue of inaccurate RSSI values obtained by RF.(http://192.168.48.36/src/driver/tl_platform_src/merge_requests/1261)
+  * (TL321x)Fix rf_power_level_index_e enumeration value error problem.(merge_requests/@1194)
+  * (TL721x/TL321x)Due to the removal of reg_bb_dma_rx_rptr, the interface rf_get_rx_packet_addr in rf_common.c has been updated to replace reg_bb_dma_rx_rptr with reg_rf_dma_rx_rptr.(merge_requests/@1207)
+  * (TL721x/TL321x)Fixed the issue of inaccurate RSSI values obtained by RF.(merge_requests/@1261)
 * **pm**
-  * (B91/B92/TL721x/TL321x)Fixed an issue where calling function pm_set_vbat_type or sys_init to modify parameter vbat_v failed. (This is only a problem when changing VBAT_MAX_VALUE_LESS_THAN_3V6 to VBAT_MAX_VALUE_GREATER_THAN_3V6)(http://192.168.48.36/src/driver/tl_platform_src/merge_requests/1195,http://192.168.48.36/src/driver/tl_platform_src/merge_requests/1213)
+  * (B91/B92/TL721x/TL321x)Fixed an issue where calling function pm_set_vbat_type or sys_init to modify parameter vbat_v failed. (This is only a problem when changing VBAT_MAX_VALUE_LESS_THAN_3V6 to VBAT_MAX_VALUE_GREATER_THAN_3V6)(merge_requests/@1195,merge_requests/@1213)
 * **dma** 
-  * (TL721x/TL321x)Due to invalid or duplicate definitions, the following interfaces have been deleted: In dma_reg.h: reg_dma_rx_wptr, reg_dma_tx_wptr, reg_dma_rx_rptr, reg_dma_tx_rptr. In rf_reg.h: reg_bb_dma_rx_wptr, reg_bb_dma_tx_wptr, reg_bb_dma_rx_rptr, reg_bb_dma_tx_rptr. Users should now use the following register definitions: reg_rf_dma_rx_wptr, reg_rf_dma_rx_rptr, reg_rf_dma_tx_rptr, reg_rf_dma_tx_wptr. (http://192.168.48.36/src/driver/tl_platform_src/merge_requests/1207)(http://192.168.48.36/src/driver/tl_platform_src/merge_requests/1235)
+  * (TL721x/TL321x)Due to invalid or duplicate definitions, the following interfaces have been deleted: In dma_reg.h: reg_dma_rx_wptr, reg_dma_tx_wptr, reg_dma_rx_rptr, reg_dma_tx_rptr. In rf_reg.h: reg_bb_dma_rx_wptr, reg_bb_dma_tx_wptr, reg_bb_dma_rx_rptr, reg_bb_dma_tx_rptr. Users should now use the following register definitions: reg_rf_dma_rx_wptr, reg_rf_dma_rx_rptr, reg_rf_dma_tx_rptr, reg_rf_dma_tx_wptr. (merge_requests/@1207)(merge_requests/@1235)
 * **spi**
-  * (B92/TL721x/TL321x) Change the type of word_len in the spi_write/spi_read interface from unsigned char to unsigned int.(http://192.168.48.36/src/driver/tl_platform_src/merge_requests/1144).
+  * (B92/TL721x/TL321x) Change the type of word_len in the spi_write/spi_read interface from unsigned char to unsigned int.(merge_requests/@1144).
 * **gpio**
-  * (TL721x/TL321X)Fix the problem of not setting gpio to low level in gpio_init(), preventing that gpio cannot be initialized to low level after calling gpio_init().(http://192.168.48.36/src/driver/tl_platform_src/merge_requests/1226)  
+  * (TL721x/TL321X)Fix the problem of not setting gpio to low level in gpio_init(), preventing that gpio cannot be initialized to low level after calling gpio_init().(merge_requests/@1226)  
  * **gpio**
-  * (B91)Fix the problem of no initialization PF group (MSPI) in gpio_init() to prevent the MSPI port from not being initialized after calling gpio_init().(http://192.168.48.36/src/driver/tl_platform_src/merge_requests/1226)  
+  * (B91)Fix the problem of no initialization PF group (MSPI) in gpio_init() to prevent the MSPI port from not being initialized after calling gpio_init().(merge_requests/@1226)  
 * **Jtag**
-  * (B91): The jtag two-wire and four-wire enable interfaces jtag_set_pin_en() and sdp_set_pin_en() add analog pull-ups and drop-downs to prevent the jtag hardware from being abnormal when not connected.(http://192.168.48.36/src/driver/tl_platform_src/merge_requests/1226)
+  * (B91): The jtag two-wire and four-wire enable interfaces jtag_set_pin_en() and sdp_set_pin_en() add analog pull-ups and drop-downs to prevent the jtag hardware from being abnormal when not connected.(merge_requests/@1226)
 * **usb**
-  * (TL321X)Fix the problem of setting usbhw_enable_hw_feature() would clear other features exceptionally.(http://192.168.48.36/src/driver/tl_platform_src/merge_requests/1249)
+  * (TL321X)Fix the problem of setting usbhw_enable_hw_feature() would clear other features exceptionally.(merge_requests/@1249)
 * **adc**
-  * (TL721x/TL321x):adc_get_code() is changed from reading analog registers to reading adc rx fifo to prevent repeated fetching of the same code in multiple consecutive calls to adc_get_code().(http://192.168.48.36/src/driver/tl_platform_src/merge_requests/1246)
+  * (TL721x/TL321x):adc_get_code() is changed from reading analog registers to reading adc rx fifo to prevent repeated fetching of the same code in multiple consecutive calls to adc_get_code().(merge_requests/@1246)
 * **adc**
-  * (TL721x/TL321x): Modify the sample cycle configuration for each sampling frequency, and delay 30us after adc_power_on() to wait for adc to stabilize, fix the problem of the first code exception after adc_power_on().(http://192.168.48.36/src/driver/tl_platform_src/merge_requests/1246)
+  * (TL721x/TL321x): Modify the sample cycle configuration for each sampling frequency, and delay 30us after adc_power_on() to wait for adc to stabilize, fix the problem of the first code exception after adc_power_on().(merge_requests/@1246)
 * **flash**
-  * (B91/B92/TL721X/TL321X):Add macro in platform_init() not to add protection to the flash of the chip running ram bin to prevent the chip with no flash on board from getting stuck.(http://192.168.48.36/src/driver/tl_platform_src/merge_requests/1255)
+  * (B91/B92/TL721X/TL321X):Add macro in platform_init() not to add protection to the flash of the chip running ram bin to prevent the chip with no flash on board from getting stuck.(merge_requests/@1255)
 * **uart**
-  * (TL721X/TL321X):Fixed dma uart rx data loss issue by changing the length parameter passed to uart_receive_dma to the maximum value that can be received.(http://192.168.48.36/src/driver/tl_platform_src/merge_requests/1257)
+  * (TL721X/TL321X):Fixed dma uart rx data loss issue by changing the length parameter passed to uart_receive_dma to the maximum value that can be received.(merge_requests/@1257)
 
 ### Refactoring
 
 * **trap**
-  * (B91/B92/TL721X/TL321X) Define the trap_entry function as a weak function so that applications can reimplement it.(http://192.168.48.36/src/driver/tl_platform_src/merge_requests/1212).
+  * (B91/B92/TL721X/TL321X) Define the trap_entry function as a weak function so that applications can reimplement it.(merge_requests/@1212).
 * **ADC**
-  * (B91/B92/TL721X/TL321X)The ADC temperature detection function is an internal test function, not opened to the public, and the function is disabled by default.(http://192.168.48.36/src/driver/tl_platform_src/merge_requests/1227)
+  * (B91/B92/TL721X/TL321X)The ADC temperature detection function is an internal test function, not opened to the public, and the function is disabled by default.(merge_requests/@1227)
 * **pm**
-  * (TL721x/TL321x)Encapsulated clock.c, stimer.c, mspi.c, and core.c into library files.(http://192.168.48.36/src/driver/tl_platform_src/merge_requests/1195,http://192.168.48.36/src/driver/tl_platform_src/merge_requests/1213)
-  * (TL721X)Modify the PM-related interfaces to use the O2 optimization option.(http://192.168.48.36/src/driver/tl_platform_src/merge_requests/1238)
+  * (TL721x/TL321x)Encapsulated clock.c, stimer.c, mspi.c, and core.c into library files.(merge_requests/@1195,merge_requests/@1213)
+  * (TL721X)Modify the PM-related interfaces to use the O2 optimization option.(merge_requests/@1238)
 * **usb**
-  * (TL721x/TL321x)Remove unused header file (wchar.h) from usbhw.c. (http://192.168.48.36/src/driver/tl_platform_src/merge_requests/1237)
+  * (TL721x/TL321x)Remove unused header file (wchar.h) from usbhw.c. (merge_requests/@1237)
 * **calibration**
-  * (B91/B92)Add a range limit of frequency_offset_value to the user_calib_freq_offset interface(http://192.168.48.36/src/driver/tl_platform_src/merge_requests/1247)
+  * (B91/B92)Add a range limit of frequency_offset_value to the user_calib_freq_offset interface(merge_requests/@1247)
 * **rf**
-  * (TL721x/TL321x)the function rf_clr_dig_logic_state and rf_reset_register_value have been updated with the _attribute_ram_code_sec_noinline_ attribute. The function rf_dma_reset has been updated to static _always_inline.(http://192.168.48.36/src/driver/tl_platform_src/merge_requests/1251)
+  * (TL721x/TL321x)the function rf_clr_dig_logic_state and rf_reset_register_value have been updated with the _attribute_ram_code_sec_noinline_ attribute. The function rf_dma_reset has been updated to static _always_inline.(merge_requests/@1251)
 
 ### Performance Improvements
 
 * **clock**
-  * (TL721x/TL321x)To save power, the 24M RC and PLL are turned off separately when not in use.(http://192.168.48.36/src/driver/tl_platform_src/merge_requests/1195,http://192.168.48.36/src/driver/tl_platform_src/merge_requests/1213)
+  * (TL721x/TL321x)To save power, the 24M RC and PLL are turned off separately when not in use.(merge_requests/@1195,merge_requests/@1213)
 * **S**
-  * (TL721x/TL321x)To save power, the GPIO input functionality is turned off during initialization.(http://192.168.48.36/src/driver/tl_platform_src/merge_requests/1195,http://192.168.48.36/src/driver/tl_platform_src/merge_requests/1213)
+  * (TL721x/TL321x)To save power, the GPIO input functionality is turned off during initialization.(merge_requests/@1195,merge_requests/@1213)
 * **rf**
-  * (TL721x)Add configuration related to optimising TX power consumption inside rf_mode_init().(http://192.168.48.36/src/driver/tl_platform_src/merge_requests/1234)
+  * (TL721x)Add configuration related to optimising TX power consumption inside rf_mode_init().(merge_requests/@1234)
   * (TL321x):Optimise power consumption in tx vant mode, increase vant maximum output power, 
   and update the rf_power_level_list table with the latest driver configuration.
-  (http://192.168.48.36/src/driver/tl_platform_src/merge_requests/1213,http://192.168.48.36/src/driver/tl_platform_src/merge_requests/1234)
-  * (TL321x): optimise RX sensitivity performance, add rf_rx_performance_mode interface and rf_rx_performance_e to select RX sensitivity configurations, default configuration is RF_RX_LOW_POWER; select RF_RX_HIGH_PERFORMANCE to increase the performance by 1dbm, but it will increase the RX power consumption.(http://192.168.48.36/src/driver/tl_platform_src/merge_requests/1213,http://192.168.48.36/src/driver/tl_platform_src/merge_requests/1234,http://192.168.48.36/src/driver/tl_platform_src/merge_requests/1265)
-  * (TL721x/TL321x)Improve BLE500K and BLE125K per floor performance.(http://192.168.48.36/src/driver/tl_platform_src/merge_requests/1232)(http://192.168.48.36/src/driver/tl_platform_src/merge_requests/1260)
-
+  (merge_requests/@1213,merge_requests/@1234)
+  * (TL321x): optimise RX sensitivity performance, add rf_rx_performance_mode interface and rf_rx_performance_e to select RX sensitivity configurations, default configuration is RF_RX_LOW_POWER; select RF_RX_HIGH_PERFORMANCE to increase the performance by 1dbm, but it will increase the RX power consumption.(merge_requests/@1213,merge_requests/@1234,merge_requests/@1265)
+  * (TL721x/TL321x)Improve BLE500K and BLE125K per floor performance.(merge_requests/@1232)(merge_requests/@1260)
+  
 ### 版本
 
 * SDK版本: tl_platform_sdk V3.2.0
@@ -154,124 +735,124 @@
   - TL321x: gcc12(TL32 ELF MCULIB V5 GCC12.2 (riscv32-elf-gcc))
 
 ### Note
-* (B92/TL721x/TL321x)编译工具链从V5.3.0升级为V5.3.x。(http://192.168.48.36/src/driver/tl_platform_src/merge_requests/1175)
-* (B91/B92/TL721X/TL321X) 新增usb_set_pin()接口，在USB应用中可以选择使能或不使能dp_through_swire功能，为了兼容性usb_set_pin_en()定义为 usb_set_pin(1)，并在cstartup.S 添加相应注释。(http://192.168.48.36/src/driver/tl_platform_src/merge_requests/1249)
+* (B92/TL721x/TL321x)编译工具链从V5.3.0升级为V5.3.x。(merge_requests/@1175)
+* (B91/B92/TL721X/TL321X) 新增usb_set_pin()接口，在USB应用中可以选择使能或不使能dp_through_swire功能，为了兼容性usb_set_pin_en()定义为 usb_set_pin(1)，并在cstartup.S 添加相应注释。(merge_requests/@1249)
 
 ### BREAKING CHANGES 
 
 * **sys**
-  * (TL321X)sys_init新增power_mode参数（A0只支持LDO模式，A1支持LDO和DCDC_LDO）同时更新sys_init内容以适配A1芯片。(http://192.168.48.36/src/driver/tl_platform_src/merge_requests/1218)
-  * (TL721x/TL321x)新的版本调用sys_init()之后，如果想要获取g_pm_status_info.mcu_status的值，或者调用pm_get_reboot_event（）获取相关信息，获取不到了。需要应用层自己调用pm_update_status_info()获取。新的使用方法如下：调用sys_init()后再调用pm_update_status_info()，即可获得g_pm_status_info.mcu_status的值并且可以调用pm_get_sw_reboot_event查看软件重启原因。同时，之前的reboot分类也做了如下变更：1.g_pm_status_info.mcu_status新增两个状态：MCU_HW_REBOOT_TIMER_WATCHDOG 、MCU_HW_REBOOT_32K_WATCHDOG2.MCU_STATUS_REBOOT_BACK的含义和以前不一样了，以前是包含软件重启和watchdog重启。现在的版本MCU_STATUS_REBOOT_BACK仅仅代表软件重启，如果想要知道软件重启的具体原因，可以调用pm_get_sw_reboot_event进行查看。删除了pm_get_reboot_event()/pm_get_deep_retention_flag()函数。(http://192.168.48.36/src/driver/tl_platform_src/merge_requests/1195,http://192.168.48.36/src/driver/tl_platform_src/merge_requests/1213)
-  * (TL721x/TL321x)之前的软件reboot原因，可以多种情况共存，为了节省寄存器bit以便将来扩展使用，现在的版本只会保存最新一次软件reboot的原因。所以如果想要保存所有软件reboot的原因的话，上层应用需要每次初始化后自行保存，以防看不到历史的reboot原因。(http://192.168.48.36/src/driver/tl_platform_src/merge_requests/1195,http://192.168.48.36/src/driver/tl_platform_src/merge_requests/1213)
-  * (TL721x/TL321x)函数名字变更：sys_set_power_mode->pm_set_power_mode，sys_set_vbat_type->pm_set_vbat_type。(http://192.168.48.36/src/driver/tl_platform_src/merge_requests/1195,http://192.168.48.36/src/driver/tl_platform_src/merge_requests/1213)
+  * (TL321X)sys_init新增power_mode参数（A0只支持LDO模式，A1支持LDO和DCDC_LDO）同时更新sys_init内容以适配A1芯片。(merge_requests/@1218)
+  * (TL721x/TL321x)新的版本调用sys_init()之后，如果想要获取g_pm_status_info.mcu_status的值，或者调用pm_get_reboot_event（）获取相关信息，获取不到了。需要应用层自己调用pm_update_status_info()获取。新的使用方法如下：调用sys_init()后再调用pm_update_status_info()，即可获得g_pm_status_info.mcu_status的值并且可以调用pm_get_sw_reboot_event查看软件重启原因。同时，之前的reboot分类也做了如下变更：1.g_pm_status_info.mcu_status新增两个状态：MCU_HW_REBOOT_TIMER_WATCHDOG 、MCU_HW_REBOOT_32K_WATCHDOG2.MCU_STATUS_REBOOT_BACK的含义和以前不一样了，以前是包含软件重启和watchdog重启。现在的版本MCU_STATUS_REBOOT_BACK仅仅代表软件重启，如果想要知道软件重启的具体原因，可以调用pm_get_sw_reboot_event进行查看。删除了pm_get_reboot_event()/pm_get_deep_retention_flag()函数。(merge_requests/@1195,merge_requests/@1213)
+  * (TL721x/TL321x)之前的软件reboot原因，可以多种情况共存，为了节省寄存器bit以便将来扩展使用，现在的版本只会保存最新一次软件reboot的原因。所以如果想要保存所有软件reboot的原因的话，上层应用需要每次初始化后自行保存，以防看不到历史的reboot原因。(merge_requests/@1195,merge_requests/@1213)
+  * (TL721x/TL321x)函数名字变更：sys_set_power_mode->pm_set_power_mode，sys_set_vbat_type->pm_set_vbat_type。(merge_requests/@1195,merge_requests/@1213)
 * **dma**
-  * (B92/TL321x/TL721x)设置链表DMA的中断模式的接口由dma_set_llp_int_mode改成dma_set_llp_irq_mode, 将中断模式的枚举类型统一为dma_llp_irq_mode_e。(http://192.168.48.36/src/driver/tl_platform_src/merge_requests/1229)
+  * (B92/TL321x/TL721x)设置链表DMA的中断模式的接口由dma_set_llp_int_mode改成dma_set_llp_irq_mode, 将中断模式的枚举类型统一为dma_llp_irq_mode_e。(merge_requests/@1229)
 * **dma**
-  * (B92/TL721x/TL321x) 将dma_set_spi_burst_size接口名称修改为dma_set_burst_size。(http://192.168.48.36/src/driver/tl_platform_src/merge_requests/1144).
+  * (B92/TL721x/TL321x) 将dma_set_spi_burst_size接口名称修改为dma_set_burst_size。(merge_requests/@1144).
 * **audio**
-  * (B92) 将audio_set_i2s_align_en,audio_set_i2s_align_dis接口名称修改为audio_i2s_align_en,audio_i2s_align_dis。(http://192.168.48.36/src/driver/tl_platform_src/merge_requests/1144).
+  * (B92) 将audio_set_i2s_align_en,audio_set_i2s_align_dis接口名称修改为audio_i2s_align_en,audio_i2s_align_dis。(merge_requests/@1144).
 * **emi**
-  * (B91/B92/TL721X/TL321X)修改emi.c rf_continue_mode_run 接口，增加了可配置发包数据类型，调整命令值与数据类型的对应关系，由（0:pbrs9 1:0xf0 2:0x55）调整为（0:pbrs9 1:0x0f 2:0x55 3:0xaa 4:0xf0 5:0x00 6:0xff）(http://192.168.48.36/src/driver/tl_platform_src/merge_requests/1247)
-  * (B91/B92/TL721X/TL321X)将 rf_emi_tx_continue_update_data,rf_emi_rx_setup,rf_emi_tx_burst_loop,rf_emi_tx_burst_setup函数的rf_mode参数的原支持模式RF_MODE_BLE_2M更名为RF_MODE_BLE_2M_NO_PN（新名字更贴近其模式）(http://192.168.48.36/src/driver/tl_platform_src/merge_requests/1247)
+  * (B91/B92/TL721X/TL321X)修改emi.c rf_continue_mode_run 接口，增加了可配置发包数据类型，调整命令值与数据类型的对应关系，由（0:pbrs9 1:0xf0 2:0x55）调整为（0:pbrs9 1:0x0f 2:0x55 3:0xaa 4:0xf0 5:0x00 6:0xff）(merge_requests/@1247)
+  * (B91/B92/TL721X/TL321X)将 rf_emi_tx_continue_update_data,rf_emi_rx_setup,rf_emi_tx_burst_loop,rf_emi_tx_burst_setup函数的rf_mode参数的原支持模式RF_MODE_BLE_2M更名为RF_MODE_BLE_2M_NO_PN（新名字更贴近其模式）(merge_requests/@1247)
 * **adc**
-  * (TL721x/TL321x)ADC DMA模式从轮巡方式优化成DMA中断方式读取数据，提高代码运行效率，同时将adc_get_sample_status_dma()/adc_clr_sample_status_dma()/adc_set_dma_trig_num()改名为adc_get_irq_status_dma()/adc_clr_irq_status_dma()/adc_set_rx_fifo_trig_cnt(),删除了adc_get_code_dma()。(http://192.168.48.36/src/driver/tl_platform_src/merge_requests/1246)
+  * (TL721x/TL321x)ADC DMA模式从轮巡方式优化成DMA中断方式读取数据，提高代码运行效率，同时将adc_get_sample_status_dma()/adc_clr_sample_status_dma()/adc_set_dma_trig_num()改名为adc_get_irq_status_dma()/adc_clr_irq_status_dma()/adc_set_rx_fifo_trig_cnt(),删除了adc_get_code_dma()。(merge_requests/@1246)
 
 ### Features
 
 * **flash**
-  * (TL321x)添加新增flash P25Q40SU/P25Q16SU.(http://192.168.48.36/src/driver/tl_platform_src/merge_requests/1171)
+  * (TL321x)添加新增flash P25Q40SU/P25Q16SU.(merge_requests/@1171)
 * **Secure_Boot_Demo**
-  * (TL721x/TL321x) 添加Secure_Boot_Demo, 编译demo生成运行描述符等bin.(http://192.168.48.36/src/driver/tl_platform_src/merge_requests/1184)
+  * (TL721x/TL321x) 添加Secure_Boot_Demo, 编译demo生成运行描述符等bin.(merge_requests/@1184)
 * **Toolchain**
   * (B91/B92/TL321x/TL721x):为了支持开源工具链编译(若使用开源工具链，需要打开这个宏'STD_GCC'，目前支持Zephyr工具链编译)，做如下修改：
     1. 使用汇编语言实现CSR寄存器的读写等接口，不使用nds_intrinsic.h内的函数(这是一个在Andes工具链里的头文件)；
-    2. 添加一个新文件core_reg.h, 将nds_intrinsic.h里面CSR寄存器拷贝到core_reg.h。(http://192.168.48.36/src/driver/tl_platform_src/merge_requests/1181)
+    2. 添加一个新文件core_reg.h, 将nds_intrinsic.h里面CSR寄存器拷贝到core_reg.h。(merge_requests/@1181)
 * **Trap**
-  * (B91/B92/TL321x/TL721x)新增接口 plic_irqs_preprocess_for_wfi() 和 plic_irqs_postprocess_for_wfi() ，分别用于配置进入和退出 WFI 模式的相关中断并提供示例代码(http://192.168.48.36/src/driver/tl_platform_src/merge_requests/1186)。
+  * (B91/B92/TL321x/TL721x)新增接口 plic_irqs_preprocess_for_wfi() 和 plic_irqs_postprocess_for_wfi() ，分别用于配置进入和退出 WFI 模式的相关中断并提供示例代码(merge_requests/@1186)。
 * **efuse**
-  * (B92):增加efuse_get_chip_status接口，用于读取JTAG、SWS 和启动模式的状态。(http://192.168.48.36/src/driver/tl_platform_src/merge_requests/1223)
-  * (TL321x) 增加efuse_get_chip_id接口。(http://192.168.48.36/src/driver/tl_platform_src/merge_requests/1075)
+  * (B92):增加efuse_get_chip_status接口，用于读取JTAG、SWS 和启动模式的状态。(merge_requests/@1223)
+  * (TL321x) 增加efuse_get_chip_id接口。(merge_requests/@1075)
 * **IR_LEARN_Demo**
-  * (TL721x/TL321x) 新增IR_LEARN_Demo和driver files.(http://192.168.48.36/src/driver/tl_platform_src/merge_requests/1214)。
+  * (TL721x/TL321x) 新增IR_LEARN_Demo和driver files.(merge_requests/@1214)。
 * **audio**
-  * (TL721x) 添加audio相关驱动和demo.(http://192.168.48.36/src/driver/tl_platform_src/merge_requests/1144)。
+  * (TL721x) 添加audio相关驱动和demo.(merge_requests/@1144)。
 * **USB Demo**
-  * (B91/B92/TL321x/TL721x)在USB_Demo中添加print demo。(http://192.168.48.36/src/driver/tl_platform_src/merge_requests/1230)
+  * (B91/B92/TL321x/TL721x)在USB_Demo中添加print demo。(merge_requests/@1230)
 * **link**
-  * (TL721X/TL321X)link文件中新增flash_code段,complier.h中新增_attribute_flash_code_sec_noinline_(http://192.168.48.36/src/driver/tl_platform_src/merge_requests/1243)
-  * (B91/B92/TL721X/TL321X)添加rf_certification_cfg段，用于rf certification的相关配置(http://192.168.48.36/src/driver/tl_platform_src/merge_requests/1175)
+  * (TL721X/TL321X)link文件中新增flash_code段,complier.h中新增_attribute_flash_code_sec_noinline_(merge_requests/@1243)
+  * (B91/B92/TL721X/TL321X)添加rf_certification_cfg段，用于rf certification的相关配置(merge_requests/@1175)
 * **common**
-  * (B91/B92/TL721x/TL321X)为防止漏电，在platform_init()中添加gpio_shutdown(GPIO_ALL)将所有gpio（除SWS和MSPI外）配置为高阻态。(http://192.168.48.36/src/driver/tl_platform_src/merge_requests/1226)
+  * (B91/B92/TL721x/TL321X)为防止漏电，在platform_init()中添加gpio_shutdown(GPIO_ALL)将所有gpio（除SWS和MSPI外）配置为高阻态。(merge_requests/@1226)
 * **Jtag**
-  * (B92/TL321x/TL721x)添加jtag配置接口jtag_sdp_set_pin()，两线和四线使能接口jtag_set_pin_en()和sdp_set_pin_en()。(http://192.168.48.36/src/driver/tl_platform_src/merge_requests/1226)
+  * (B92/TL321x/TL721x)添加jtag配置接口jtag_sdp_set_pin()，两线和四线使能接口jtag_set_pin_en()和sdp_set_pin_en()。(merge_requests/@1226)
 * **emi**
-  * (B91/B92/TL721X/TL321X)新增rf_phy_test_prbs15()接口用于生成prbs15类型数据(http://192.168.48.36/src/driver/tl_platform_src/merge_requests/1247)
+  * (B91/B92/TL721X/TL321X)新增rf_phy_test_prbs15()接口用于生成prbs15类型数据(merge_requests/@1247)
 * **calibration**
-  * (TL721X/TL321X)新增calibration_func(),user_calib_freq_offset()校准接口(http://192.168.48.36/src/driver/tl_platform_src/merge_requests/1247)
+  * (TL721X/TL321X)新增calibration_func(),user_calib_freq_offset()校准接口(merge_requests/@1247)
 * **rf**
-   * (B91/B92/TL721X/TL321X)新增rf_set_power_level_singletone接口，删除emi.c 中的rf_set_power_level_index_singletone接口(http://192.168.48.36/src/driver/tl_platform_src/merge_requests/1247)
+   * (B91/B92/TL721X/TL321X)新增rf_set_power_level_singletone接口，删除emi.c 中的rf_set_power_level_index_singletone接口(merge_requests/@1247)
 * **S**
-  * (B91/B92/TL721X/TL321X)添加RF_Certification配置相关的起始地址 0x10 并定义 RF_Certification 配置的起始地址 _RF_CERTIFICATION_CFG_ADDR_OFFSET(http://192.168.48.36/src/driver/tl_platform_src/merge_requests/1175)
+  * (B91/B92/TL721X/TL321X)添加RF_Certification配置相关的起始地址 0x10 并定义 RF_Certification 配置的起始地址 _RF_CERTIFICATION_CFG_ADDR_OFFSET(merge_requests/@1175)
 * **adc**
-  * (TL721x/TL321x):添加adc_start_sample_nodma(), adc_stop_sample_nodma(), adc_get_irq_status(),adc_clr_irq_status()和adc_set_scan_chn_dis().(http://192.168.48.36/src/driver/tl_platform_src/merge_requests/1246)  
+  * (TL721x/TL321x):添加adc_start_sample_nodma(), adc_stop_sample_nodma(), adc_get_irq_status(),adc_clr_irq_status()和adc_set_scan_chn_dis().(merge_requests/@1246)  
 ### Bug Fixes
 
 * **flash**
-  * (TL721x)修复flash默认保护区域（从无保护改为保护flash的一半区域）。(http://192.168.48.36/src/driver/tl_platform_src/merge_requests/1188)
+  * (TL721x)修复flash默认保护区域（从无保护改为保护flash的一半区域）。(merge_requests/@1188)
 * **rf**
-  * (TL321x)修复 rf_power_level_index_e 枚举值错误问题。(http://192.168.48.36/src/driver/tl_platform_src/merge_requests/1194)
-  * (TL721x/TL321x)由于删除了 reg_bb_dma_rx_rptr，在 rf_common.c 中，接口 rf_get_rx_packet_addr 中的 reg_bb_dma_rx_rptr 已替换为 reg_rf_dma_rx_rptr。(http://192.168.48.36/src/driver/tl_platform_src/merge_requests/1207)
-  * (TL721x/TL321x)修复了RF获取RSSI值不准的问题(http://192.168.48.36/src/driver/tl_platform_src/merge_requests/1261)
+  * (TL321x)修复 rf_power_level_index_e 枚举值错误问题。(merge_requests/@1194)
+  * (TL721x/TL321x)由于删除了 reg_bb_dma_rx_rptr，在 rf_common.c 中，接口 rf_get_rx_packet_addr 中的 reg_bb_dma_rx_rptr 已替换为 reg_rf_dma_rx_rptr。(merge_requests/@1207)
+  * (TL721x/TL321x)修复了RF获取RSSI值不准的问题(merge_requests/@1261)
 * **pm**
-  * (B91/B92/TL721x/TL321x)解决了调用函数pm_set_vbat_type或者sys_init修改参数vbat_v不成功的问题。（仅仅当将VBAT_MAX_VALUE_LESS_THAN_3V6修改为VBAT_MAX_VALUE_GREATER_THAN_3V6会有问题）(http://192.168.48.36/src/driver/tl_platform_src/merge_requests/1195,http://192.168.48.36/src/driver/tl_platform_src/merge_requests/1213)
+  * (B91/B92/TL721x/TL321x)解决了调用函数pm_set_vbat_type或者sys_init修改参数vbat_v不成功的问题。（仅仅当将VBAT_MAX_VALUE_LESS_THAN_3V6修改为VBAT_MAX_VALUE_GREATER_THAN_3V6会有问题）(merge_requests/@1195,merge_requests/@1213)
 * **dma** 
-  * (TL721x/TL321x)由于定义无效或重复，删除了以下寄存器定义：dma_reg.h中reg_dma_rx_wptr、reg_dma_tx_wptr、reg_dma_rx_rptr、reg_dma_tx_rptr；rf_reg.h中reg_bb_dma_rx_wptr、reg_bb_dma_tx_wptr、reg_bb_dma_rx_rptr、reg_bb_dma_tx_rptr;用户请使用如下寄存器定义：reg_rf_dma_rx_wptr、reg_rf_dma_rx_rptr、reg_rf_dma_tx_rptr、reg_rf_dma_tx_wptr。(http://192.168.48.36/src/driver/tl_platform_src/merge_requests/1207)(http://192.168.48.36/src/driver/tl_platform_src/merge_requests/1235)
+  * (TL721x/TL321x)由于定义无效或重复，删除了以下寄存器定义：dma_reg.h中reg_dma_rx_wptr、reg_dma_tx_wptr、reg_dma_rx_rptr、reg_dma_tx_rptr；rf_reg.h中reg_bb_dma_rx_wptr、reg_bb_dma_tx_wptr、reg_bb_dma_rx_rptr、reg_bb_dma_tx_rptr;用户请使用如下寄存器定义：reg_rf_dma_rx_wptr、reg_rf_dma_rx_rptr、reg_rf_dma_tx_rptr、reg_rf_dma_tx_wptr。(merge_requests/@1207)(merge_requests/@1235)
 * **spi**
-  * (B92/TL721x/TL321x) 将spi_write/spi_read接口中的word_len类型从unsigned char修改为unsigned int。(http://192.168.48.36/src/driver/tl_platform_src/merge_requests/1144).
+  * (B92/TL721x/TL321x) 将spi_write/spi_read接口中的word_len类型从unsigned char修改为unsigned int。(merge_requests/@1144).
 * **gpio**
-  * (TL721x/TL321X)修复gpio_init()中无法设置gpio为低电平的问题，防止调用gpio_init()后不能将gpio初始化为低电平。(http://192.168.48.36/src/driver/tl_platform_src/merge_requests/1226)  
+  * (TL721x/TL321X)修复gpio_init()中无法设置gpio为低电平的问题，防止调用gpio_init()后不能将gpio初始化为低电平。(merge_requests/@1226)  
  * **gpio**
-  * (B91)修复gpio_init()中无法初始化PF组(MSPI)的问题，防止调用gpio_init()后不能初始化MSPI口。(http://192.168.48.36/src/driver/tl_platform_src/merge_requests/1226)  
+  * (B91)修复gpio_init()中无法初始化PF组(MSPI)的问题，防止调用gpio_init()后不能初始化MSPI口。(merge_requests/@1226)  
 * **Jtag**
-  * (B91)jtag两线和四线使能接口jtag_set_pin_en()和sdp_set_pin_en()添加模拟上下拉，防止jtag硬件在未连接时出现异常。(http://192.168.48.36/src/driver/tl_platform_src/merge_requests/1226)  
+  * (B91)jtag两线和四线使能接口jtag_set_pin_en()和sdp_set_pin_en()添加模拟上下拉，防止jtag硬件在未连接时出现异常。(merge_requests/@1226)  
 * **usb**
-  * (TL321X)修复了设置usbhw_enable_hw_feature()时会将其他feature异常清除的问题.(http://192.168.48.36/src/driver/tl_platform_src/merge_requests/1249)
+  * (TL321X)修复了设置usbhw_enable_hw_feature()时会将其他feature异常清除的问题.(merge_requests/@1249)
 * **adc**
-  * (TL721x/TL321x): adc_get_code()由读模拟寄存器方式改为读adc rx fifo方式，防止连续多次调用adc_get_code()时重复取的是同一个code。(http://192.168.48.36/src/driver/tl_platform_src/merge_requests/1246)
+  * (TL721x/TL321x): adc_get_code()由读模拟寄存器方式改为读adc rx fifo方式，防止连续多次调用adc_get_code()时重复取的是同一个code。(merge_requests/@1246)
 * **adc**
-  * (TL721x/TL321x):修改各个采样频率的sample cycle配置，且在adc_power_on()后delay 30us 等待adc稳定，修复adc_power_on()后第一个code异常的问题。(http://192.168.48.36/src/driver/tl_platform_src/merge_requests/1246)
+  * (TL721x/TL321x):修改各个采样频率的sample cycle配置，且在adc_power_on()后delay 30us 等待adc稳定，修复adc_power_on()后第一个code异常的问题。(merge_requests/@1246)
 * **flash**
-  * (B91/B92/TL721X/TL321X):在platform_init()中添加宏不对跑ram bin的芯片的flash加保护，防止无搭载flash的芯片卡死。(http://192.168.48.36/src/driver/tl_platform_src/merge_requests/1255)
+  * (B91/B92/TL721X/TL321X):在platform_init()中添加宏不对跑ram bin的芯片的flash加保护，防止无搭载flash的芯片卡死。(merge_requests/@1255)
 * **uart**
-  * (TL721X/TL321X):修复了dma uart rx数据丢失问题,将传递给uart_receive_dma的长度参数修改为可以接收到的最大值。(http://192.168.48.36/src/driver/tl_platform_src/merge_requests/1257)
+  * (TL721X/TL321X):修复了dma uart rx数据丢失问题,将传递给uart_receive_dma的长度参数修改为可以接收到的最大值。(merge_requests/@1257)
 
 ### Refactoring
 
 * **trap**
-  * (B91/B92/TL721X/TL321X) 将 trap_entry 函数定义为弱函数，以便应用程序重新可以实现该函数。(http://192.168.48.36/src/driver/tl_platform_src/merge_requests/1212).
+  * (B91/B92/TL721X/TL321X) 将 trap_entry 函数定义为弱函数，以便应用程序重新可以实现该函数。(merge_requests/@1212).
 * **ADC**
-  * (B91/B92/TL721X/TL321X)ADC温度检测功能属于内部测试功能，不对外开放，默认禁用该功能。(http://192.168.48.36/src/driver/tl_platform_src/merge_requests/1227)
+  * (B91/B92/TL721X/TL321X)ADC温度检测功能属于内部测试功能，不对外开放，默认禁用该功能。(merge_requests/@1227)
 * **pm**
-  * (TL721x/TL321x)clock.c stimer.c mspi.c core.c 封装成库文件。(http://192.168.48.36/src/driver/tl_platform_src/merge_requests/1195,http://192.168.48.36/src/driver/tl_platform_src/merge_requests/1213)
-  * (TL721X)修改PM相关的接口都使用O2优化选项。(http://192.168.48.36/src/driver/tl_platform_src/merge_requests/1238)
+  * (TL721x/TL321x)clock.c stimer.c mspi.c core.c 封装成库文件。(merge_requests/@1195,merge_requests/@1213)
+  * (TL721X)修改PM相关的接口都使用O2优化选项。(merge_requests/@1238)
 * **usb**
-  * (TL721x/TL321x)删除 usbhw.c 中未使用的头文件 wchar.h。(http://192.168.48.36/src/driver/tl_platform_src/merge_requests/1237)
+  * (TL721x/TL321x)删除 usbhw.c 中未使用的头文件 wchar.h。(merge_requests/@1237)
 * **calibration**
-  *  (B91/B92)给user_calib_freq_offset接口添加frequency_offset_value范围限制(http://192.168.48.36/src/driver/tl_platform_src/merge_requests/1247)
+  *  (B91/B92)给user_calib_freq_offset接口添加frequency_offset_value范围限制(merge_requests/@1247)
 * **rf**
-  * (TL721x/TL321x)函数rf_clr_dig_logic_state、rf_reset_register_value类型修改为_attribute_ram_code_sec_noinline_；函数rf_dma_reset类型修改为static _always_inline。(http://192.168.48.36/src/driver/tl_platform_src/merge_requests/1251)
+  * (TL721x/TL321x)函数rf_clr_dig_logic_state、rf_reset_register_value类型修改为_attribute_ram_code_sec_noinline_；函数rf_dma_reset类型修改为static _always_inline。(merge_requests/@1251)
 
 ### Performance Improvements
 
 * **clock**
-  * (TL721x/TL321x)为了节省功耗，在不使用24M RC和PLL的时候，分别关闭24M RC/PLL。(http://192.168.48.36/src/driver/tl_platform_src/merge_requests/1195,http://192.168.48.36/src/driver/tl_platform_src/merge_requests/1213)
+  * (TL721x/TL321x)为了节省功耗，在不使用24M RC和PLL的时候，分别关闭24M RC/PLL。(merge_requests/@1195,merge_requests/@1213)
 * **S**
-  * (TL721x/TL321x)为了节省功耗，初始化时关掉gpio输入功能。(http://192.168.48.36/src/driver/tl_platform_src/merge_requests/1195,http://192.168.48.36/src/driver/tl_platform_src/merge_requests/1213)
+  * (TL721x/TL321x)为了节省功耗，初始化时关掉gpio输入功能。(merge_requests/@1195,merge_requests/@1213)
 * **rf**
-  * (TL721x)rf_mode_init()内部添加优化TX功耗的相关配置，并根据最新的驱动配置更新rf_power_Level_list表。(http://192.168.48.36/src/driver/tl_platform_src/merge_requests/1234)
-  * (TL321x)优化 tx vant 模式下的功耗，提高 vant 最大输出功率，并根据最新的驱动配置更新rf_power_Level_list表(http://192.168.48.36/src/driver/tl_platform_src/merge_requests/1213,http://192.168.48.36/src/driver/tl_platform_src/merge_requests/1234)
-  * (TL321x)优化RX sensitivity 性能，添加rf_rx_performance_mode接口及rf_rx_performance_e选择RX灵敏度配置，默认配置为RF_RX_LOW_POWER；选择RF_RX_HIGH_PERFORMANCE性能会提升1dbm,但会增加RX功耗(http://192.168.48.36/src/driver/tl_platform_src/merge_requests/1213,http://192.168.48.36/src/driver/tl_platform_src/merge_requests/1234,http://192.168.48.36/src/driver/tl_platform_src/merge_requests/1265)
-  * (TL721x/TL321x)提升 BLE500K 和 BLE125K per floor 性能。(http://192.168.48.36/src/driver/tl_platform_src/merge_requests/1232)(http://192.168.48.36/src/driver/tl_platform_src/merge_requests/1260)
+  * (TL721x)rf_mode_init()内部添加优化TX功耗的相关配置，并根据最新的驱动配置更新rf_power_Level_list表。(merge_requests/@1234)
+  * (TL321x)优化 tx vant 模式下的功耗，提高 vant 最大输出功率，并根据最新的驱动配置更新rf_power_Level_list表(merge_requests/@1213,merge_requests/@1234)
+  * (TL321x)优化RX sensitivity 性能，添加rf_rx_performance_mode接口及rf_rx_performance_e选择RX灵敏度配置，默认配置为RF_RX_LOW_POWER；选择RF_RX_HIGH_PERFORMANCE性能会提升1dbm,但会增加RX功耗(merge_requests/@1213,merge_requests/@1234,merge_requests/@1265)
+  * (TL721x/TL321x)提升 BLE500K 和 BLE125K per floor 性能。(merge_requests/@1232)(merge_requests/@1260)
   
 ---
 
@@ -291,16 +872,16 @@
 ### Bug Fixes
 
 * **pm**
-  * (TL721x)Solved the problem of exiting the sleep function or causing a reset due to the incorrect position of the clear wake source state operation.Clear the wake source status after setting the wake tick.The process of setting the wake up tick value may generate an intermediate value. If the intermediate value is the same as the 32k tick value, the state of the timer wake up source will be set, causing the exit of the sleep function or a reset.[2b4ddd52](http://192.168.48.36/src/driver/tl_platform_src/merge_requests/1147/commits?commit_id=2b4ddd52a79331bd344548bd5bed1d5f1847f6f8)
-  * (B91/B92)Solved the problem that pm_set_wakeup_time_param and pm_set_xtal_stable_timer_param interfaces calculate the early wake time of sleep incorrectly. If you call either of these interfaces, you may not be able to sleep properly.[2f9b7be4](http://192.168.48.36/src/driver/tl_platform_src/merge_requests/1159/commits?commit_id=2f9b7be4ff8e2c0018180a9df7d85d6b4c1f0db3)
+  * (TL721x)Solved the problem of exiting the sleep function or causing a reset due to the incorrect position of the clear wake source state operation.Clear the wake source status after setting the wake tick.The process of setting the wake up tick value may generate an intermediate value. If the intermediate value is the same as the 32k tick value, the state of the timer wake up source will be set, causing the exit of the sleep function or a reset.[2b4ddd52](merge_requests/@1147/commits?commit_id=2b4ddd52a79331bd344548bd5bed1d5f1847f6f8)
+  * (B91/B92)Solved the problem that pm_set_wakeup_time_param and pm_set_xtal_stable_timer_param interfaces calculate the early wake time of sleep incorrectly. If you call either of these interfaces, you may not be able to sleep properly.[2f9b7be4](merge_requests/@1159/commits?commit_id=2f9b7be4ff8e2c0018180a9df7d85d6b4c1f0db3)
 * **i2c1_m** 
-  * (TLSR922x/TLSR952x/TL721X/TL321X)I2C1_M_WAIT:xxx_timeout_handler error passing parameter.[5fbb0b](http://192.168.48.36/src/driver/tl_platform_src/merge_requests/1162/commits?commit_id=5fbb0bc295c5a7e9e1b976a48dea8dc72333ac61)
+  * (TLSR922x/TLSR952x/TL721X/TL321X)I2C1_M_WAIT:xxx_timeout_handler error passing parameter.[5fbb0b](merge_requests/@1162/commits?commit_id=5fbb0bc295c5a7e9e1b976a48dea8dc72333ac61)
 * **RF_Demo** 
-  * (TL721X/TL321X)Fixed data overflow during header variable assignment in app_pri_generic_mode.c[0d5bc4](http://192.168.48.36/src/driver/tl_platform_src/merge_requests/1160/commits?commit_id=0d5bc466a3c121324dee848c4f245b1080d592ae)
-  * (TL721x/TL321x)Fixed rf_set_irq_mask parameter passing error in app_pri_generic_mode.c[0d5bc4](http://192.168.48.36/src/driver/tl_platform_src/merge_requests/1160/commits?commit_id=0d5bc466a3c121324dee848c4f245b1080d592ae)
+  * (TL721X/TL321X)Fixed data overflow during header variable assignment in app_pri_generic_mode.c[0d5bc4](merge_requests/@1160/commits?commit_id=0d5bc466a3c121324dee848c4f245b1080d592ae)
+  * (TL721x/TL321x)Fixed rf_set_irq_mask parameter passing error in app_pri_generic_mode.c[0d5bc4](merge_requests/@1160/commits?commit_id=0d5bc466a3c121324dee848c4f245b1080d592ae)
 * **rf** 
-  * (TL721X/TL321X)Fixed issue where switching between different RF modes using rf_set_xx_mode could be unsuccessful (in cases where the rf_reset_register_value interface was not called before switching modes)[0d5bc4](http://192.168.48.36/src/driver/tl_platform_src/merge_requests/1160/commits?commit_id=0d5bc466a3c121324dee848c4f245b1080d592ae)
-  * (TL321x) Fix the rf_mode_init configuration error to avoid triggering RF DMA and state machine reset during invocation.[373c5d](http://192.168.48.36/src/driver/tl_platform_src/merge_requests/1149/commits?commit_id=373c5dd45fc45afab5b38f5ea572afadcd7428a0)
+  * (TL721X/TL321X)Fixed issue where switching between different RF modes using rf_set_xx_mode could be unsuccessful (in cases where the rf_reset_register_value interface was not called before switching modes)[0d5bc4](merge_requests/@1160/commits?commit_id=0d5bc466a3c121324dee848c4f245b1080d592ae)
+  * (TL321x) Fix the rf_mode_init configuration error to avoid triggering RF DMA and state machine reset during invocation.[373c5d](merge_requests/@1149/commits?commit_id=373c5dd45fc45afab5b38f5ea572afadcd7428a0)
 
 ### BREAKING CHANGES 
 
@@ -361,16 +942,16 @@
 ### Bug Fixes
 
 * **pm**
-  * (TL721X)解决了因为清唤醒源状态操作的位置不对引发的退出睡眠函数或者产生复位的问题。清唤醒源状态的操作需要放在设置唤醒tick之后。设置唤醒tick值的过程可能会产生中间值，如果中间值和32k tick值相同会把timer唤醒源的状态置起来，从而引发退出睡眠函数或者产生复位。[2b4ddd52](http://192.168.48.36/src/driver/tl_platform_src/merge_requests/1147/commits?commit_id=2b4ddd52a79331bd344548bd5bed1d5f1847f6f8)
-  * (B91/B92)解决了pm_set_wakeup_time_param和pm_set_xtal_stable_timer_param接口对于睡眠的提前唤醒时间计算错误的问题。如果调用过这两个接口中的任意一个，可能会导致不能正常睡眠。[2f9b7be4](http://192.168.48.36/src/driver/tl_platform_src/merge_requests/1159/commits?commit_id=2f9b7be4ff8e2c0018180a9df7d85d6b4c1f0db3)
+  * (TL721X)解决了因为清唤醒源状态操作的位置不对引发的退出睡眠函数或者产生复位的问题。清唤醒源状态的操作需要放在设置唤醒tick之后。设置唤醒tick值的过程可能会产生中间值，如果中间值和32k tick值相同会把timer唤醒源的状态置起来，从而引发退出睡眠函数或者产生复位。[2b4ddd52](merge_requests/@1147/commits?commit_id=2b4ddd52a79331bd344548bd5bed1d5f1847f6f8)
+  * (B91/B92)解决了pm_set_wakeup_time_param和pm_set_xtal_stable_timer_param接口对于睡眠的提前唤醒时间计算错误的问题。如果调用过这两个接口中的任意一个，可能会导致不能正常睡眠。[2f9b7be4](merge_requests/@1159/commits?commit_id=2f9b7be4ff8e2c0018180a9df7d85d6b4c1f0db3)
 * **i2c1_m** 
-  * (TLSR922x/TLSR952x/TL721X/TL321X)I2C1_M_WAIT:xxx_timeout_handler传参错误.[5fbb0b](http://192.168.48.36/src/driver/tl_platform_src/merge_requests/1162/commits?commit_id=5fbb0bc295c5a7e9e1b976a48dea8dc72333ac61)
+  * (TLSR922x/TLSR952x/TL721X/TL321X)I2C1_M_WAIT:xxx_timeout_handler传参错误.[5fbb0b](merge_requests/@1162/commits?commit_id=5fbb0bc295c5a7e9e1b976a48dea8dc72333ac61)
 * **RF_Demo** 
-  * (TL721X/TL321X)修复了app_pri_generic_mode.c中header变量赋值过程中的数据溢出问题[0d5bc4](http://192.168.48.36/src/driver/tl_platform_src/merge_requests/1160/commits?commit_id=0d5bc466a3c121324dee848c4f245b1080d592ae)
-  * (TL721x/TL321x)修复了app_pri_generic_mode.c中rf_set_irq_mask传参错误[0d5bc4](http://192.168.48.36/src/driver/tl_platform_src/merge_requests/1160/commits?commit_id=0d5bc466a3c121324dee848c4f245b1080d592ae)
+  * (TL721X/TL321X)修复了app_pri_generic_mode.c中header变量赋值过程中的数据溢出问题[0d5bc4](merge_requests/@1160/commits?commit_id=0d5bc466a3c121324dee848c4f245b1080d592ae)
+  * (TL721x/TL321x)修复了app_pri_generic_mode.c中rf_set_irq_mask传参错误[0d5bc4](merge_requests/@1160/commits?commit_id=0d5bc466a3c121324dee848c4f245b1080d592ae)
 * **rf**
-  * (TL721x/TL321x)修复了使用rf_set_xx_mode切换不同RF模式可能不成功的问题（在切换模式之前没有调用rf_reset_register_value接口的情况）[0d5bc4](http://192.168.48.36/src/driver/tl_platform_src/merge_requests/1160/commits?commit_id=0d5bc466a3c121324dee848c4f245b1080d592ae)
-  * (TL321x) 修复了rf_mode_init配置错误，避免调用时触发RF DMA和状态机复位。[373c5d](http://192.168.48.36/src/driver/tl_platform_src/merge_requests/1149/commits?commit_id=373c5dd45fc45afab5b38f5ea572afadcd7428a0)
+  * (TL721x/TL321x)修复了使用rf_set_xx_mode切换不同RF模式可能不成功的问题（在切换模式之前没有调用rf_reset_register_value接口的情况）[0d5bc4](merge_requests/@1160/commits?commit_id=0d5bc466a3c121324dee848c4f245b1080d592ae)
+  * (TL321x) 修复了rf_mode_init配置错误，避免调用时触发RF DMA和状态机复位。[373c5d](merge_requests/@1149/commits?commit_id=373c5dd45fc45afab5b38f5ea572afadcd7428a0)
 
 ### BREAKING CHANGES
 
@@ -457,38 +1038,38 @@
 
 ### Bug Fixes
 * **audio**
-  * (TLSR922x/TLSR952x)Fixed the problem of amic and line mono input data anomaly under 44.1k and 48k sample rate, involving interface audio_codec_swap_stream0_data. [3d3f31d9](http://192.168.48.36/src/driver/telink_b91m_platform_src/merge_requests/1034/diffs?commit_id=3d3f31d94888af0f2242fcef7e8107e729ca6776)
-  * (TLSR922x/TLSR952x)Solved the problem of inconsistent volume between the left and right channels of 20bit audio data in stereo mode. [716ead90](http://192.168.48.36/src/driver/telink_b91m_platform_src/merge_requests/944/diffs?commit_id=716ead90a4e0184169b082395715481ac358a1bb)
-  * (TLSR922x/TLSR952x)Solved the problem of abnormal dac output after dynamically switching the codec dac sampling rate. [d755dae7](http://192.168.48.36/src/driver/telink_b91m_platform_src/merge_requests/1086/diffs?commit_id=d755dae7d81454617c3ddc0290cf07cf4a30b17f)
+  * (TLSR922x/TLSR952x)Fixed the problem of amic and line mono input data anomaly under 44.1k and 48k sample rate, involving interface audio_codec_swap_stream0_data. [3d3f31d9](http://192.168.48.36/src/driver/telink_b91m_platform_src/merge_requests/@1034/diffs?commit_id=3d3f31d94888af0f2242fcef7e8107e729ca6776)
+  * (TLSR922x/TLSR952x)Solved the problem of inconsistent volume between the left and right channels of 20bit audio data in stereo mode. [716ead90](http://192.168.48.36/src/driver/telink_b91m_platform_src/merge_requests/@944/diffs?commit_id=716ead90a4e0184169b082395715481ac358a1bb)
+  * (TLSR922x/TLSR952x)Solved the problem of abnormal dac output after dynamically switching the codec dac sampling rate. [d755dae7](http://192.168.48.36/src/driver/telink_b91m_platform_src/merge_requests/@1086/diffs?commit_id=d755dae7d81454617c3ddc0290cf07cf4a30b17f)
 * **SPI_Demo**
-  * (TLSR922x/TLSR952x)Repair SPI_PROTOCOL in spi no dma mode is configured as B91M_SLAVE_PROTOCOL, and the master side sends data in wrong format, modify SPI_MODE_WR_DUMMY_WRITE to SPI_MODE_WR_WRITE_ONLY. [e171fa06](http://192.168.48.36/src/driver/telink_b91m_platform_src/merge_requests/1013/diffs?commit_id=e171fa060b221eac87bef74edadb3e296890bca2)
+  * (TLSR922x/TLSR952x)Repair SPI_PROTOCOL in spi no dma mode is configured as B91M_SLAVE_PROTOCOL, and the master side sends data in wrong format, modify SPI_MODE_WR_DUMMY_WRITE to SPI_MODE_WR_WRITE_ONLY. [e171fa06](http://192.168.48.36/src/driver/telink_b91m_platform_src/merge_requests/@1013/diffs?commit_id=e171fa060b221eac87bef74edadb3e296890bca2)
 * **pm**
-  * (TLSR922x/TLSR952x)Solved several problems that may occur when the sleep time set by the function pm_sleep_wakeup() is less than 1.62ms: 1. Entered sleep, but the sleep time did not meet expectations, and it can be awakened after about 37 hours. 2. If it happens to be after the pm_clr_all_irq_status() in the processing of pm_sleep_wakeup() and the time is up, it will cause the plic_clr_all_request() to not be cleared, triggering a software reboot. 3. If it happens to be at the moment of sleep and the time was out, it will result in not entering sleep and continuing to execute (when sleep mode is suspend/sleep retention) or software reboot (when sleep mode is deep). [bd44c301](http://192.168.48.36/src/driver/telink_b91m_platform_src/merge_requests/769/diffs?commit_id=bd44c3017fd31dbb3c0808b5c8bbcb6645f38ea2)
-  * (TLSR922x/TLSR952x)Solved the problem that may be caused by treating the VBUS flag bit as a wake-up source flag bit in pm_sleep_wakeup(): If jitter occurs on the VBUS pin after the pm_clr_all_irq_status() in the processing of pm_sleep_wakeup(), it will cause the plic_clr_all_request() to not be cleared, triggering a software reboot. [bd44c301](http://192.168.48.36/src/driver/telink_b91m_platform_src/merge_requests/769/diffs?commit_id=bd44c3017fd31dbb3c0808b5c8bbcb6645f38ea2)
-  * (TLSR921x/TLSR951x)Solved the crash problem caused by the failure of the crystal oscillator stability flag. The program determines whether to switch from 24M rc to 24M xtal by reading the stable flag of the hardware crystal oscillator. If the crystal used starts slowly and the flag of the crystal oscillator is ready, but the actual crystal oscillator does not start normally, the program will crash after switching to 24M XTAL. [3aa5ca13](http://192.168.48.36/src/driver/telink_b91m_platform_src/merge_requests/936/diffs?commit_id=3aa5ca1363a8805e274dccf03320f584ab75e477)
-  * (TLSR921x/TLSR951x/TLSR922x/TLSR952x)Restore the default value of register system_up_32k before sleep, which solves the problem of inaccurate sleep time. If the default value is not restored, the system tick updates every 32k edge. Because the system tick is not updated in a timely manner, the XTAL may be misjudged that it is not stable. If the system tick executes 40us more than once, the reserved waiting time may be exceeded, resulting in inaccurate sleep time. [e8dc8082](http://192.168.48.36/src/driver/telink_b91m_platform_src/merge_requests/1078/diffs?commit_id=e8dc80828f0d9050833b55be48764dcce8733a0a)
+  * (TLSR922x/TLSR952x)Solved several problems that may occur when the sleep time set by the function pm_sleep_wakeup() is less than 1.62ms: 1. Entered sleep, but the sleep time did not meet expectations, and it can be awakened after about 37 hours. 2. If it happens to be after the pm_clr_all_irq_status() in the processing of pm_sleep_wakeup() and the time is up, it will cause the plic_clr_all_request() to not be cleared, triggering a software reboot. 3. If it happens to be at the moment of sleep and the time was out, it will result in not entering sleep and continuing to execute (when sleep mode is suspend/sleep retention) or software reboot (when sleep mode is deep). [bd44c301](http://192.168.48.36/src/driver/telink_b91m_platform_src/merge_requests/@769/diffs?commit_id=bd44c3017fd31dbb3c0808b5c8bbcb6645f38ea2)
+  * (TLSR922x/TLSR952x)Solved the problem that may be caused by treating the VBUS flag bit as a wake-up source flag bit in pm_sleep_wakeup(): If jitter occurs on the VBUS pin after the pm_clr_all_irq_status() in the processing of pm_sleep_wakeup(), it will cause the plic_clr_all_request() to not be cleared, triggering a software reboot. [bd44c301](http://192.168.48.36/src/driver/telink_b91m_platform_src/merge_requests/@769/diffs?commit_id=bd44c3017fd31dbb3c0808b5c8bbcb6645f38ea2)
+  * (TLSR921x/TLSR951x)Solved the crash problem caused by the failure of the crystal oscillator stability flag. The program determines whether to switch from 24M rc to 24M xtal by reading the stable flag of the hardware crystal oscillator. If the crystal used starts slowly and the flag of the crystal oscillator is ready, but the actual crystal oscillator does not start normally, the program will crash after switching to 24M XTAL. [3aa5ca13](http://192.168.48.36/src/driver/telink_b91m_platform_src/merge_requests/@936/diffs?commit_id=3aa5ca1363a8805e274dccf03320f584ab75e477)
+  * (TLSR921x/TLSR951x/TLSR922x/TLSR952x)Restore the default value of register system_up_32k before sleep, which solves the problem of inaccurate sleep time. If the default value is not restored, the system tick updates every 32k edge. Because the system tick is not updated in a timely manner, the XTAL may be misjudged that it is not stable. If the system tick executes 40us more than once, the reserved waiting time may be exceeded, resulting in inaccurate sleep time. [e8dc8082](http://192.168.48.36/src/driver/telink_b91m_platform_src/merge_requests/@1078/diffs?commit_id=e8dc80828f0d9050833b55be48764dcce8733a0a)
 * **sys**
-  * (TLSR922x/TLSR952x)The A3 chip has a problem (the A4 doesn't) : If the hardware board has a 1.4V dcdc inductor component and uses 1.8V GPIO, it is necessary to set 1P4V to DCDC mode as soon as possible after the chip is powered on, otherwise there is a voltage pulse on vdd1v2 and vddo3. Before moving code operations in the S file, configure the DCDC mode to solve this problem. [875a487e](http://192.168.48.36/src/driver/telink_b91m_platform_src/merge_requests/910/diffs?commit_id=875a487edbb3191372e255369c566f4222d0b74c)
+  * (TLSR922x/TLSR952x)The A3 chip has a problem (the A4 doesn't) : If the hardware board has a 1.4V dcdc inductor component and uses 1.8V GPIO, it is necessary to set 1P4V to DCDC mode as soon as possible after the chip is powered on, otherwise there is a voltage pulse on vdd1v2 and vddo3. Before moving code operations in the S file, configure the DCDC mode to solve this problem. [875a487e](http://192.168.48.36/src/driver/telink_b91m_platform_src/merge_requests/@910/diffs?commit_id=875a487edbb3191372e255369c566f4222d0b74c)
 * **USB_Demo**
-  * (TLSR922x/TLSR952x)Solved the problem that DMIC0_DMIC1_IN cannot transfer DMIC0 data in USB_MICROPHONE mode. [716ead90](http://192.168.48.36/src/driver/telink_b91m_platform_src/merge_requests/944/diffs?commit_id=716ead90a4e0184169b082395715481ac358a1bb)
+  * (TLSR922x/TLSR952x)Solved the problem that DMIC0_DMIC1_IN cannot transfer DMIC0 data in USB_MICROPHONE mode. [716ead90](http://192.168.48.36/src/driver/telink_b91m_platform_src/merge_requests/@944/diffs?commit_id=716ead90a4e0184169b082395715481ac358a1bb)
  * **link**
-   * (TLSR921x/TLSR951x/TLSR922x/TLSR952x)make _BSS_VMA_END four-byte alignment to resolve when using the S file _FILL_STK function,due of the _BSS_VMA_END may not have four-byte alignment, there is an out-of-bounds access beyond _STACK_TOP, resulting in a store access fault. [0e732bce](http://192.168.48.36/src/driver/telink_b91m_platform_src/merge_requests/972/diffs?commit_id=0e732bcea2887804489ad6db251a281f26796218)
+   * (TLSR921x/TLSR951x/TLSR922x/TLSR952x)make _BSS_VMA_END four-byte alignment to resolve when using the S file _FILL_STK function,due of the _BSS_VMA_END may not have four-byte alignment, there is an out-of-bounds access beyond _STACK_TOP, resulting in a store access fault. [0e732bce](http://192.168.48.36/src/driver/telink_b91m_platform_src/merge_requests/@972/diffs?commit_id=0e732bcea2887804489ad6db251a281f26796218)
 * **Timer_Demo**
-  * (TLSR921x/TLSR951x/TLSR922x/TLSR952x)Wd_clear() must be executed before each call to wd_start() to avoid abnormal watchdog reset time because the initial count value is not 0. [20a065ec](http://192.168.48.36/src/driver/telink_b91m_platform_src/merge_requests/1000/diffs?commit_id=20a065ece53185549c748bf99d5780029def6180)
+  * (TLSR921x/TLSR951x/TLSR922x/TLSR952x)Wd_clear() must be executed before each call to wd_start() to avoid abnormal watchdog reset time because the initial count value is not 0. [20a065ec](http://192.168.48.36/src/driver/telink_b91m_platform_src/merge_requests/@1000/diffs?commit_id=20a065ece53185549c748bf99d5780029def6180)
 * **spi demo** 
-  * (TLSR922x/TLSR952x)Fix lspi duplicate call to gspi_reset in interrupt dma_irq_handler. [bfadf96e](http://192.168.48.36/src/driver/telink_b91m_platform_src/merge_requests/1009/diffs?commit_id=bfadf96ed151e483bbbbf0da00d9831c8f25d2ef)
+  * (TLSR922x/TLSR952x)Fix lspi duplicate call to gspi_reset in interrupt dma_irq_handler. [bfadf96e](http://192.168.48.36/src/driver/telink_b91m_platform_src/merge_requests/@1009/diffs?commit_id=bfadf96ed151e483bbbbf0da00d9831c8f25d2ef)
 * **qdec_Demo**
-  * (TLSR922x/TLSR952x)qdec_get_count_value: If the interface is called continuously (with very short intervals), it is possible that the data read is not updated in time and the result is read from the last time. [ecf387fa](http://192.168.48.36/src/driver/telink_b91m_platform_src/merge_requests/1064/diffs?commit_id=ecf387fab552255396dd584107535693c01a617d)
+  * (TLSR922x/TLSR952x)qdec_get_count_value: If the interface is called continuously (with very short intervals), it is possible that the data read is not updated in time and the result is read from the last time. [ecf387fa](http://192.168.48.36/src/driver/telink_b91m_platform_src/merge_requests/@1064/diffs?commit_id=ecf387fab552255396dd584107535693c01a617d)
 * **rf**
-  * (TLSR921x/TLSR951x/TLSR922x/TLSR952x)Add the missing active state of the reg_rf_ll_2d_sclk register bit<0-2>. [d7ef39ba](http://192.168.48.36/src/driver/telink_b91m_platform_src/merge_requests/1087/diffs?commit_id=d7ef39ba526cdf736cf4ea5b75c79c86366b609c)
+  * (TLSR921x/TLSR951x/TLSR922x/TLSR952x)Add the missing active state of the reg_rf_ll_2d_sclk register bit<0-2>. [d7ef39ba](http://192.168.48.36/src/driver/telink_b91m_platform_src/merge_requests/@1087/diffs?commit_id=d7ef39ba526cdf736cf4ea5b75c79c86366b609c)
 * **Coremark_demo**
-  * (TLSR921x/TLSR951x/TLSR922x/TLSR952x)Fix the compilation options for the project to ensure that the CPU runs properly. [791247df](http://192.168.48.36/src/driver/telink_b91m_platform_src/merge_requests/894/diffs?commit_id=791247df9dba930661b988a44fc55f3898d3c718)
+  * (TLSR921x/TLSR951x/TLSR922x/TLSR952x)Fix the compilation options for the project to ensure that the CPU runs properly. [791247df](http://192.168.48.36/src/driver/telink_b91m_platform_src/merge_requests/@894/diffs?commit_id=791247df9dba930661b988a44fc55f3898d3c718)
 * **Dhrystone_Demo**
-  * (TLSR921x/TLSR951x/TLSR922x/TLSR952x)Fix the compilation options for the project to ensure that the CPU runs properly. [791247df](http://192.168.48.36/src/driver/telink_b91m_platform_src/merge_requests/894/diffs?commit_id=791247df9dba930661b988a44fc55f3898d3c718)
+  * (TLSR921x/TLSR951x/TLSR922x/TLSR952x)Fix the compilation options for the project to ensure that the CPU runs properly. [791247df](http://192.168.48.36/src/driver/telink_b91m_platform_src/merge_requests/@894/diffs?commit_id=791247df9dba930661b988a44fc55f3898d3c718)
 * **flash**
-  * (TLSR921x/TLSR951x/TLSR922x/TLSR952x)Fix the problem that multiple calls to flash_write_status_midxxx() result in wrong return value. [0634358a](http://192.168.48.36/src/driver/telink_b91m_platform_src/merge_requests/984/diffs?commit_id=0634358ade7aaedb2939b14c8b4ebb49dfe131ce)
+  * (TLSR921x/TLSR951x/TLSR922x/TLSR952x)Fix the problem that multiple calls to flash_write_status_midxxx() result in wrong return value. [0634358a](http://192.168.48.36/src/driver/telink_b91m_platform_src/merge_requests/@984/diffs?commit_id=0634358ade7aaedb2939b14c8b4ebb49dfe131ce)
 * **RF_Demo**
-  * (TLSR921x/TLSR951x/TLSR922x/TLSR952x)Fixed a compilation error caused by undefined TX_DELAY_US in the rf demo. [3fc3d848](http://192.168.48.36/src/driver/telink_b91m_platform_src/merge_requests/904/diffs?commit_id=3fc3d848715b84cdcd763af3613aa4fb99477a86)
+  * (TLSR921x/TLSR951x/TLSR922x/TLSR952x)Fixed a compilation error caused by undefined TX_DELAY_US in the rf demo. [3fc3d848](http://192.168.48.36/src/driver/telink_b91m_platform_src/merge_requests/@904/diffs?commit_id=3fc3d848715b84cdcd763af3613aa4fb99477a86)
 
 ### BREAKING CHANGES 
 * **sys**
@@ -702,38 +1283,38 @@
 
 ### Bug Fixes
 * **audio**
-  * (TLSR922x/TLSR952x)修复在44.1k和48k采样率下, amic和line单声道输入数据异常问题，涉及接口 audio_codec_swap_stream0_data。 [3d3f31d9](http://192.168.48.36/src/driver/telink_b91m_platform_src/merge_requests/1034/diffs?commit_id=3d3f31d94888af0f2242fcef7e8107e729ca6776)
-  * (TLSR922x/TLSR952x)解决了立体声模式时 20bit 音频数据左右声道音量不一致的问题。 [716ead90](http://192.168.48.36/src/driver/telink_b91m_platform_src/merge_requests/944/diffs?commit_id=716ead90a4e0184169b082395715481ac358a1bb)
-  * (TLSR922x/TLSR952x)解决了动态切换codec dac采样率后，dac输出异常问题。 [d755dae7](http://192.168.48.36/src/driver/telink_b91m_platform_src/merge_requests/1086/diffs?commit_id=d755dae7d81454617c3ddc0290cf07cf4a30b17f)
+  * (TLSR922x/TLSR952x)修复在44.1k和48k采样率下, amic和line单声道输入数据异常问题，涉及接口 audio_codec_swap_stream0_data。 [3d3f31d9](http://192.168.48.36/src/driver/telink_b91m_platform_src/merge_requests/@1034/diffs?commit_id=3d3f31d94888af0f2242fcef7e8107e729ca6776)
+  * (TLSR922x/TLSR952x)解决了立体声模式时 20bit 音频数据左右声道音量不一致的问题。 [716ead90](http://192.168.48.36/src/driver/telink_b91m_platform_src/merge_requests/@944/diffs?commit_id=716ead90a4e0184169b082395715481ac358a1bb)
+  * (TLSR922x/TLSR952x)解决了动态切换codec dac采样率后，dac输出异常问题。 [d755dae7](http://192.168.48.36/src/driver/telink_b91m_platform_src/merge_requests/@1086/diffs?commit_id=d755dae7d81454617c3ddc0290cf07cf4a30b17f)
 * **SPI_Demo**
-  * (TLSR922x/TLSR952x)修复spi no dma模式下SPI_PROTOCOL配置为B91M_SLAVE_PROTOCOL，master端发送数据格式错误，将SPI_MODE_WR_DUMMY_WRITE修改成SPI_MODE_WR_WRITE_ONLY。 [e171fa06](http://192.168.48.36/src/driver/telink_b91m_platform_src/merge_requests/1013/diffs?commit_id=e171fa060b221eac87bef74edadb3e296890bca2)
+  * (TLSR922x/TLSR952x)修复spi no dma模式下SPI_PROTOCOL配置为B91M_SLAVE_PROTOCOL，master端发送数据格式错误，将SPI_MODE_WR_DUMMY_WRITE修改成SPI_MODE_WR_WRITE_ONLY。 [e171fa06](http://192.168.48.36/src/driver/telink_b91m_platform_src/merge_requests/@1013/diffs?commit_id=e171fa060b221eac87bef74edadb3e296890bca2)
 * **pm**
-  * (TLSR922x/TLSR952x)解决了当函数pm_sleep_wakeup()设置的睡眠时间小于1.62ms时，可能会引起的以下几种问题： 1.进入了睡眠，但睡眠时间不符合预期，约37小时后可以唤醒。 2.如果正好在pm_sleep_wakeup()函数中的pm_clr_all_irq_status()之后，时间到了，会导致plic_clr_all_request()清除不掉，触发软件reboot。 3.如果正好在睡眠的瞬间，时间到了，会导致不进入睡眠，继续执行（当sleep_mode是suspend/deep retention）或者软件reboot（当sleep_mode是deep）。 [bd44c301](http://192.168.48.36/src/driver/telink_b91m_platform_src/merge_requests/769/diffs?commit_id=bd44c3017fd31dbb3c0808b5c8bbcb6645f38ea2)
-  * (TLSR922x/TLSR952x)解决了由于在pm_sleep_wakeup()中把VBUS标志位当成唤醒源标志位一样处理可能会引起的问题：即如果在pm_sleep_wakeup()函数中的pm_clr_all_irq_status()之后，VBUS引脚上产生抖动，会导致plic_clr_all_request()清除不掉，触发软件reboot。 [bd44c301](http://192.168.48.36/src/driver/telink_b91m_platform_src/merge_requests/769/diffs?commit_id=bd44c3017fd31dbb3c0808b5c8bbcb6645f38ea2)
-  * (TLSR921x/TLSR951x)解决了因为晶振稳定标志位失效导致的死机问题。程序通过读硬件晶振稳定标志位判断是否从24M rc切换到24M xtal，如果使用的晶体起振较慢，晶振标志位ready但是实际晶振没有正常起震，切换到24M XTAL后，程序就会发生死机问题。 [3aa5ca13](http://192.168.48.36/src/driver/telink_b91m_platform_src/merge_requests/936/diffs?commit_id=3aa5ca1363a8805e274dccf03320f584ab75e477)
-  * (TLSR921x/TLSR951x/TLSR922x/TLSR952x)进睡眠前恢复寄存器system_up_32k默认值，解决了睡眠时间不准的问题。如果不恢复默认值，system tick会在每个32k沿更新，由于system tick更新不及时，可能会误判XTAL还没有稳定，多判断一次，多执行40us，可能会超过预留的等待时间，而导致睡眠时间不准确。 [e8dc8082](http://192.168.48.36/src/driver/telink_b91m_platform_src/merge_requests/1078/diffs?commit_id=e8dc80828f0d9050833b55be48764dcce8733a0a)
+  * (TLSR922x/TLSR952x)解决了当函数pm_sleep_wakeup()设置的睡眠时间小于1.62ms时，可能会引起的以下几种问题： 1.进入了睡眠，但睡眠时间不符合预期，约37小时后可以唤醒。 2.如果正好在pm_sleep_wakeup()函数中的pm_clr_all_irq_status()之后，时间到了，会导致plic_clr_all_request()清除不掉，触发软件reboot。 3.如果正好在睡眠的瞬间，时间到了，会导致不进入睡眠，继续执行（当sleep_mode是suspend/deep retention）或者软件reboot（当sleep_mode是deep）。 [bd44c301](http://192.168.48.36/src/driver/telink_b91m_platform_src/merge_requests/@769/diffs?commit_id=bd44c3017fd31dbb3c0808b5c8bbcb6645f38ea2)
+  * (TLSR922x/TLSR952x)解决了由于在pm_sleep_wakeup()中把VBUS标志位当成唤醒源标志位一样处理可能会引起的问题：即如果在pm_sleep_wakeup()函数中的pm_clr_all_irq_status()之后，VBUS引脚上产生抖动，会导致plic_clr_all_request()清除不掉，触发软件reboot。 [bd44c301](http://192.168.48.36/src/driver/telink_b91m_platform_src/merge_requests/@769/diffs?commit_id=bd44c3017fd31dbb3c0808b5c8bbcb6645f38ea2)
+  * (TLSR921x/TLSR951x)解决了因为晶振稳定标志位失效导致的死机问题。程序通过读硬件晶振稳定标志位判断是否从24M rc切换到24M xtal，如果使用的晶体起振较慢，晶振标志位ready但是实际晶振没有正常起震，切换到24M XTAL后，程序就会发生死机问题。 [3aa5ca13](http://192.168.48.36/src/driver/telink_b91m_platform_src/merge_requests/@936/diffs?commit_id=3aa5ca1363a8805e274dccf03320f584ab75e477)
+  * (TLSR921x/TLSR951x/TLSR922x/TLSR952x)进睡眠前恢复寄存器system_up_32k默认值，解决了睡眠时间不准的问题。如果不恢复默认值，system tick会在每个32k沿更新，由于system tick更新不及时，可能会误判XTAL还没有稳定，多判断一次，多执行40us，可能会超过预留的等待时间，而导致睡眠时间不准确。 [e8dc8082](http://192.168.48.36/src/driver/telink_b91m_platform_src/merge_requests/@1078/diffs?commit_id=e8dc80828f0d9050833b55be48764dcce8733a0a)
 * **sys** 
-  * (TLSR922x/TLSR952x)A3芯片有个issue（A4没有这个问题）：如果硬件板子上有1.4V dcdc inductor component，并且用1.8V GPIO，则需要在芯片上电之后，尽快设置1P4V为DCDC模式，否则在vdd1v2和vddo3上有个电压脉冲。在S文件中搬代码操作前，配置为DCDC模式，解决这个问题。 [875a487e](http://192.168.48.36/src/driver/telink_b91m_platform_src/merge_requests/910/diffs?commit_id=875a487edbb3191372e255369c566f4222d0b74c)
+  * (TLSR922x/TLSR952x)A3芯片有个issue（A4没有这个问题）：如果硬件板子上有1.4V dcdc inductor component，并且用1.8V GPIO，则需要在芯片上电之后，尽快设置1P4V为DCDC模式，否则在vdd1v2和vddo3上有个电压脉冲。在S文件中搬代码操作前，配置为DCDC模式，解决这个问题。 [875a487e](http://192.168.48.36/src/driver/telink_b91m_platform_src/merge_requests/@910/diffs?commit_id=875a487edbb3191372e255369c566f4222d0b74c)
 * **USB_Demo**
-  * (TLSR922x/TLSR952x)解决了 USB_MICROPHONE 模式下 DMIC0_DMIC1_IN 无法传输 DMIC0 数据的问题。 [716ead90](http://192.168.48.36/src/driver/telink_b91m_platform_src/merge_requests/944/diffs?commit_id=716ead90a4e0184169b082395715481ac358a1bb)
+  * (TLSR922x/TLSR952x)解决了 USB_MICROPHONE 模式下 DMIC0_DMIC1_IN 无法传输 DMIC0 数据的问题。 [716ead90](http://192.168.48.36/src/driver/telink_b91m_platform_src/merge_requests/@944/diffs?commit_id=716ead90a4e0184169b082395715481ac358a1bb)
 * **link**
-   * (TLSR921x/TLSR951x/TLSR922x/TLSR952x)将_BSS_VMA_END四字节对齐，解决使能S文件中的_FILL_STK功能后，由于_BSS_VMA_END可能没有四字节对齐，存在越界访问超出_STACK_TOP，导致store access fault。 [0e732bce](http://192.168.48.36/src/driver/telink_b91m_platform_src/merge_requests/972/diffs?commit_id=0e732bcea2887804489ad6db251a281f26796218)
+   * (TLSR921x/TLSR951x/TLSR922x/TLSR952x)将_BSS_VMA_END四字节对齐，解决使能S文件中的_FILL_STK功能后，由于_BSS_VMA_END可能没有四字节对齐，存在越界访问超出_STACK_TOP，导致store access fault。 [0e732bce](http://192.168.48.36/src/driver/telink_b91m_platform_src/merge_requests/@972/diffs?commit_id=0e732bcea2887804489ad6db251a281f26796218)
 * **Timer_Demo**
-  * (TLSR921x/TLSR951x/TLSR922x/TLSR952x)Wd_clear()需要在每次调用wd_start()之前执行，避免因为初始计数值不为0导致watchdog复位时间异常。 [20a065ec](http://192.168.48.36/src/driver/telink_b91m_platform_src/merge_requests/1000/diffs?commit_id=20a065ece53185549c748bf99d5780029def6180)
+  * (TLSR921x/TLSR951x/TLSR922x/TLSR952x)Wd_clear()需要在每次调用wd_start()之前执行，避免因为初始计数值不为0导致watchdog复位时间异常。 [20a065ec](http://192.168.48.36/src/driver/telink_b91m_platform_src/merge_requests/@1000/diffs?commit_id=20a065ece53185549c748bf99d5780029def6180)
 * **spi demo** 
-   * (TLSR922x/TLSR952x)修复lspi在中断dma_irq_handler中重复调用gspi_reset。 [bfadf96e](http://192.168.48.36/src/driver/telink_b91m_platform_src/merge_requests/1009/diffs?commit_id=bfadf96ed151e483bbbbf0da00d9831c8f25d2ef)
+   * (TLSR922x/TLSR952x)修复lspi在中断dma_irq_handler中重复调用gspi_reset。 [bfadf96e](http://192.168.48.36/src/driver/telink_b91m_platform_src/merge_requests/@1009/diffs?commit_id=bfadf96ed151e483bbbbf0da00d9831c8f25d2ef)
 * **qdec_Demo**
-  * (TLSR922x/TLSR952x)qdec_get_count_value: If the interface is called continuously (with very short intervals), it is possible that the data read is not updated in time and the result is read from the last time。 [ecf387fa](http://192.168.48.36/src/driver/telink_b91m_platform_src/merge_requests/1064/diffs?commit_id=ecf387fab552255396dd584107535693c01a617d)
+  * (TLSR922x/TLSR952x)qdec_get_count_value: If the interface is called continuously (with very short intervals), it is possible that the data read is not updated in time and the result is read from the last time。 [ecf387fa](http://192.168.48.36/src/driver/telink_b91m_platform_src/merge_requests/@1064/diffs?commit_id=ecf387fab552255396dd584107535693c01a617d)
 * **rf** 
-  * (TLSR921x/TLSR951x/TLSR922x/TLSR952x)添加reg_rf_ll_2d_sclk寄存器 bit<0-2>缺失的active状态。 [d7ef39ba](http://192.168.48.36/src/driver/telink_b91m_platform_src/merge_requests/1087/diffs?commit_id=d7ef39ba526cdf736cf4ea5b75c79c86366b609c)
+  * (TLSR921x/TLSR951x/TLSR922x/TLSR952x)添加reg_rf_ll_2d_sclk寄存器 bit<0-2>缺失的active状态。 [d7ef39ba](http://192.168.48.36/src/driver/telink_b91m_platform_src/merge_requests/@1087/diffs?commit_id=d7ef39ba526cdf736cf4ea5b75c79c86366b609c)
 * **Coremark_demo**
-  * (TLSR921x/TLSR951x/TLSR922x/TLSR952x)修复工程的编译选项，保证CPU跑分正常。 [791247df](http://192.168.48.36/src/driver/telink_b91m_platform_src/merge_requests/894/diffs?commit_id=791247df9dba930661b988a44fc55f3898d3c718)
+  * (TLSR921x/TLSR951x/TLSR922x/TLSR952x)修复工程的编译选项，保证CPU跑分正常。 [791247df](http://192.168.48.36/src/driver/telink_b91m_platform_src/merge_requests/@894/diffs?commit_id=791247df9dba930661b988a44fc55f3898d3c718)
 * **Dhrystone_Demo**
-  * (TLSR921x/TLSR951x/TLSR922x/TLSR952x)修复工程的编译选项，保证CPU跑分正常。 [791247df](http://192.168.48.36/src/driver/telink_b91m_platform_src/merge_requests/894/diffs?commit_id=791247df9dba930661b988a44fc55f3898d3c718)
+  * (TLSR921x/TLSR951x/TLSR922x/TLSR952x)修复工程的编译选项，保证CPU跑分正常。 [791247df](http://192.168.48.36/src/driver/telink_b91m_platform_src/merge_requests/@894/diffs?commit_id=791247df9dba930661b988a44fc55f3898d3c718)
 * **flash**
-  * (TLSR921x/TLSR951x/TLSR922x/TLSR952x)修复多次调用flash_write_status_midxxx()导致返回值错误的问题。 [0634358a](http://192.168.48.36/src/driver/telink_b91m_platform_src/merge_requests/984/diffs?commit_id=0634358ade7aaedb2939b14c8b4ebb49dfe131ce)
+  * (TLSR921x/TLSR951x/TLSR922x/TLSR952x)修复多次调用flash_write_status_midxxx()导致返回值错误的问题。 [0634358a](http://192.168.48.36/src/driver/telink_b91m_platform_src/merge_requests/@984/diffs?commit_id=0634358ade7aaedb2939b14c8b4ebb49dfe131ce)
 * **RF_Demo**
-  * (TLSR921x/TLSR951x/TLSR922x/TLSR952x)修正了 rf demo 中由于未定义 TX_DELAY_US 而导致的编译报错。 [3fc3d848](http://192.168.48.36/src/driver/telink_b91m_platform_src/merge_requests/904/diffs?commit_id=3fc3d848715b84cdcd763af3613aa4fb99477a86)
+  * (TLSR921x/TLSR951x/TLSR922x/TLSR952x)修正了 rf demo 中由于未定义 TX_DELAY_US 而导致的编译报错。 [3fc3d848](http://192.168.48.36/src/driver/telink_b91m_platform_src/merge_requests/@904/diffs?commit_id=3fc3d848715b84cdcd763af3613aa4fb99477a86)
 
 ### BREAKING CHANGES 
 * **sys**
@@ -938,59 +1519,59 @@
 
 ### Bug Fixes
 * **trap**
-  * (B91/B92)plic_set_threshold, core_interrupt_enable, core_interrupt_disable and core_restore_interrupt interfaces, the operation of PLIC registers may not be successful, resulting in the interrupt priority function may be abnormal, add the fence instruction to fix the problem. [c97214d6](http://192.168.48.36/src/driver/telink_b91m_driver_src/merge_requests/617/diffs?commit_id=c97214d640478e3dca1dd1b828b2cb490eab130c)
-  * (B91/B92)Fixed an anomaly that caused the PLIC threshold to be set to 0 when the following configurations were enabled at the same time: [e0b8115b](http://192.168.48.36/src/driver/telink_b91m_driver_src/merge_requests/613/diffs?commit_id=e0b8115be1d294c548ba1f56ae2e86abade31d88)
+  * (B91/B92)plic_set_threshold, core_interrupt_enable, core_interrupt_disable and core_restore_interrupt interfaces, the operation of PLIC registers may not be successful, resulting in the interrupt priority function may be abnormal, add the fence instruction to fix the problem. [c97214d6](http://192.168.48.36/src/driver/telink_b91m_driver_src/merge_requests/@617/diffs?commit_id=c97214d640478e3dca1dd1b828b2cb490eab130c)
+  * (B91/B92)Fixed an anomaly that caused the PLIC threshold to be set to 0 when the following configurations were enabled at the same time: [e0b8115b](http://192.168.48.36/src/driver/telink_b91m_driver_src/merge_requests/@613/diffs?commit_id=e0b8115be1d294c548ba1f56ae2e86abade31d88)
     - plic_set_threshold is set to a non-IRQ_PRI_NUM0 value.
     - plic_preempt_feature_en is called to enable interrupt preemption;
     - flash_plic_preempt_config has preempt_en set to 1.
 * **flash**
-  * (B92)flash_read_data_decrypt_check/flash_dread_decrypt_check/flash_4read_decrypt_check: After calling the above interface, the prefetch instruction is turned off by mistake, and this version fixes it to turn on. [2242c4e0](http://192.168.48.36/src/driver/telink_b91m_driver_src/merge_requests/620/diffs?commit_id=2242c4e0815369707030eea6e2b20ff128dc64e2)
-  * (B91/B92)flash_get_lock_block_midxxxx:get lock protected area error, this version fixes it. [c6395c73](http://192.168.48.36/src/driver/telink_b91m_driver_src/merge_requests/622/diffs?commit_id=c6395c731d56d4419fe0f868e6c08d6c126fcb06)
+  * (B92)flash_read_data_decrypt_check/flash_dread_decrypt_check/flash_4read_decrypt_check: After calling the above interface, the prefetch instruction is turned off by mistake, and this version fixes it to turn on. [2242c4e0](http://192.168.48.36/src/driver/telink_b91m_driver_src/merge_requests/@620/diffs?commit_id=2242c4e0815369707030eea6e2b20ff128dc64e2)
+  * (B91/B92)flash_get_lock_block_midxxxx:get lock protected area error, this version fixes it. [c6395c73](http://192.168.48.36/src/driver/telink_b91m_driver_src/merge_requests/@622/diffs?commit_id=c6395c731d56d4419fe0f868e6c08d6c126fcb06)
 * **pm**
   * (B92)pm_sleep_wakeup:Fixed a probabilistic crash caused by entering low power mode in an abnormal way:
-    - Wait for the MCU to enter wfi mode before going to sleep and then enter low power mode. [d33fba65](http://192.168.48.36/src/driver/telink_b91m_driver_src/merge_requests/580/diffs?commit_id=d33fba652f9848fed81d3d1db8d68af99b8c4896)
-  * (B92)Fixed probabilistic crash caused by low retention ldo voltage. [d33fba65](http://192.168.48.36/src/driver/telink_b91m_driver_src/merge_requests/580/diffs?commit_id=d33fba652f9848fed81d3d1db8d68af99b8c4896)
-  * (B91/B92)Eliminates the risk that STATUS_GPIO_ERR_NO_ENTER_PM may be set to 1 in the return value of cpu_sleep_wakeup. [e503c4eb](http://192.168.48.36/src/driver/telink_b91m_driver_src/merge_requests/719/diffs?commit_id=e503c4ebe3477ab15acaac67f8e45f95c55180a1) 
-  * (B92)Fixed issue where pm_clr_irq_status()could mistakenly clear other interrupt flag bits. [69b24afa](http://192.168.48.36/src/driver/telink_b91m_driver_src/merge_requests/717/diffs?commit_id=69b24afadb7e477214c194d69717e4a1d3249c3f)
+    - Wait for the MCU to enter wfi mode before going to sleep and then enter low power mode. [d33fba65](http://192.168.48.36/src/driver/telink_b91m_driver_src/merge_requests/@580/diffs?commit_id=d33fba652f9848fed81d3d1db8d68af99b8c4896)
+  * (B92)Fixed probabilistic crash caused by low retention ldo voltage. [d33fba65](http://192.168.48.36/src/driver/telink_b91m_driver_src/merge_requests/@580/diffs?commit_id=d33fba652f9848fed81d3d1db8d68af99b8c4896)
+  * (B91/B92)Eliminates the risk that STATUS_GPIO_ERR_NO_ENTER_PM may be set to 1 in the return value of cpu_sleep_wakeup. [e503c4eb](http://192.168.48.36/src/driver/telink_b91m_driver_src/merge_requests/@719/diffs?commit_id=e503c4ebe3477ab15acaac67f8e45f95c55180a1) 
+  * (B92)Fixed issue where pm_clr_irq_status()could mistakenly clear other interrupt flag bits. [69b24afa](http://192.168.48.36/src/driver/telink_b91m_driver_src/merge_requests/@717/diffs?commit_id=69b24afadb7e477214c194d69717e4a1d3249c3f)
 * **audio**
-  * (B92)Fixed an issue where the audio_set_stream0_dig_gain0() interface setting stream0 digital gain did not take effect. [f34468c2](http://192.168.48.36/src/driver/telink_b91m_driver_src/merge_requests/660/diffs?commit_id=f34468c2bf3e26f98ef05a37bd4919538fd4ce7b)
-  * (B92)Fixed an issue where repeated calls to the audio_power_on() interface resulted in audio function exceptions. [2f903fc6](http://192.168.48.36/src/driver/telink_b91m_driver_src/merge_requests/715/diffs?commit_id=2f903fc61a8cb5b8b144c6e1c481513b86992de5)
+  * (B92)Fixed an issue where the audio_set_stream0_dig_gain0() interface setting stream0 digital gain did not take effect. [f34468c2](http://192.168.48.36/src/driver/telink_b91m_driver_src/merge_requests/@660/diffs?commit_id=f34468c2bf3e26f98ef05a37bd4919538fd4ce7b)
+  * (B92)Fixed an issue where repeated calls to the audio_power_on() interface resulted in audio function exceptions. [2f903fc6](http://192.168.48.36/src/driver/telink_b91m_driver_src/merge_requests/@715/diffs?commit_id=2f903fc61a8cb5b8b144c6e1c481513b86992de5)
 * **clock**
-  * (B91/B92)Fixed a risk that when users use clock_init() to switch between different clock frequencies, hclk/pclk/mspi_clk could exceed its maximum configurable frequency for a short time. [6a0b5cc2](http://192.168.48.36/src/driver/telink_b91m_driver_src/merge_requests/668/diffs?commit_id=6a0b5cc277dc4ba4966ba53ea450a9c92882e67a)
-  * (B92)Fixed a risk that when users use cclk_hclk_pclk_config() to switch cclk/hclk/pclk, hclk/pclk could exceed its maximum configurable frequency for a short time. [6a0b5cc2](http://192.168.48.36/src/driver/telink_b91m_driver_src/merge_requests/668/diffs?commit_id=6a0b5cc277dc4ba4966ba53ea450a9c92882e67a)
-  * (B92):pll_div_cclk_hclk_pclk_e: cclk/hclk/pclk has a certain multiple relationship, and unsupported relationships are masked. [2a1b07bd](http://192.168.48.36/src/driver/telink_b91m_driver_src/merge_requests/687/diffs?commit_id=2a1b07bd6b20356b160ecdd74df1592cd50669f8)
+  * (B91/B92)Fixed a risk that when users use clock_init() to switch between different clock frequencies, hclk/pclk/mspi_clk could exceed its maximum configurable frequency for a short time. [6a0b5cc2](http://192.168.48.36/src/driver/telink_b91m_driver_src/merge_requests/@668/diffs?commit_id=6a0b5cc277dc4ba4966ba53ea450a9c92882e67a)
+  * (B92)Fixed a risk that when users use cclk_hclk_pclk_config() to switch cclk/hclk/pclk, hclk/pclk could exceed its maximum configurable frequency for a short time. [6a0b5cc2](http://192.168.48.36/src/driver/telink_b91m_driver_src/merge_requests/@668/diffs?commit_id=6a0b5cc277dc4ba4966ba53ea450a9c92882e67a)
+  * (B92):pll_div_cclk_hclk_pclk_e: cclk/hclk/pclk has a certain multiple relationship, and unsupported relationships are masked. [2a1b07bd](http://192.168.48.36/src/driver/telink_b91m_driver_src/merge_requests/@687/diffs?commit_id=2a1b07bd6b20356b160ecdd74df1592cd50669f8)
 * **uart**
-  * (B91)When dma receives data, solve the problem that rxdone cannot be generated when the send length is greater than the receive length. [a853aaca](http://192.168.48.36/src/driver/telink_b91m_driver_src/merge_requests/691/diffs?commit_id=a853aaca634913b7dbb559283e960febf5479871)
-  * (B91)Solve the problem that DMA can't be sent after the program goes to suspend sleep and is awakened up. [b309dfbf](http://192.168.48.36/src/driver/telink_b91m_driver_src/merge_requests/705/diffs?commit_id=b309dfbfd9bcb3c1c96984cea5ad09fa12f2c7f4)
-  * (B91)Fixed issue where uart_clr_irq_status() could mistakenly clear other interrupt flag bits. [69b24afa](http://192.168.48.36/src/driver/telink_b91m_driver_src/merge_requests/717/diffs?commit_id=69b24afadb7e477214c194d69717e4a1d3249c3f)
+  * (B91)When dma receives data, solve the problem that rxdone cannot be generated when the send length is greater than the receive length. [a853aaca](http://192.168.48.36/src/driver/telink_b91m_driver_src/merge_requests/@691/diffs?commit_id=a853aaca634913b7dbb559283e960febf5479871)
+  * (B91)Solve the problem that DMA can't be sent after the program goes to suspend sleep and is awakened up. [b309dfbf](http://192.168.48.36/src/driver/telink_b91m_driver_src/merge_requests/@705/diffs?commit_id=b309dfbfd9bcb3c1c96984cea5ad09fa12f2c7f4)
+  * (B91)Fixed issue where uart_clr_irq_status() could mistakenly clear other interrupt flag bits. [69b24afa](http://192.168.48.36/src/driver/telink_b91m_driver_src/merge_requests/@717/diffs?commit_id=69b24afadb7e477214c194d69717e4a1d3249c3f)
 * **rf**
-  * (B92)Fixed misconfiguration issue within the rf_set_ble_500K_mode driver interface. [46a18667](http://192.168.48.36/src/driver/telink_b91m_driver_src/merge_requests/695/diffs?commit_id=46a18667e2dccef1c7add17893e66526089f20b6)
-  * (B92)Fixed an issue where the rf_start_srx2tx parameter tick did not work resulting in an exception for sending and receiving packets. [f0cdfeb5](http://192.168.48.36/src/driver/telink_b91m_driver_src/merge_requests/764/diffs?commit_id=f0cdfeb5dba0c4df171a0eaca544a3897bcf98ce)
-  * (B91)Fixed the issue of incorrect return values for interfaces rf_aoa_aod_hdinfo_offset() and rf_aoa_aod_get_pkt_timestamp(). [04bd6d9c](http://192.168.48.36/src/driver/telink_b91m_driver_src/merge_requests/770/diffs?commit_id=04bd6d9c1472433047ac243eb13353f6976ebbf8)
+  * (B92)Fixed misconfiguration issue within the rf_set_ble_500K_mode driver interface. [46a18667](http://192.168.48.36/src/driver/telink_b91m_driver_src/merge_requests/@695/diffs?commit_id=46a18667e2dccef1c7add17893e66526089f20b6)
+  * (B92)Fixed an issue where the rf_start_srx2tx parameter tick did not work resulting in an exception for sending and receiving packets. [f0cdfeb5](http://192.168.48.36/src/driver/telink_b91m_driver_src/merge_requests/@764/diffs?commit_id=f0cdfeb5dba0c4df171a0eaca544a3897bcf98ce)
+  * (B91)Fixed the issue of incorrect return values for interfaces rf_aoa_aod_hdinfo_offset() and rf_aoa_aod_get_pkt_timestamp(). [04bd6d9c](http://192.168.48.36/src/driver/telink_b91m_driver_src/merge_requests/@770/diffs?commit_id=04bd6d9c1472433047ac243eb13353f6976ebbf8)
 * **mdec**
-  * (B91/B92)Fixed issue where mdec_clr_irq_status() could mistakenly clear other interrupt flag bits. [69b24afa](http://192.168.48.36/src/driver/telink_b91m_driver_src/merge_requests/717/diffs?commit_id=69b24afadb7e477214c194d69717e4a1d3249c3f)
+  * (B91/B92)Fixed issue where mdec_clr_irq_status() could mistakenly clear other interrupt flag bits. [69b24afa](http://192.168.48.36/src/driver/telink_b91m_driver_src/merge_requests/@717/diffs?commit_id=69b24afadb7e477214c194d69717e4a1d3249c3f)
 * **i2c**
-  * (B92)Fixed issue where i2c_clr_irq_status() could mistakenly clear other interrupt flag bits. [69b24afa](http://192.168.48.36/src/driver/telink_b91m_driver_src/merge_requests/717/diffs?commit_id=69b24afadb7e477214c194d69717e4a1d3249c3f)
+  * (B92)Fixed issue where i2c_clr_irq_status() could mistakenly clear other interrupt flag bits. [69b24afa](http://192.168.48.36/src/driver/telink_b91m_driver_src/merge_requests/@717/diffs?commit_id=69b24afadb7e477214c194d69717e4a1d3249c3f)
 * **pwm** 
-  * (B92)Fixed issue where pwm_get_irq_status() could return incorrect interrupt status determination and could clear interrupt flag bits by mistake. [5a0e1014](http://192.168.48.36/src/driver/telink_b91m_driver_src/merge_requests/700/diffs?commit_id=5a0e1014e2340b2a9c661ecc2d79c64247cbc48e)
+  * (B92)Fixed issue where pwm_get_irq_status() could return incorrect interrupt status determination and could clear interrupt flag bits by mistake. [5a0e1014](http://192.168.48.36/src/driver/telink_b91m_driver_src/merge_requests/@700/diffs?commit_id=5a0e1014e2340b2a9c661ecc2d79c64247cbc48e)
 * **gpio**
-   * (B91)Fix the problem that the unneeded pin in uart_set_pin()/hspi_set_pin()/pspi_set_pin() is not initialized to NONE_PIN, which leads to abnormal PA0 function. [ef3ff6f1](http://192.168.48.36/src/driver/telink_b91m_driver_src/merge_requests/753/diffs?commit_id=ef3ff6f194fc513802b98afd4263923445555e40)
+   * (B91)Fix the problem that the unneeded pin in uart_set_pin()/hspi_set_pin()/pspi_set_pin() is not initialized to NONE_PIN, which leads to abnormal PA0 function. [ef3ff6f1](http://192.168.48.36/src/driver/telink_b91m_driver_src/merge_requests/@753/diffs?commit_id=ef3ff6f194fc513802b98afd4263923445555e40)
 * **flash**
-  * (B91/B92)Fixed an exception issue in flash_write(), flash_write_otp(), flash_write_encrypt() functions that may be triggered by mistakenly setting the parameter len to 0. [291e8752](http://192.168.48.36/src/driver/telink_b91m_driver_src/merge_requests/743/diffs?commit_id=291e8752e69460bc9d3d46e8629b9374d5348dcc)
+  * (B91/B92)Fixed an exception issue in flash_write(), flash_write_otp(), flash_write_encrypt() functions that may be triggered by mistakenly setting the parameter len to 0. [291e8752](http://192.168.48.36/src/driver/telink_b91m_driver_src/merge_requests/@743/diffs?commit_id=291e8752e69460bc9d3d46e8629b9374d5348dcc)
 * **adc**
-  * (B92)Fix the problem that efuse_calib_adc_vref() interface didn't do the conversion when taking out offset as a negative number resulting in calibration error. [291e8752](http://192.168.48.36/src/driver/telink_b91m_driver_src/merge_requests/743/diffs?commit_id=291e8752e69460bc9d3d46e8629b9374d5348dcc)
+  * (B92)Fix the problem that efuse_calib_adc_vref() interface didn't do the conversion when taking out offset as a negative number resulting in calibration error. [291e8752](http://192.168.48.36/src/driver/telink_b91m_driver_src/merge_requests/@743/diffs?commit_id=291e8752e69460bc9d3d46e8629b9374d5348dcc)
 * **USB_Demo**
-  * (B91/B92)Fixed a bug in USB enumeration where the device returned too much data when the host request length was less than the actual descriptor length. [4f97a6f1](http://192.168.48.36/src/driver/telink_b91m_driver_src/merge_requests/762/diffs?commit_id=4f97a6f1f2be7b62310bc4061d194c8f9b0b5821)
-  * (B91/B92)Fixed a bug where the HID descriptor returned too much data when the host requested an interface-specific descriptor. [4f97a6f1](http://192.168.48.36/src/driver/telink_b91m_driver_src/merge_requests/762/diffs?commit_id=4f97a6f1f2be7b62310bc4061d194c8f9b0b5821)
+  * (B91/B92)Fixed a bug in USB enumeration where the device returned too much data when the host request length was less than the actual descriptor length. [4f97a6f1](http://192.168.48.36/src/driver/telink_b91m_driver_src/merge_requests/@762/diffs?commit_id=4f97a6f1f2be7b62310bc4061d194c8f9b0b5821)
+  * (B91/B92)Fixed a bug where the HID descriptor returned too much data when the host requested an interface-specific descriptor. [4f97a6f1](http://192.168.48.36/src/driver/telink_b91m_driver_src/merge_requests/@762/diffs?commit_id=4f97a6f1f2be7b62310bc4061d194c8f9b0b5821)
 * **TRAP_Demo**
-  * (B91/B92)Fix compile error caused by case mixing in linux environment. [5131b7d0](http://192.168.48.36/src/driver/telink_b91m_driver_src/merge_requests/612/diffs?commit_id=5131b7d09e0eb4e0cbea84c1ac9119da4018ce70)
-  * (B91)Fix the issue that WFI mode can't be entered and woken up repeatedly when the global interrupt is turned off. [08c0ddab](http://192.168.48.36/src/driver/telink_b91m_driver_src/merge_requests/595/diffs?commit_id=08c0ddabfb30e08ad2c50d0b7a33d1240ca4f600)
+  * (B91/B92)Fix compile error caused by case mixing in linux environment. [5131b7d0](http://192.168.48.36/src/driver/telink_b91m_driver_src/merge_requests/@612/diffs?commit_id=5131b7d09e0eb4e0cbea84c1ac9119da4018ce70)
+  * (B91)Fix the issue that WFI mode can't be entered and woken up repeatedly when the global interrupt is turned off. [08c0ddab](http://192.168.48.36/src/driver/telink_b91m_driver_src/merge_requests/@595/diffs?commit_id=08c0ddabfb30e08ad2c50d0b7a33d1240ca4f600)
 * **I2C_Demo**
-  * (B92) When the slave  (I2C_STRETCH_MODE == I2C_STRETCH_DIS),interrupt is incorrectly enabled, sending or receiving messages is abnormal. [9ddf8348](http://192.168.48.36/src/driver/telink_b91m_driver_src/merge_requests/589/diffs?commit_id=9ddf8348849f009574a4d5b7eee3edc6b927992c)
+  * (B92) When the slave  (I2C_STRETCH_MODE == I2C_STRETCH_DIS),interrupt is incorrectly enabled, sending or receiving messages is abnormal. [9ddf8348](http://192.168.48.36/src/driver/telink_b91m_driver_src/merge_requests/@589/diffs?commit_id=9ddf8348849f009574a4d5b7eee3edc6b927992c)
 * **SPI_Demo**
-  * (B92) spi_master_read_dma_plus()/spi_master_write_read_dma(): indicates whether to use dma_set_irq_mask instead. SPI_END_EN can only represent the completion of spi receiving, not the completion of dma work, to prevent abnormal situations. [7bdb43d4](http://192.168.48.36/src/driver/telink_b91m_driver_src/merge_requests/598/diffs?commit_id=7bdb43d406e33ce6571372b0752b34a5df200d70)
+  * (B92) spi_master_read_dma_plus()/spi_master_write_read_dma(): indicates whether to use dma_set_irq_mask instead. SPI_END_EN can only represent the completion of spi receiving, not the completion of dma work, to prevent abnormal situations. [7bdb43d4](http://192.168.48.36/src/driver/telink_b91m_driver_src/merge_requests/@598/diffs?commit_id=7bdb43d406e33ce6571372b0752b34a5df200d70)
 * **UART_DEMO**
-  * (B91/B92)When nodma receives data, uart_get_rxfifo_num() is used instead of uart_rx_trig_level to determine how much data is read at one time in the interrupt, which can solve the risk of data not being retrieved in time due to interrupt in the application and reduce the disturbance of fifo Pointers. [a853aaca](http://192.168.48.36/src/driver/telink_b91m_driver_src/merge_requests/691/diffs?commit_id=a853aaca634913b7dbb559283e960febf5479871)
+  * (B91/B92)When nodma receives data, uart_get_rxfifo_num() is used instead of uart_rx_trig_level to determine how much data is read at one time in the interrupt, which can solve the risk of data not being retrieved in time due to interrupt in the application and reduce the disturbance of fifo Pointers. [a853aaca](http://192.168.48.36/src/driver/telink_b91m_driver_src/merge_requests/@691/diffs?commit_id=a853aaca634913b7dbb559283e960febf5479871)
 
 ### BREAKING CHANGES 
 * **i2c**
@@ -1125,59 +1706,59 @@ rf_dis_hpmc_trim();rf_dis_ldo_trim();rf_dis_dcoc_trim();rf_dis_rccal_trim();
 
 ### Bug Fixes
 * **trap**
-  * (B91/B92)plic_set_threshold, core_interrupt_enable,core_interrupt_disable 和 core_restore_interrupt 接口，操作 PLIC 寄存器可能未成功，导致中断优先级功能可能出现异常，加入fence指令修复该问题。 [c97214d6](http://192.168.48.36/src/driver/telink_b91m_driver_src/merge_requests/617/diffs?commit_id=c97214d640478e3dca1dd1b828b2cb490eab130c)
-  * (B91/B92)修复了同时使能如下配置时导致的 PLIC 阈值被设置为 0 的异常问题： [e0b8115b](http://192.168.48.36/src/driver/telink_b91m_driver_src/merge_requests/613/diffs?commit_id=e0b8115be1d294c548ba1f56ae2e86abade31d88)
+  * (B91/B92)plic_set_threshold, core_interrupt_enable,core_interrupt_disable 和 core_restore_interrupt 接口，操作 PLIC 寄存器可能未成功，导致中断优先级功能可能出现异常，加入fence指令修复该问题。 [c97214d6](http://192.168.48.36/src/driver/telink_b91m_driver_src/merge_requests/@617/diffs?commit_id=c97214d640478e3dca1dd1b828b2cb490eab130c)
+  * (B91/B92)修复了同时使能如下配置时导致的 PLIC 阈值被设置为 0 的异常问题： [e0b8115b](http://192.168.48.36/src/driver/telink_b91m_driver_src/merge_requests/@613/diffs?commit_id=e0b8115be1d294c548ba1f56ae2e86abade31d88)
     - plic_set_threshold 设置为非 IRQ_PRI_NUM0 值;
     - 调用函数 plic_preempt_feature_en 使能了中断抢占功能;
     - flash_plic_preempt_config 的 preempt_en 设置为1。
 * **flash**
-  * (B92)flash_read_data_decrypt_check/flash_dread_decrypt_check/flash_4read_decrypt_check:调用以上接口后，误将预取指令关闭，这个版本将其修复打开。 [2242c4e0](http://192.168.48.36/src/driver/telink_b91m_driver_src/merge_requests/620/diffs?commit_id=2242c4e0815369707030eea6e2b20ff128dc64e2)
-  * (B91/B92)flash_get_lock_block_midxxxx:获取lock保护区域错误，这个版本将其修改。 [c6395c73](http://192.168.48.36/src/driver/telink_b91m_driver_src/merge_requests/622/diffs?commit_id=c6395c731d56d4419fe0f868e6c08d6c126fcb06)
+  * (B92)flash_read_data_decrypt_check/flash_dread_decrypt_check/flash_4read_decrypt_check:调用以上接口后，误将预取指令关闭，这个版本将其修复打开。 [2242c4e0](http://192.168.48.36/src/driver/telink_b91m_driver_src/merge_requests/@620/diffs?commit_id=2242c4e0815369707030eea6e2b20ff128dc64e2)
+  * (B91/B92)flash_get_lock_block_midxxxx:获取lock保护区域错误，这个版本将其修改。 [c6395c73](http://192.168.48.36/src/driver/telink_b91m_driver_src/merge_requests/@622/diffs?commit_id=c6395c731d56d4419fe0f868e6c08d6c126fcb06)
 * **pm**
   * (B92)pm_sleep_wakeup:修复了进入低功耗模式的方式不正常而导致的概率性死机问题：
-    - 在进睡眠前等待MCU进入wfi模式后再进入低功耗模式。 [d33fba65](http://192.168.48.36/src/driver/telink_b91m_driver_src/merge_requests/580/diffs?commit_id=d33fba652f9848fed81d3d1db8d68af99b8c4896)
-  * (B92)修复了因retention ldo电压偏低而导致的概率性死机问题。 [d33fba65](http://192.168.48.36/src/driver/telink_b91m_driver_src/merge_requests/580/diffs?commit_id=d33fba652f9848fed81d3d1db8d68af99b8c4896)
-  * (B91/B92)规避了cpu_sleep_wakeup的返回值中STATUS_GPIO_ERR_NO_ENTER_PM 可能会被异常置为1的风险。 [e503c4eb](http://192.168.48.36/src/driver/telink_b91m_driver_src/merge_requests/719/diffs?commit_id=e503c4ebe3477ab15acaac67f8e45f95c55180a1)
-  * (B92)修复了pm_clr_irq_status()可能会误清其他中断标志位的问题。 [69b24afa](http://192.168.48.36/src/driver/telink_b91m_driver_src/merge_requests/717/diffs?commit_id=69b24afadb7e477214c194d69717e4a1d3249c3f)
+    - 在进睡眠前等待MCU进入wfi模式后再进入低功耗模式。 [d33fba65](http://192.168.48.36/src/driver/telink_b91m_driver_src/merge_requests/@580/diffs?commit_id=d33fba652f9848fed81d3d1db8d68af99b8c4896)
+  * (B92)修复了因retention ldo电压偏低而导致的概率性死机问题。 [d33fba65](http://192.168.48.36/src/driver/telink_b91m_driver_src/merge_requests/@580/diffs?commit_id=d33fba652f9848fed81d3d1db8d68af99b8c4896)
+  * (B91/B92)规避了cpu_sleep_wakeup的返回值中STATUS_GPIO_ERR_NO_ENTER_PM 可能会被异常置为1的风险。 [e503c4eb](http://192.168.48.36/src/driver/telink_b91m_driver_src/merge_requests/@719/diffs?commit_id=e503c4ebe3477ab15acaac67f8e45f95c55180a1)
+  * (B92)修复了pm_clr_irq_status()可能会误清其他中断标志位的问题。 [69b24afa](http://192.168.48.36/src/driver/telink_b91m_driver_src/merge_requests/@717/diffs?commit_id=69b24afadb7e477214c194d69717e4a1d3249c3f)
 * **audio**
-  * (B92)修复了 audio_set_stream0_dig_gain0() 接口设置 stream0 数字增益不生效的问题。 [f34468c2](http://192.168.48.36/src/driver/telink_b91m_driver_src/merge_requests/660/diffs?commit_id=f34468c2bf3e26f98ef05a37bd4919538fd4ce7b)
-  * (B92)修复了重复调用 audio_power_on() 接口导致音频功能异常的问题。 [2f903fc6](http://192.168.48.36/src/driver/telink_b91m_driver_src/merge_requests/715/diffs?commit_id=2f903fc61a8cb5b8b144c6e1c481513b86992de5)
+  * (B92)修复了 audio_set_stream0_dig_gain0() 接口设置 stream0 数字增益不生效的问题。 [f34468c2](http://192.168.48.36/src/driver/telink_b91m_driver_src/merge_requests/@660/diffs?commit_id=f34468c2bf3e26f98ef05a37bd4919538fd4ce7b)
+  * (B92)修复了重复调用 audio_power_on() 接口导致音频功能异常的问题。 [2f903fc6](http://192.168.48.36/src/driver/telink_b91m_driver_src/merge_requests/@715/diffs?commit_id=2f903fc61a8cb5b8b144c6e1c481513b86992de5)
 * **clock**
-  * (B91/B92)修复了用户使用clock_init()切换不同时钟频率时,可能导致hclk/pclk/mspi_clk有短时间超出其最大可设置频率的风险。 [6a0b5cc2](http://192.168.48.36/src/driver/telink_b91m_driver_src/merge_requests/668/diffs?commit_id=6a0b5cc277dc4ba4966ba53ea450a9c92882e67a)
-  * (B92)修复了用户使用cclk_hclk_pclk_config()切换cclk/hclk/pclk频率时，可能导致hclk/pclk有短时间超出其最大可设置频率的风险。 [6a0b5cc2](http://192.168.48.36/src/driver/telink_b91m_driver_src/merge_requests/668/diffs?commit_id=6a0b5cc277dc4ba4966ba53ea450a9c92882e67a)
-  * (B92):pll_div_cclk_hclk_pclk_e: cclk/hclk/pclk存在一定的倍数关系，将不支持的关系进行屏蔽。 [2a1b07bd](http://192.168.48.36/src/driver/telink_b91m_driver_src/merge_requests/687/diffs?commit_id=2a1b07bd6b20356b160ecdd74df1592cd50669f8)
+  * (B91/B92)修复了用户使用clock_init()切换不同时钟频率时,可能导致hclk/pclk/mspi_clk有短时间超出其最大可设置频率的风险。 [6a0b5cc2](http://192.168.48.36/src/driver/telink_b91m_driver_src/merge_requests/@668/diffs?commit_id=6a0b5cc277dc4ba4966ba53ea450a9c92882e67a)
+  * (B92)修复了用户使用cclk_hclk_pclk_config()切换cclk/hclk/pclk频率时，可能导致hclk/pclk有短时间超出其最大可设置频率的风险。 [6a0b5cc2](http://192.168.48.36/src/driver/telink_b91m_driver_src/merge_requests/@668/diffs?commit_id=6a0b5cc277dc4ba4966ba53ea450a9c92882e67a)
+  * (B92):pll_div_cclk_hclk_pclk_e: cclk/hclk/pclk存在一定的倍数关系，将不支持的关系进行屏蔽。 [2a1b07bd](http://192.168.48.36/src/driver/telink_b91m_driver_src/merge_requests/@687/diffs?commit_id=2a1b07bd6b20356b160ecdd74df1592cd50669f8)
 * **uart**
-  * (B91)当dma接收数据时，解决发送长度大于接收长度时rxdone无法产生的问题。 [a853aaca](http://192.168.48.36/src/driver/telink_b91m_driver_src/merge_requests/691/diffs?commit_id=a853aaca634913b7dbb559283e960febf5479871)
-  * (B91)解决程序进入睡眠被唤醒后DMA无法发送的问题。 [b309dfbf](http://192.168.48.36/src/driver/telink_b91m_driver_src/merge_requests/705/diffs?commit_id=b309dfbfd9bcb3c1c96984cea5ad09fa12f2c7f4)
-  * (B91)修复了uart_clr_irq_status()可能会误清其他中断标志位的问题。 [69b24afa](http://192.168.48.36/src/driver/telink_b91m_driver_src/merge_requests/717/diffs?commit_id=69b24afadb7e477214c194d69717e4a1d3249c3f)
+  * (B91)当dma接收数据时，解决发送长度大于接收长度时rxdone无法产生的问题。 [a853aaca](http://192.168.48.36/src/driver/telink_b91m_driver_src/merge_requests/@691/diffs?commit_id=a853aaca634913b7dbb559283e960febf5479871)
+  * (B91)解决程序进入睡眠被唤醒后DMA无法发送的问题。 [b309dfbf](http://192.168.48.36/src/driver/telink_b91m_driver_src/merge_requests/@705/diffs?commit_id=b309dfbfd9bcb3c1c96984cea5ad09fa12f2c7f4)
+  * (B91)修复了uart_clr_irq_status()可能会误清其他中断标志位的问题。 [69b24afa](http://192.168.48.36/src/driver/telink_b91m_driver_src/merge_requests/@717/diffs?commit_id=69b24afadb7e477214c194d69717e4a1d3249c3f)
 * **rf**
-  * (B92)修复了 rf_set_ble_500K_mode驱动接口内配置错误问题。 [46a18667](http://192.168.48.36/src/driver/telink_b91m_driver_src/merge_requests/695/diffs?commit_id=46a18667e2dccef1c7add17893e66526089f20b6)
-  * (B92)修复了rf_start_srx2tx参数tick不起作用导致收发包异常的问题。 [f0cdfeb5](http://192.168.48.36/src/driver/telink_b91m_driver_src/merge_requests/764/diffs?commit_id=f0cdfeb5dba0c4df171a0eaca544a3897bcf98ce)
-  * (B91)修复了接口rf_aoa_aod_hdinfo_offset()和rf_aoa_aod_get_pkt_timestamp()返回值错误问题。 [04bd6d9c](http://192.168.48.36/src/driver/telink_b91m_driver_src/merge_requests/770/diffs?commit_id=04bd6d9c1472433047ac243eb13353f6976ebbf8)
+  * (B92)修复了 rf_set_ble_500K_mode驱动接口内配置错误问题。 [46a18667](http://192.168.48.36/src/driver/telink_b91m_driver_src/merge_requests/@695/diffs?commit_id=46a18667e2dccef1c7add17893e66526089f20b6)
+  * (B92)修复了rf_start_srx2tx参数tick不起作用导致收发包异常的问题。 [f0cdfeb5](http://192.168.48.36/src/driver/telink_b91m_driver_src/merge_requests/@764/diffs?commit_id=f0cdfeb5dba0c4df171a0eaca544a3897bcf98ce)
+  * (B91)修复了接口rf_aoa_aod_hdinfo_offset()和rf_aoa_aod_get_pkt_timestamp()返回值错误问题。 [04bd6d9c](http://192.168.48.36/src/driver/telink_b91m_driver_src/merge_requests/@770/diffs?commit_id=04bd6d9c1472433047ac243eb13353f6976ebbf8)
 * **mdec**
-  * (B91/B92)修复了mdec_clr_irq_status()可能会误清其他中断标志位的问题。 [69b24afa](http://192.168.48.36/src/driver/telink_b91m_driver_src/merge_requests/717/diffs?commit_id=69b24afadb7e477214c194d69717e4a1d3249c3f)
+  * (B91/B92)修复了mdec_clr_irq_status()可能会误清其他中断标志位的问题。 [69b24afa](http://192.168.48.36/src/driver/telink_b91m_driver_src/merge_requests/@717/diffs?commit_id=69b24afadb7e477214c194d69717e4a1d3249c3f)
 * **i2c**
-  * (B92)修复了i2c_clr_irq_status()可能会误清其他中断标志位的问题。 [69b24afa](http://192.168.48.36/src/driver/telink_b91m_driver_src/merge_requests/717/diffs?commit_id=69b24afadb7e477214c194d69717e4a1d3249c3f)
+  * (B92)修复了i2c_clr_irq_status()可能会误清其他中断标志位的问题。 [69b24afa](http://192.168.48.36/src/driver/telink_b91m_driver_src/merge_requests/@717/diffs?commit_id=69b24afadb7e477214c194d69717e4a1d3249c3f)
 * **pwm** 
-  * (B92)修改了pwm_get_irq_status()可能返回错误的中断状态判断以及会误清中断标志位的问题。 [5a0e1014](http://192.168.48.36/src/driver/telink_b91m_driver_src/merge_requests/700/diffs?commit_id=5a0e1014e2340b2a9c661ecc2d79c64247cbc48e)
+  * (B92)修改了pwm_get_irq_status()可能返回错误的中断状态判断以及会误清中断标志位的问题。 [5a0e1014](http://192.168.48.36/src/driver/telink_b91m_driver_src/merge_requests/@700/diffs?commit_id=5a0e1014e2340b2a9c661ecc2d79c64247cbc48e)
 * **gpio**
-  * (B91)修复uart_set_pin()/hspi_set_pin()/pspi_set_pin()中不需要使用的pin没有被初始化为NONE_PIN而导致PA0功能异常的问题。 [ef3ff6f1](http://192.168.48.36/src/driver/telink_b91m_driver_src/merge_requests/753/diffs?commit_id=ef3ff6f194fc513802b98afd4263923445555e40)
+  * (B91)修复uart_set_pin()/hspi_set_pin()/pspi_set_pin()中不需要使用的pin没有被初始化为NONE_PIN而导致PA0功能异常的问题。 [ef3ff6f1](http://192.168.48.36/src/driver/telink_b91m_driver_src/merge_requests/@753/diffs?commit_id=ef3ff6f194fc513802b98afd4263923445555e40)
 * **flash**
-  * (B91/B92)修复了flash_write()、flash_write_otp()、flash_write_encrypt()函数，误将参数len设置为0可能触发的异常问题。 [291e8752](http://192.168.48.36/src/driver/telink_b91m_driver_src/merge_requests/743/diffs?commit_id=291e8752e69460bc9d3d46e8629b9374d5348dcc)
+  * (B91/B92)修复了flash_write()、flash_write_otp()、flash_write_encrypt()函数，误将参数len设置为0可能触发的异常问题。 [291e8752](http://192.168.48.36/src/driver/telink_b91m_driver_src/merge_requests/@743/diffs?commit_id=291e8752e69460bc9d3d46e8629b9374d5348dcc)
 * **adc**
-  * (B92)修复efuse_calib_adc_vref()接口取出offset为负数时没做转换导致校准错误的问题。 [291e8752](http://192.168.48.36/src/driver/telink_b91m_driver_src/merge_requests/743/diffs?commit_id=291e8752e69460bc9d3d46e8629b9374d5348dcc)
+  * (B92)修复efuse_calib_adc_vref()接口取出offset为负数时没做转换导致校准错误的问题。 [291e8752](http://192.168.48.36/src/driver/telink_b91m_driver_src/merge_requests/@743/diffs?commit_id=291e8752e69460bc9d3d46e8629b9374d5348dcc)
 * **USB_Demo**
-  * (B91/B92)修复了 USB 枚举时，host 请求长度小于实际描述符长度时，device 返回过多数据的 bug。 [4f97a6f1](http://192.168.48.36/src/driver/telink_b91m_driver_src/merge_requests/762/diffs?commit_id=4f97a6f1f2be7b62310bc4061d194c8f9b0b5821)
-  * (B91/B92)修复了主机请求接口特殊描述符时， HID 描述符返回数据过多的 bug。 [4f97a6f1](http://192.168.48.36/src/driver/telink_b91m_driver_src/merge_requests/762/diffs?commit_id=4f97a6f1f2be7b62310bc4061d194c8f9b0b5821)
+  * (B91/B92)修复了 USB 枚举时，host 请求长度小于实际描述符长度时，device 返回过多数据的 bug。 [4f97a6f1](http://192.168.48.36/src/driver/telink_b91m_driver_src/merge_requests/@762/diffs?commit_id=4f97a6f1f2be7b62310bc4061d194c8f9b0b5821)
+  * (B91/B92)修复了主机请求接口特殊描述符时， HID 描述符返回数据过多的 bug。 [4f97a6f1](http://192.168.48.36/src/driver/telink_b91m_driver_src/merge_requests/@762/diffs?commit_id=4f97a6f1f2be7b62310bc4061d194c8f9b0b5821)
 * **TRAP_Demo**
-  * (B91/B92)修复在 linux 环境下由大小写混用引起的编译错误。 [5131b7d0](http://192.168.48.36/src/driver/telink_b91m_driver_src/merge_requests/612/diffs?commit_id=5131b7d09e0eb4e0cbea84c1ac9119da4018ce70)
-  * (B91)修复当全局中断关闭时，WFI 模式无法重复进入与唤醒的问题。 [08c0ddab](http://192.168.48.36/src/driver/telink_b91m_driver_src/merge_requests/595/diffs?commit_id=08c0ddabfb30e08ad2c50d0b7a33d1240ca4f600)
+  * (B91/B92)修复在 linux 环境下由大小写混用引起的编译错误。 [5131b7d0](http://192.168.48.36/src/driver/telink_b91m_driver_src/merge_requests/@612/diffs?commit_id=5131b7d09e0eb4e0cbea84c1ac9119da4018ce70)
+  * (B91)修复当全局中断关闭时，WFI 模式无法重复进入与唤醒的问题。 [08c0ddab](http://192.168.48.36/src/driver/telink_b91m_driver_src/merge_requests/@595/diffs?commit_id=08c0ddabfb30e08ad2c50d0b7a33d1240ca4f600)
 * **I2C_Demo**
-  * (B92) 当slave端(I2C_STRETCH_MODE  == I2C_STRETCH_DIS),中断使能错误，导致收发异常。 [9ddf8348](http://192.168.48.36/src/driver/telink_b91m_driver_src/merge_requests/589/diffs?commit_id=9ddf8348849f009574a4d5b7eee3edc6b927992c)
+  * (B92) 当slave端(I2C_STRETCH_MODE  == I2C_STRETCH_DIS),中断使能错误，导致收发异常。 [9ddf8348](http://192.168.48.36/src/driver/telink_b91m_driver_src/merge_requests/@589/diffs?commit_id=9ddf8348849f009574a4d5b7eee3edc6b927992c)
 * **SPI_Demo**
-  * (B92)spi_master_read_dma_plus()/spi_master_write_read_dma():判断是否结束使用dma_set_irq_mask代替；SPI_END_EN只能代表spi接收完成，不能代表dma是否工作完，防止出现异常情况。 [7bdb43d4](http://192.168.48.36/src/driver/telink_b91m_driver_src/merge_requests/598/diffs?commit_id=7bdb43d406e33ce6571372b0752b34a5df200d70)
+  * (B92)spi_master_read_dma_plus()/spi_master_write_read_dma():判断是否结束使用dma_set_irq_mask代替；SPI_END_EN只能代表spi接收完成，不能代表dma是否工作完，防止出现异常情况。 [7bdb43d4](http://192.168.48.36/src/driver/telink_b91m_driver_src/merge_requests/@598/diffs?commit_id=7bdb43d406e33ce6571372b0752b34a5df200d70)
 * **UART_DEMO**
-  * (B91/B92)当nodma接收数据时，使用uart_get_rxfifo_num()替代uart_rx_trig_level判断在中断一次性读取多少数据，解决应用中中断被打断导致数据没有来得及取减少fifo指针紊乱的风险。 [a853aaca](http://192.168.48.36/src/driver/telink_b91m_driver_src/merge_requests/691/diffs?commit_id=a853aaca634913b7dbb559283e960febf5479871)
+  * (B91/B92)当nodma接收数据时，使用uart_get_rxfifo_num()替代uart_rx_trig_level判断在中断一次性读取多少数据，解决应用中中断被打断导致数据没有来得及取减少fifo指针紊乱的风险。 [a853aaca](http://192.168.48.36/src/driver/telink_b91m_driver_src/merge_requests/@691/diffs?commit_id=a853aaca634913b7dbb559283e960febf5479871)
 
 ### BREAKING CHANGES 
 * **i2c**
@@ -1297,8 +1878,8 @@ rf_dis_hpmc_trim();rf_dis_ldo_trim();rf_dis_dcoc_trim();rf_dis_rccal_trim();
 * SDK version: telink_b91m_driver_sdk V2.2.0.
 * This version of the SDK supports B91(A0/A1/A2),B92(A1/A2) chips.
 * The default configuration of LEDs and KEYs match the following hardware revisions:
-*   B91	 	C1T213A20_V1_3_20200727
-*   B92	 	C1T266A20_V1_3_20220722
+*   B91     C1T213A20_V1_3_20200727
+*   B92     C1T266A20_V1_3_20220722
 
 ### Note
 
@@ -1347,44 +1928,44 @@ rf_dis_hpmc_trim();rf_dis_ldo_trim();rf_dis_dcoc_trim();rf_dis_rccal_trim();
 ### Bug Fixes
 
 * **gpio**
-  * (B92)The digital Pull-up resistor of PF [5:0] and PG [5:0] is not available, and these pins are prohibited in the interface of gpio_set_pullup_res_30k(). [ad91c3e5](http://192.168.48.36/src/driver/telink_b91m_driver_src/merge_requests/566/diffs?commit_id=ad91c3e57719db168a95846f8022a0c7c9bf8ec5)
+  * (B92)The digital Pull-up resistor of PF [5:0] and PG [5:0] is not available, and these pins are prohibited in the interface of gpio_set_pullup_res_30k(). [ad91c3e5](http://192.168.48.36/src/driver/telink_b91m_driver_src/merge_requests/@566/diffs?commit_id=ad91c3e57719db168a95846f8022a0c7c9bf8ec5)
 * **rf**
-  * (B92)Fixed the issue that the RSSI value did not match the actual received energy. [435541cf](http://192.168.48.36/src/driver/telink_b91m_driver_src/merge_requests/444/diffs?commit_id=435541cf3d9776581b57883579b54cb4421f08fd)
-  *	(B91/B92)Fixed the problem of incorrect setting of ctrim at some frequency points of rf_set_chn, and reduced the tx energy difference at different frequency points. [8ead48a7](http://192.168.48.36/src/driver/telink_b91m_driver_src/merge_requests/541/diffs?commit_id=8ead48a7e05d90ee0cd64d68ef475f8275974b9f)
-  *	(B91/B92)The SETTLE_Time setting error caused by 4bit settle_time not taking effect when the rf_set_tx_settle_time interface is set, the SETTLE_time setting range is extended to 0xfff. [8ead48a7](http://192.168.48.36/src/driver/telink_b91m_driver_src/merge_requests/541/diffs?commit_id=8ead48a7e05d90ee0cd64d68ef475f8275974b9f)
+  * (B92)Fixed the issue that the RSSI value did not match the actual received energy. [435541cf](http://192.168.48.36/src/driver/telink_b91m_driver_src/merge_requests/@444/diffs?commit_id=435541cf3d9776581b57883579b54cb4421f08fd)
+  * (B91/B92)Fixed the problem of incorrect setting of ctrim at some frequency points of rf_set_chn, and reduced the tx energy difference at different frequency points. [8ead48a7](http://192.168.48.36/src/driver/telink_b91m_driver_src/merge_requests/@541/diffs?commit_id=8ead48a7e05d90ee0cd64d68ef475f8275974b9f)
+  * (B91/B92)The SETTLE_Time setting error caused by 4bit settle_time not taking effect when the rf_set_tx_settle_time interface is set, the SETTLE_time setting range is extended to 0xfff. [8ead48a7](http://192.168.48.36/src/driver/telink_b91m_driver_src/merge_requests/@541/diffs?commit_id=8ead48a7e05d90ee0cd64d68ef475f8275974b9f)
 * **emi**
-  * (B91/B92)Fixed inconsistency between rx packet length and dma fifo size causing FIFO data overflow to overwrite other RAM information. [95a0c226](http://192.168.48.36/src/driver/telink_b91m_driver_src/merge_requests/450/diffs?commit_id=95a0c22606473f33a8f5032cf0eeb7660bd94a16)
+  * (B91/B92)Fixed inconsistency between rx packet length and dma fifo size causing FIFO data overflow to overwrite other RAM information. [95a0c226](http://192.168.48.36/src/driver/telink_b91m_driver_src/merge_requests/@450/diffs?commit_id=95a0c22606473f33a8f5032cf0eeb7660bd94a16)
 * **audio**
-  * (B92)The channel data exchange problem is solved when the sampling rate of DMIC is 44.1k and 48k. [2928be92](http://192.168.48.36/src/driver/telink_b91m_driver_src/merge_requests/453/diffs?commit_id=2928be92d4f9dbd3b52f2633ae13356b3e100c43) 
+  * (B92)The channel data exchange problem is solved when the sampling rate of DMIC is 44.1k and 48k. [2928be92](http://192.168.48.36/src/driver/telink_b91m_driver_src/merge_requests/@453/diffs?commit_id=2928be92d4f9dbd3b52f2633ae13356b3e100c43) 
 * **spi**
-  * (B92)Fixed the slave gpsi rx dma receiving the first data error. [03fdb77b](http://192.168.48.36/src/driver/telink_b91m_driver_src/merge_requests/452/diffs?commit_id=03fdb77bfb4840573ff6bad797a1deea9ebb32ed)
+  * (B92)Fixed the slave gpsi rx dma receiving the first data error. [03fdb77b](http://192.168.48.36/src/driver/telink_b91m_driver_src/merge_requests/@452/diffs?commit_id=03fdb77bfb4840573ff6bad797a1deea9ebb32ed)
 * **mspi**
-  * (B92)The related function is modified with ramcode, to avoid the risk that the mspi-related function may be compiled into the text segment and cause crash. [7ce63726](http://192.168.48.36/src/driver/telink_b91m_driver_src/merge_requests/465/diffs?commit_id=7ce63726d14f7135e8efd37d7b183a6e52577bd2)
+  * (B92)The related function is modified with ramcode, to avoid the risk that the mspi-related function may be compiled into the text segment and cause crash. [7ce63726](http://192.168.48.36/src/driver/telink_b91m_driver_src/merge_requests/@465/diffs?commit_id=7ce63726d14f7135e8efd37d7b183a6e52577bd2)
 * **sys**
-  * (B92)sys_reboot: the definition of sys_reboot is changed to sys.c, and the sys_reboot_ram interface is added. the processing of sys_reboot is stored in ram to avoid incorrect operations on flash when sys_reboot is called. [7ce63726](http://192.168.48.36/src/driver/telink_b91m_driver_src/merge_requests/465/diffs?commit_id=7ce63726d14f7135e8efd37d7b183a6e52577bd2)
-  * (B91/B92)The sys_reboot interface was rewritten to avoid crash due to prefetch and interruption. [1cd3cc0e](http://192.168.48.36/src/driver/telink_b91m_driver_src/merge_requests/479/diffs?commit_id=1cd3cc0e1c14780aad3f729d8db6917ba44c66c9)
-  * (B92)The power supply of sram is about 1.2V. Adjusting the voltage to the ram in different states can be maintained at 1.2V. [1cd3cc0e](http://192.168.48.36/src/driver/telink_b91m_driver_src/merge_requests/479/diffs?commit_id=1cd3cc0e1c14780aad3f729d8db6917ba44c66c9)
-  * (B92)Solve the problem that the crystal oscillator stability flag fails to cause the crash. If the start-up is abnormal, it will restart. Use PM_ANA_REG_POWER_ON_CLR_BUF0[bit1] to check whether the restart caused by the abnormal start-up has occurred. (It has been implemented in the driver layer, and does not require special calls from the application layer.) [406f518d](http://192.168.48.36/src/driver/telink_b91m_driver_src/merge_requests/540/diffs?commit_id=406f518d43f134209d4dc9c81bc40523208a93ad)
-  * (B92)The clock sources for configuring cclk, hclk, pclk, and mspiclk during initialization are all from 24M rc. [2b85e90e](http://192.168.48.36/src/driver/telink_b91m_driver_src/merge_requests/551/diffs?commit_id=2b85e90e6f30097f0f400212951fca7712666936)
-  * (B92)The risk of digital core voltages greater than the maximum operating voltage of 1.32V is avoided. The digital core voltage is configured at 1.2V. [cb5916dc](http://192.168.48.36/src/driver/telink_b91m_driver_src/merge_requests/573/diffs?commit_id=cb5916dc4b5503b19cc92744e4a7471c3b88205c)
+  * (B92)sys_reboot: the definition of sys_reboot is changed to sys.c, and the sys_reboot_ram interface is added. the processing of sys_reboot is stored in ram to avoid incorrect operations on flash when sys_reboot is called. [7ce63726](http://192.168.48.36/src/driver/telink_b91m_driver_src/merge_requests/@465/diffs?commit_id=7ce63726d14f7135e8efd37d7b183a6e52577bd2)
+  * (B91/B92)The sys_reboot interface was rewritten to avoid crash due to prefetch and interruption. [1cd3cc0e](http://192.168.48.36/src/driver/telink_b91m_driver_src/merge_requests/@479/diffs?commit_id=1cd3cc0e1c14780aad3f729d8db6917ba44c66c9)
+  * (B92)The power supply of sram is about 1.2V. Adjusting the voltage to the ram in different states can be maintained at 1.2V. [1cd3cc0e](http://192.168.48.36/src/driver/telink_b91m_driver_src/merge_requests/@479/diffs?commit_id=1cd3cc0e1c14780aad3f729d8db6917ba44c66c9)
+  * (B92)Solve the problem that the crystal oscillator stability flag fails to cause the crash. If the start-up is abnormal, it will restart. Use PM_ANA_REG_POWER_ON_CLR_BUF0[bit1] to check whether the restart caused by the abnormal start-up has occurred. (It has been implemented in the driver layer, and does not require special calls from the application layer.) [406f518d](http://192.168.48.36/src/driver/telink_b91m_driver_src/merge_requests/@540/diffs?commit_id=406f518d43f134209d4dc9c81bc40523208a93ad)
+  * (B92)The clock sources for configuring cclk, hclk, pclk, and mspiclk during initialization are all from 24M rc. [2b85e90e](http://192.168.48.36/src/driver/telink_b91m_driver_src/merge_requests/@551/diffs?commit_id=2b85e90e6f30097f0f400212951fca7712666936)
+  * (B92)The risk of digital core voltages greater than the maximum operating voltage of 1.32V is avoided. The digital core voltage is configured at 1.2V. [cb5916dc](http://192.168.48.36/src/driver/telink_b91m_driver_src/merge_requests/@573/diffs?commit_id=cb5916dc4b5503b19cc92744e4a7471c3b88205c)
 * **clock**
-  * (B91)clock_init: added clock_init_ram interface to store the processing of clock_init in the ram to avoid possible machine crashes caused by improper operations during clock configuration. [7ce63726](http://192.168.48.36/src/driver/telink_b91m_driver_src/merge_requests/465/diffs?commit_id=7ce63726d14f7135e8efd37d7b183a6e52577bd2)
+  * (B91)clock_init: added clock_init_ram interface to store the processing of clock_init in the ram to avoid possible machine crashes caused by improper operations during clock configuration. [7ce63726](http://192.168.48.36/src/driver/telink_b91m_driver_src/merge_requests/@465/diffs?commit_id=7ce63726d14f7135e8efd37d7b183a6e52577bd2)
 * **uart**
-  * (B92)uart_receive_dma interface directly uses UART0 instead of parameter uart_num, modify it. [f7cebf4e](http://192.168.48.36/src/driver/telink_b91m_driver_src/merge_requests/516/diffs?commit_id=f7cebf4e152151ca130c1c3861eff0f856985b10)
+  * (B92)uart_receive_dma interface directly uses UART0 instead of parameter uart_num, modify it. [f7cebf4e](http://192.168.48.36/src/driver/telink_b91m_driver_src/merge_requests/@516/diffs?commit_id=f7cebf4e152151ca130c1c3861eff0f856985b10)
 * **gpio**
-  * (B92)Modify the gpio_set_src_irq() configuration to resolved the problem that the group src level interrupt could not work properly.[e9581b0a](http://192.168.48.36/src/driver/telink_b91m_driver_src/merge_requests/511/commits?commit_id=e9581b0a098b9230269a5389a98a82c9e4a90bb3)
+  * (B92)Modify the gpio_set_src_irq() configuration to resolved the problem that the group src level interrupt could not work properly.[e9581b0a](http://192.168.48.36/src/driver/telink_b91m_driver_src/merge_requests/@511/commits?commit_id=e9581b0a098b9230269a5389a98a82c9e4a90bb3)
 * **dma** 
-  * (B92/B91) Fix the problem that if the buff parameter in audio_rx/tx_dma_chain_init interface is in IRAM area(DRAM is not affected), then calling audio_get_rx_dma_wptr/audio_get_tx_dma_rptr interface will cause error.  Reason: The return value of convert_ram_addr_cpu2bus is written to the dma-related register,The value of the register is read out as input parameter of convert_ram_addr_bus2cpu,it will be calculated incorrectly. [cfcb91ef](http://192.168.48.36/src/driver/telink_b91m_driver_src/merge_requests/543/diffs?commit_id=cfcb91ef95289d327a78c014a401705c53d7118a)
+  * (B92/B91) Fix the problem that if the buff parameter in audio_rx/tx_dma_chain_init interface is in IRAM area(DRAM is not affected), then calling audio_get_rx_dma_wptr/audio_get_tx_dma_rptr interface will cause error.  Reason: The return value of convert_ram_addr_cpu2bus is written to the dma-related register,The value of the register is read out as input parameter of convert_ram_addr_bus2cpu,it will be calculated incorrectly. [cfcb91ef](http://192.168.48.36/src/driver/telink_b91m_driver_src/merge_requests/@543/diffs?commit_id=cfcb91ef95289d327a78c014a401705c53d7118a)
 * **pwm**
-  * (B91)In the pwm_clr_irq_status interface, fix the problem that the FLD_PWM0_IR_FIFO_IRQ interrupt flag bit is not cleared correctly. [e0dfb211](http://192.168.48.36/src/driver/telink_b91m_driver_src/merge_requests/532/diffs?commit_id=e0dfb21137f0e1396618ac246e10626d941093e0)
+  * (B91)In the pwm_clr_irq_status interface, fix the problem that the FLD_PWM0_IR_FIFO_IRQ interrupt flag bit is not cleared correctly. [e0dfb211](http://192.168.48.36/src/driver/telink_b91m_driver_src/merge_requests/@532/diffs?commit_id=e0dfb21137f0e1396618ac246e10626d941093e0)
 * **pm**
-  * (B92)Solved the problem of high current in suspend sleep caused by leakage caused by the failure to connect the up and down pull of sws. [eb6c0261](http://192.168.48.36/src/driver/telink_b91m_driver_src/merge_requests/466/diffs?commit_id=eb6c0261101c513f228a1a9dbf02dc9832f088d6)
+  * (B92)Solved the problem of high current in suspend sleep caused by leakage caused by the failure to connect the up and down pull of sws. [eb6c0261](http://192.168.48.36/src/driver/telink_b91m_driver_src/merge_requests/@466/diffs?commit_id=eb6c0261101c513f228a1a9dbf02dc9832f088d6)
 * **I2C_Demo**
-  * (B92)The received packet data is abnormal due to a code logic error. [106435f3](http://192.168.48.36/src/driver/telink_b91m_driver_src/merge_requests/443/diffs?commit_id=106435f316711e1b27c9b7a095969ec2e1fca7aa)
+  * (B92)The received packet data is abnormal due to a code logic error. [106435f3](http://192.168.48.36/src/driver/telink_b91m_driver_src/merge_requests/@443/diffs?commit_id=106435f316711e1b27c9b7a095969ec2e1fca7aa)
 * **USB_Demo**
-  * (B92)Fixed the problem of not turn off the 8s vbus timer after unplugging and reinserting the vbus while the power is on(Vbat supply). [b36d04e1](http://192.168.48.36/src/driver/telink_b91m_driver_src/merge_requests/451/diffs?commit_id=b36d04e10302fd0eb09c30d9a5e41fb1bc533096)
-  * (B91/B92)Fixed an issue that may enter an unexpected endpoint interrupt due to the endpoint interrupt mask being fully turned on by default.[2a22e068](http://192.168.48.36/src/driver/telink_b91m_driver_src/merge_requests/454/diffs?commit_id=2a22e0684b524a11c22db86fe932164d56642ed6)
-  * (B91)Fixed mic_demo MIC_DMA_CHN undefined and spk_demo #ifdef #endif not used in pairs bug. [a2efbbb2](http://192.168.48.36/src/driver/telink_b91m_driver_src/merge_requests/498/diffs?commit_id=a2efbbb2853f979e84fc2dc0464ff0b55c827cbb)
+  * (B92)Fixed the problem of not turn off the 8s vbus timer after unplugging and reinserting the vbus while the power is on(Vbat supply). [b36d04e1](http://192.168.48.36/src/driver/telink_b91m_driver_src/merge_requests/@451/diffs?commit_id=b36d04e10302fd0eb09c30d9a5e41fb1bc533096)
+  * (B91/B92)Fixed an issue that may enter an unexpected endpoint interrupt due to the endpoint interrupt mask being fully turned on by default.[2a22e068](http://192.168.48.36/src/driver/telink_b91m_driver_src/merge_requests/@454/diffs?commit_id=2a22e0684b524a11c22db86fe932164d56642ed6)
+  * (B91)Fixed mic_demo MIC_DMA_CHN undefined and spk_demo #ifdef #endif not used in pairs bug. [a2efbbb2](http://192.168.48.36/src/driver/telink_b91m_driver_src/merge_requests/@498/diffs?commit_id=a2efbbb2853f979e84fc2dc0464ff0b55c827cbb)
 ### Features
 
 * **usb**
@@ -1494,8 +2075,8 @@ interfaces to improve the sensitivity performance of emi/bqb programs at 24M mul
 * SDK版本: telink_b91m_driver_sdk V2.2.0。
 * 此版本SDK支持 B91(A0/A1/A2),B92(A1/A2) 芯片。
 * LED和KEY的默认配置匹配以下硬件版本:
-*   B91	 	C1T213A20_V1_3_20200727
-*   B92	 	C1T266A20_V1_3_20220722
+*   B91     C1T213A20_V1_3_20200727
+*   B92     C1T266A20_V1_3_20220722
 
 ### Note
 
@@ -1543,45 +2124,45 @@ interfaces to improve the sensitivity performance of emi/bqb programs at 24M mul
 ### Bug Fixes
 
 * **gpio**
-  * (B92)PF[5:0]和PG[5:0]的数字上拉电阻不可用，这些引脚在接口gpio_set_pullup_res_30k()中被禁止。 [ad91c3e5](http://192.168.48.36/src/driver/telink_b91m_driver_src/merge_requests/566/diffs?commit_id=ad91c3e57719db168a95846f8022a0c7c9bf8ec5)
+  * (B92)PF[5:0]和PG[5:0]的数字上拉电阻不可用，这些引脚在接口gpio_set_pullup_res_30k()中被禁止。 [ad91c3e5](http://192.168.48.36/src/driver/telink_b91m_driver_src/merge_requests/@566/diffs?commit_id=ad91c3e57719db168a95846f8022a0c7c9bf8ec5)
 
 * **rf**
-  * (B92)修复了rssi值与实际接收能量不符的问题。[435541cf](http://192.168.48.36/src/driver/telink_b91m_driver_src/merge_requests/444/diffs?commit_id=435541cf3d9776581b57883579b54cb4421f08fd)
-  * (B91/B92)修复了rf_set_chn部分频点ctrim设置错误的问题，减小不同频点上tx能量差异。[8ead48a7](http://192.168.48.36/src/driver/telink_b91m_driver_src/merge_requests/541/diffs?commit_id=8ead48a7e05d90ee0cd64d68ef475f8275974b9f)
-  * (B91/B92)解决rf_set_tx_settle_time接口设置settle时间时高4bit未生效导致settle time设置错误的问题，将settle时间的设置范围扩展到0xfff。[8ead48a7](http://192.168.48.36/src/driver/telink_b91m_driver_src/merge_requests/541/diffs?commit_id=8ead48a7e05d90ee0cd64d68ef475f8275974b9f)
+  * (B92)修复了rssi值与实际接收能量不符的问题。[435541cf](http://192.168.48.36/src/driver/telink_b91m_driver_src/merge_requests/@444/diffs?commit_id=435541cf3d9776581b57883579b54cb4421f08fd)
+  * (B91/B92)修复了rf_set_chn部分频点ctrim设置错误的问题，减小不同频点上tx能量差异。[8ead48a7](http://192.168.48.36/src/driver/telink_b91m_driver_src/merge_requests/@541/diffs?commit_id=8ead48a7e05d90ee0cd64d68ef475f8275974b9f)
+  * (B91/B92)解决rf_set_tx_settle_time接口设置settle时间时高4bit未生效导致settle time设置错误的问题，将settle时间的设置范围扩展到0xfff。[8ead48a7](http://192.168.48.36/src/driver/telink_b91m_driver_src/merge_requests/@541/diffs?commit_id=8ead48a7e05d90ee0cd64d68ef475f8275974b9f)
 * **emi**
-  * (B91/B92)修复了rx包长度和dma fifo大小之间不一致导致FIFO数据溢出覆盖其他RAM信息。[95a0c226](http://192.168.48.36/src/driver/telink_b91m_driver_src/merge_requests/450/diffs?commit_id=95a0c22606473f33a8f5032cf0eeb7660bd94a16)
+  * (B91/B92)修复了rx包长度和dma fifo大小之间不一致导致FIFO数据溢出覆盖其他RAM信息。[95a0c226](http://192.168.48.36/src/driver/telink_b91m_driver_src/merge_requests/@450/diffs?commit_id=95a0c22606473f33a8f5032cf0eeb7660bd94a16)
 * **audio**
-  * (B92)解决了DMIC在采样率为44.1k,48k时通道数据相互调换的问题。[2928be92](http://192.168.48.36/src/driver/telink_b91m_driver_src/merge_requests/453/diffs?commit_id=2928be92d4f9dbd3b52f2633ae13356b3e100c43) 
+  * (B92)解决了DMIC在采样率为44.1k,48k时通道数据相互调换的问题。[2928be92](http://192.168.48.36/src/driver/telink_b91m_driver_src/merge_requests/@453/diffs?commit_id=2928be92d4f9dbd3b52f2633ae13356b3e100c43) 
 * **spi**
-  * (B92)修复slave端 gpsi rx dma接收第一笔数据会出错问题。[03fdb77b](http://192.168.48.36/src/driver/telink_b91m_driver_src/merge_requests/452/diffs?commit_id=03fdb77bfb4840573ff6bad797a1deea9ebb32ed)
+  * (B92)修复slave端 gpsi rx dma接收第一笔数据会出错问题。[03fdb77b](http://192.168.48.36/src/driver/telink_b91m_driver_src/merge_requests/@452/diffs?commit_id=03fdb77bfb4840573ff6bad797a1deea9ebb32ed)
 * **mspi**
-  * (B92)mspi相关的函数增加ramcode修饰，避免了mspi相关函数可能编译到text段，造成死机的风险。[7ce63726](http://192.168.48.36/src/driver/telink_b91m_driver_src/merge_requests/465/diffs?commit_id=7ce63726d14f7135e8efd37d7b183a6e52577bd2)
+  * (B92)mspi相关的函数增加ramcode修饰，避免了mspi相关函数可能编译到text段，造成死机的风险。[7ce63726](http://192.168.48.36/src/driver/telink_b91m_driver_src/merge_requests/@465/diffs?commit_id=7ce63726d14f7135e8efd37d7b183a6e52577bd2)
 * **sys**
-  * (B92)sys_reboot:将sys_reboot的定义改到sys.c中，并新增sys_reboot_ram接口，将sys_reboot的处理放在ram中，避免调用sys_reboot时引发对flash错误操作。[7ce63726](http://192.168.48.36/src/driver/telink_b91m_driver_src/merge_requests/465/diffs?commit_id=7ce63726d14f7135e8efd37d7b183a6e52577bd2)
-  * (B91/B92)重新写了sys_reboot接口，避免了因预取址和中断等因素引发死机的隐患。[1cd3cc0e](http://192.168.48.36/src/driver/telink_b91m_driver_src/merge_requests/479/diffs?commit_id=1cd3cc0e1c14780aad3f729d8db6917ba44c66c9)
-  * (B92)sram供电要求1.2V左右。调整不同状态下给ram供电的电压都可以保持在1.2V。[1cd3cc0e](http://192.168.48.36/src/driver/telink_b91m_driver_src/merge_requests/479/diffs?commit_id=1cd3cc0e1c14780aad3f729d8db6917ba44c66c9)
-  * (B92)解决晶振稳定标志位失灵导致死机的问题。 起振异常则重启，占用PM_ANA_REG_POWER_ON_CLR_BUF0[bit1]查询是否发生过起振异常导致的重启。（已在驱动层实现，不需要应用层特殊调用。）[406f518d](http://192.168.48.36/src/driver/telink_b91m_driver_src/merge_requests/540/diffs?commit_id=406f518d43f134209d4dc9c81bc40523208a93ad)
-  * (B92)初始化时配置cclk/hclk/pclk/mspiclk的时钟源都来源于24M rc。[2b85e90e](http://192.168.48.36/src/driver/telink_b91m_driver_src/merge_requests/551/diffs?commit_id=2b85e90e6f30097f0f400212951fca7712666936)
-  * (B92)避免了digital core电压大于最高工作电压1.32V的可能带来的风险。digital core电压配置为1.2V。[cb5916dc](http://192.168.48.36/src/driver/telink_b91m_driver_src/merge_requests/573/diffs?commit_id=cb5916dc4b5503b19cc92744e4a7471c3b88205c)
+  * (B92)sys_reboot:将sys_reboot的定义改到sys.c中，并新增sys_reboot_ram接口，将sys_reboot的处理放在ram中，避免调用sys_reboot时引发对flash错误操作。[7ce63726](http://192.168.48.36/src/driver/telink_b91m_driver_src/merge_requests/@465/diffs?commit_id=7ce63726d14f7135e8efd37d7b183a6e52577bd2)
+  * (B91/B92)重新写了sys_reboot接口，避免了因预取址和中断等因素引发死机的隐患。[1cd3cc0e](http://192.168.48.36/src/driver/telink_b91m_driver_src/merge_requests/@479/diffs?commit_id=1cd3cc0e1c14780aad3f729d8db6917ba44c66c9)
+  * (B92)sram供电要求1.2V左右。调整不同状态下给ram供电的电压都可以保持在1.2V。[1cd3cc0e](http://192.168.48.36/src/driver/telink_b91m_driver_src/merge_requests/@479/diffs?commit_id=1cd3cc0e1c14780aad3f729d8db6917ba44c66c9)
+  * (B92)解决晶振稳定标志位失灵导致死机的问题。 起振异常则重启，占用PM_ANA_REG_POWER_ON_CLR_BUF0[bit1]查询是否发生过起振异常导致的重启。（已在驱动层实现，不需要应用层特殊调用。）[406f518d](http://192.168.48.36/src/driver/telink_b91m_driver_src/merge_requests/@540/diffs?commit_id=406f518d43f134209d4dc9c81bc40523208a93ad)
+  * (B92)初始化时配置cclk/hclk/pclk/mspiclk的时钟源都来源于24M rc。[2b85e90e](http://192.168.48.36/src/driver/telink_b91m_driver_src/merge_requests/@551/diffs?commit_id=2b85e90e6f30097f0f400212951fca7712666936)
+  * (B92)避免了digital core电压大于最高工作电压1.32V的可能带来的风险。digital core电压配置为1.2V。[cb5916dc](http://192.168.48.36/src/driver/telink_b91m_driver_src/merge_requests/@573/diffs?commit_id=cb5916dc4b5503b19cc92744e4a7471c3b88205c)
 * **clock**
-  * (B91)clock_init:新增clock_init_ram接口，将clock_init的处理放在ram中，避免配置clock时不当操作引起死机隐患。[7ce63726](http://192.168.48.36/src/driver/telink_b91m_driver_src/merge_requests/465/diffs?commit_id=7ce63726d14f7135e8efd37d7b183a6e52577bd2)
+  * (B91)clock_init:新增clock_init_ram接口，将clock_init的处理放在ram中，避免配置clock时不当操作引起死机隐患。[7ce63726](http://192.168.48.36/src/driver/telink_b91m_driver_src/merge_requests/@465/diffs?commit_id=7ce63726d14f7135e8efd37d7b183a6e52577bd2)
 * **uart**
-  * (B92)uart_receive_dma接口中有直接使用UART0,而不是参数uart_num，将其修改。[f7cebf4e](http://192.168.48.36/src/driver/telink_b91m_driver_src/merge_requests/516/diffs?commit_id=f7cebf4e152151ca130c1c3861eff0f856985b10)
+  * (B92)uart_receive_dma接口中有直接使用UART0,而不是参数uart_num，将其修改。[f7cebf4e](http://192.168.48.36/src/driver/telink_b91m_driver_src/merge_requests/@516/diffs?commit_id=f7cebf4e152151ca130c1c3861eff0f856985b10)
 * **gpio**
-  * (B92)修改gpio_set_src_irq()配置，解决了group src level中断无法正常工作的问题。[e9581b0a](http://192.168.48.36/src/driver/telink_b91m_driver_src/merge_requests/511/commits?commit_id=e9581b0a098b9230269a5389a98a82c9e4a90bb3)
+  * (B92)修改gpio_set_src_irq()配置，解决了group src level中断无法正常工作的问题。[e9581b0a](http://192.168.48.36/src/driver/telink_b91m_driver_src/merge_requests/@511/commits?commit_id=e9581b0a098b9230269a5389a98a82c9e4a90bb3)
 * **dma** 
-  * (B92/B91)修复audio_rx/tx_dma_chain_init接口中传入的buff参数分配在IRAM时(DRAM不受影响)，再调用audio_get_rx_dma_wptr/audio_get_tx_dma_rptr接口会出错问题，原因：先调用convert_ram_addr_cpu2bus，其返回值写到dma相关寄存器后，再读出寄存器的值输入到convert_ram_addr_bus2cpu 其计算结果会出错。[cfcb91ef](http://192.168.48.36/src/driver/telink_b91m_driver_src/merge_requests/543/diffs?commit_id=cfcb91ef95289d327a78c014a401705c53d7118a)
+  * (B92/B91)修复audio_rx/tx_dma_chain_init接口中传入的buff参数分配在IRAM时(DRAM不受影响)，再调用audio_get_rx_dma_wptr/audio_get_tx_dma_rptr接口会出错问题，原因：先调用convert_ram_addr_cpu2bus，其返回值写到dma相关寄存器后，再读出寄存器的值输入到convert_ram_addr_bus2cpu 其计算结果会出错。[cfcb91ef](http://192.168.48.36/src/driver/telink_b91m_driver_src/merge_requests/@543/diffs?commit_id=cfcb91ef95289d327a78c014a401705c53d7118a)
 * **pwm**
-  * (B91)在pwm_clr_irq_status接口中，修复FLD_PWM0_IR_FIFO_IRQ中断标志位不能正确清除问题。[e0dfb211](http://192.168.48.36/src/driver/telink_b91m_driver_src/merge_requests/532/diffs?commit_id=e0dfb21137f0e1396618ac246e10626d941093e0)
+  * (B91)在pwm_clr_irq_status接口中，修复FLD_PWM0_IR_FIFO_IRQ中断标志位不能正确清除问题。[e0dfb211](http://192.168.48.36/src/driver/telink_b91m_driver_src/merge_requests/@532/diffs?commit_id=e0dfb21137f0e1396618ac246e10626d941093e0)
 * **pm**
-  * (B92)解决了因sws未接模拟上下拉而漏电导致的suspend睡眠电流大的问题。[eb6c0261](http://192.168.48.36/src/driver/telink_b91m_driver_src/merge_requests/466/diffs?commit_id=eb6c0261101c513f228a1a9dbf02dc9832f088d6)
+  * (B92)解决了因sws未接模拟上下拉而漏电导致的suspend睡眠电流大的问题。[eb6c0261](http://192.168.48.36/src/driver/telink_b91m_driver_src/merge_requests/@466/diffs?commit_id=eb6c0261101c513f228a1a9dbf02dc9832f088d6)
 * **I2C_Demo**
-  * (B92)代码逻辑错误导致收包数据异常。[106435f3](http://192.168.48.36/src/driver/telink_b91m_driver_src/merge_requests/443/diffs?commit_id=106435f316711e1b27c9b7a095969ec2e1fca7aa)
+  * (B92)代码逻辑错误导致收包数据异常。[106435f3](http://192.168.48.36/src/driver/telink_b91m_driver_src/merge_requests/@443/diffs?commit_id=106435f316711e1b27c9b7a095969ec2e1fca7aa)
 * **USB_Demo**
-  * (B92)修复了在不断电的情况下(Vbat供电),重复拔插Vbus，vbus 8s复位定时器无法再次清除的问题。[b36d04e1](http://192.168.48.36/src/driver/telink_b91m_driver_src/merge_requests/451/diffs?commit_id=b36d04e10302fd0eb09c30d9a5e41fb1bc533096)
-  * (B91/B92)修复端点中断mask默认全部打开，可能导致进入非预期端点中断问题。[2a22e068](http://192.168.48.36/src/driver/telink_b91m_driver_src/merge_requests/454/diffs?commit_id=2a22e0684b524a11c22db86fe932164d56642ed6)
-  * (B91)修复了 mic_demo MIC_DMA_CHN 未定义和 spk_demo #ifdef #endif未成对使用的错误。[a2efbbb2](http://192.168.48.36/src/driver/telink_b91m_driver_src/merge_requests/498/diffs?commit_id=a2efbbb2853f979e84fc2dc0464ff0b55c827cbb)
+  * (B92)修复了在不断电的情况下(Vbat供电),重复拔插Vbus，vbus 8s复位定时器无法再次清除的问题。[b36d04e1](http://192.168.48.36/src/driver/telink_b91m_driver_src/merge_requests/@451/diffs?commit_id=b36d04e10302fd0eb09c30d9a5e41fb1bc533096)
+  * (B91/B92)修复端点中断mask默认全部打开，可能导致进入非预期端点中断问题。[2a22e068](http://192.168.48.36/src/driver/telink_b91m_driver_src/merge_requests/@454/diffs?commit_id=2a22e0684b524a11c22db86fe932164d56642ed6)
+  * (B91)修复了 mic_demo MIC_DMA_CHN 未定义和 spk_demo #ifdef #endif未成对使用的错误。[a2efbbb2](http://192.168.48.36/src/driver/telink_b91m_driver_src/merge_requests/@498/diffs?commit_id=a2efbbb2853f979e84fc2dc0464ff0b55c827cbb)
   
 
 ### Features
@@ -1693,8 +2274,8 @@ interfaces to improve the sensitivity performance of emi/bqb programs at 24M mul
 * This version of the SDK supports B91(A0,A1,A2),B92(A1) chips.
 * B92(added) supports USB/AUDIO/I2C/s7816//UART/QDEC/PWM/Timer/Stimer/PLIC/GPIO/SPI/PKE/AES/ANALOG/TRNG
 * The default configuration of LEDs and KEYs match the following hardware revisions:
-*   B91	 	C1T213A20_V1_3_20200727
-*   B92	 	C1T266A20_V1_3_20220722
+*   B91     C1T213A20_V1_3_20200727
+*   B92     C1T266A20_V1_3_20220722
 
 ### BREAKING CHANGES
 
@@ -1793,8 +2374,8 @@ interfaces to improve the sensitivity performance of emi/bqb programs at 24M mul
 * 此版本SDK支持 B91(A0,A1,A2),B92(A1) 芯片。
 * B92(新增) 支持 USB/AUDIO/I2C/s7816//UART/QDEC/PWM/Timer/Stimer/PLIC/GPIO/SPI/PKE/AES/ANALOG/TRNG
 * LED和KEY的默认配置匹配以下硬件版本:
-*   B91	 	C1T213A20_V1_3_20200727
-*   B92	 	C1T266A20_V1_3_20220722
+*   B91     C1T213A20_V1_3_20200727
+*   B92     C1T266A20_V1_3_20220722
 
 ### BREAKING CHANGES
 
@@ -1979,9 +2560,9 @@ interfaces to improve the sensitivity performance of emi/bqb programs at 24M mul
  * **plic** 
     * fix the problem that the plic_set_threshold() may not take effect.  
 * **spi**
-	* Solved the problem that sometimes compilation optimization will store the table of switch case statement in rodata segment. Encoding options add -fno-jump-tables.
+    * Solved the problem that sometimes compilation optimization will store the table of switch case statement in rodata segment. Encoding options add -fno-jump-tables.
 * **sws_usb**
-	* fix the issue that dp dm use as GPIO may cause unexpected error.firmware will disable swire through usb function,and you need to call usb_set_pin_en() function to enable it.
+    * fix the issue that dp dm use as GPIO may cause unexpected error.firmware will disable swire through usb function,and you need to call usb_set_pin_en() function to enable it.
 
 ### Refactoring
 
@@ -2103,7 +2684,7 @@ interfaces to improve the sensitivity performance of emi/bqb programs at 24M mul
     * 修改sys_pll_clk_e枚举中对应位置的值为正确的60。
 * **audio**
     * mono模式下，修复了模拟输入（amic或line-in）切换通道时不起作用问题。
-	* 通道切换时，对应的codec的adc通道（adc1,adc2）也需作切换。
+    * 通道切换时，对应的codec的adc通道（adc1,adc2）也需作切换。
 * **rf**
     * 修复B91中rf中断的枚举中关于FLD_RF_IRQ_ALL的定义错误。
     * 修复了函数rf_set_access_code_len只有在设置access code长度为4的时候才生效的问题。
@@ -2206,13 +2787,13 @@ interfaces to improve the sensitivity performance of emi/bqb programs at 24M mul
     * 去除了一些不必要的代码：EMI初始化中写频偏值的代码；用于PA设置的临时代码。
 * **spi(demo)**
     * 增加宏定义SPI_SLAVE_READY_TEST，用于测试slave_ready功能。
-	
+    
 ### Performance Improvements
 * **IDE**
     * 添加编译命令make -j${NUMBER_OF_PROCESSORS}，增快编译速度。
 * **plic**
     * 添加函数plic_isr的always_inline修饰，减少编译的bin文件大小。
-	
+    
 ---
 ## V1.5.0-Beta
 
@@ -2573,7 +3154,7 @@ interfaces to improve the sensitivity performance of emi/bqb programs at 24M mul
 * **sys**
   * Modify the member name of the parameter enumeration vbat\_type\_e variable in the sys\_init function
 * **watchdog**
-	* Simplify the parameters of the wd\_set\_interval\_ms function, and no longer retain the parameter tick\_per\_ms
+    * Simplify the parameters of the wd\_set\_interval\_ms function, and no longer retain the parameter tick\_per\_ms
 * **timer**
    * In the timer\_set\_mode function, the initial tick and capture tick are no longer configured and are encapsulated into two interfaces (timer\_set\_init\_tick, timer\_set\_cap_tick)
 * **gpio** 
@@ -2609,7 +3190,7 @@ interfaces to improve the sensitivity performance of emi/bqb programs at 24M mul
 * **sys**
   * 在sys\_init函数中修改枚举vbat\_type\_e类型的成员名称。
 * **watchdog**
-	* 简化wd\_set\_interval_ms函数的参数,参数period\_ms为间隔时间，不再保留参数tick\_per\_ms
+    * 简化wd\_set\_interval_ms函数的参数,参数period\_ms为间隔时间，不再保留参数tick\_per\_ms
 * **timer**
   * 在timer\_set\_mode函数中,不再配置初始tick和capture tick，分别封装成两个接口（timer\_set\_init_tick,timer\_set\_cap\_tick）
 * **gpio** 
