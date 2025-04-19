@@ -39,7 +39,7 @@
     #define STRING_VENDOR L"Telink"
 #endif
 #ifndef STRING_PRODUCT
-    #define STRING_PRODUCT L"BLE 5.3"
+    #define STRING_PRODUCT L"BLE 6.0"
 #endif
 
 #ifndef STRING_SERIAL
@@ -322,6 +322,8 @@
     #include "boards/B91_C1T213A20.h"
 #elif (BOARD_SELECT == BOARD_952X_EVK_C1T266A20)
     #include "boards/B92_C1T266A20.h"
+#elif (BOARD_SELECT == BOARD_952X_EVK_C1T266A102)
+    #include "boards/B92_C1T266A102.h"
 #elif (BOARD_SELECT == BOARD_721X_EVK_C1T315A20)
     #include "boards/TL721X_C1T315A20.h"
 #elif (BOARD_SELECT == BOARD_321X_EVK_C1T331A20)

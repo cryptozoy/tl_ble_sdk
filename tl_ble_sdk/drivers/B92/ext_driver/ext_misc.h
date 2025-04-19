@@ -168,6 +168,15 @@ void rf_set_channel_power_calibration(unsigned char *channel_power);
 void rf_set_channel_power_enable(unsigned char enable);
 #endif
 
+/**
+ * @brief    This function serves to enable zb_rt interrupt source initialize
+ * the default index value for CS SYNC and the base index for mode2 antenna index.
+ * @param[in] antsel0_pin : the first pin of the switch control
+ * @param[in] antsel1_pin : the second pin of the switch control
+ * @param[in] antsel2_pin : the third pin of the switch control
+ * @return  none
+ */
+void rf_cs_ant_switch_pin_init(gpio_pin_e antsel0_pin, gpio_pin_e antsel1_pin, gpio_pin_e antsel2_pin);
 /******************************* rf end  **********************************************************************/
 
 
@@ -279,7 +288,7 @@ void generateRandomNum(int len, unsigned char *data);
 #define     CS_ALIGN_16(len)                                                 (((len + 15)>>4) <<4)
 #define     CS_RX_MODE0_FIFO_SIZE_MAX                                        CS_ALIGN_16(80*20 + 50 + 4)
 #define     CS_RX_MODE1_FIFO_SIZE_MAX                                        CS_ALIGN_16((5 + 44 + 128 + 15)*20 + 50 + 4)
-#define     CS_RX_MODE2_FIFO_SIZE_MAX(AP,PM, SW)                             CS_ALIGN_16((5 + (AP+1)*(PM+SW) - SW)*20 + 50 + 4)
+#define     CS_RX_MODE2_FIFO_SIZE_MAX(AP,PM, SW)                             CS_ALIGN_16((5 + (AP+1)*(PM+SW) - SW)*20 + 54 + 4)
 #define     CHANNEL_SOUNDING_RX_FIFO_SIZE_ALIGN16(N_AP, T_PM_US, T_SW_US)    max3(CS_RX_MODE0_FIFO_SIZE_MAX,CS_RX_MODE1_FIFO_SIZE_MAX, CS_RX_MODE2_FIFO_SIZE_MAX(N_AP, T_PM_US, T_SW_US))
 
 /******************************* dma_end ********************************************************************/

@@ -23,12 +23,12 @@
  *******************************************************************************************************/
 #pragma once
 
-#ifndef __PROJECT_ACL_CONN_DEMO__
-    #define __PROJECT_ACL_CONN_DEMO__ 0
+#ifndef __PROJECT_CS_INITIATOR_DEMO__
+    #define __PROJECT_CS_INITIATOR_DEMO__ 0
 #endif
 
-#ifndef __PROJECT_ACL_CEN_DEMO__
-    #define __PROJECT_ACL_CEN_DEMO__ 0
+#ifndef __PROJECT_CS_REFLECTOR_DEMO__
+    #define __PROJECT_CS_REFLECTOR_DEMO__ 0
 #endif
 
 #ifndef __PROJECT_ACL_PER_DEMO__
@@ -53,6 +53,10 @@
     #include "vendor/2p4g_gen_fsk/app_config.h"
 #elif (__PROJECT_2P4G_FEATURE_DEMOE__)
     #include "vendor/2p4g_feature_test/app_config.h"
+#elif (__PROJECT_CS_INITIATOR_DEMO__)
+    #include "vendor/cs_initiator_demo/app_config.h"
+#elif (__PROJECT_CS_REFLECTOR_DEMO__)
+    #include "vendor/cs_reflector_demo/app_config.h"
 #else
     #include "vendor/common/default_config.h"
 #endif

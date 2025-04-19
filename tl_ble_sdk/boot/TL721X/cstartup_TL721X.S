@@ -22,8 +22,10 @@
  *
  *******************************************************************************************************/
 
-#include "user_config.h"
-
+ #include "user_config.h"
+#ifndef __CHANNEL_SOUNDING_EN__
+#define __CHANNEL_SOUNDING_EN__     0
+#endif
 /**
  * @brief   Set "DP_THROUGH_SWIRE_DIS" as "1" to disable the "dp_through_swire" function. Set "DP_THROUGH_SWIRE_DIS" as "0" to enable the "dp_through_swire" function.
  *          Risk description:
@@ -65,7 +67,11 @@
 #define SRAM_256K      2    //256KSRAM, 256KB-IRAM(256KB-Retention)/0KB-DRAM
 #define SRAM_384K      3    //384KSRAM, 256KB-IRAM(256KB-Retention)/128KB-DRAM
 #define SRAM_512K      4    //512KSRAM, 256KB-IRAM(256KB-Retention)/256KB-DRAM
-#define SRAM_SIZE      SRAM_128K
+#if(__CHANNEL_SOUNDING_EN__)
+    #define SRAM_SIZE      SRAM_512K
+#else
+    #define SRAM_SIZE      SRAM_128K
+#endif
 
 #if (SRAM_SIZE == SRAM_256K)
     .equ __IRAM_2_EN,   1
@@ -282,7 +288,29 @@ _DATA_INIT_BEGIN:
     addi   t1, t1, 4
     addi   t2, t2, 4
     j      _DATA_INIT_BEGIN
+#if __CHANNEL_SOUNDING_EN__
+    /* Zero .bss section in sram */
+_ZERO_BSS:
+    lui    t0, 0
+    la     t2, _BSS_VMA_START
+    la     t3, _BSS_VMA_END
+_ZERO_BSS_BEGIN:
+    bleu   t3, t2, _ZERO_IRAM_BSS
+    sw     t0, 0(t2)
+    addi   t2, t2, 4
+    j      _ZERO_BSS_BEGIN
 
+        /* Zero .iram_bss section in sram */
+_ZERO_IRAM_BSS:
+    lui    t0, 0
+    la     t2, _IRAM_BSS_VMA_START
+    la     t3, _IRAM_BSS_VMA_END
+_ZERO_IRAM_BSS_BEGIN:
+    bleu   t3, t2, _FILL_STK
+    sw     t0, 0(t2)
+    addi   t2, t2, 4
+    j      _ZERO_IRAM_BSS_BEGIN
+#else
     /* Zero .bss section in sram */
 _ZERO_BSS:
     lui    t0, 0
@@ -293,7 +321,7 @@ _ZERO_BSS_BEGIN:
     sw     t0, 0(t2)
     addi   t2, t2, 4
     j      _ZERO_BSS_BEGIN
-
+#endif
     /* Fill the remaining section in sram */
 _FILL_STK:
 #if 0
