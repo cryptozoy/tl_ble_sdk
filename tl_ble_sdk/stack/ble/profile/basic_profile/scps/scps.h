@@ -30,22 +30,25 @@
 /******************************* ScPS Common Start **********************************************************************/
 //The format and values of these fields are the same as the HCI LE Create Connection Command.
 //LE_Scan_Interval and LE_Scan_Window range 0x0004 to 0x4000, time range 2.5ms to 10.24s
-struct scan_interval_window{
+struct scan_interval_window
+{
     u16 leScanInterval;
     u16 leScanWindow;
 };
+
 /******************************* ScPS Common End **********************************************************************/
 
 
 /******************************* ScPS Client Start **********************************************************************/
 //ScPS Client Event ID
-enum{
+enum
+{
     BASIC_EVT_SCPSC_START = BASIC_EVT_TYPE_SCPS_CLIENT,
-    SCPSC_EVT_RECV_SERVER_REQUIRES_REFRESH,     //refer to 'NULL'
+    SCPSC_EVT_RECV_SERVER_REQUIRES_REFRESH, //refer to 'NULL'
 };
 
-struct blc_scpsc_regParam{
-
+struct blc_scpsc_regParam
+{
 };
 
 /**
@@ -55,12 +58,6 @@ struct blc_scpsc_regParam{
  */
 void blc_basic_registerSCPSControlClient(const struct blc_scpsc_regParam *param);
 
-/**
- * @brief      Write the scan interval and window values to the GATT server for a given connection handle.
- * @param[in]  connHandle - The connection handle for the GATT server client.
- * @param[in]  scanIntervalWindow - Pointer to the structure containing the scan interval and window values to be written.
- * @return     int - Status of the operation, 0: success, non-zero value: error code.
- */
 int blc_scpsc_writeScanIntervalWindow(u16 connHandle, struct scan_interval_window *scanIntervalWindow);
 
 /******************************* ScPS Client End **********************************************************************/
@@ -68,19 +65,20 @@ int blc_scpsc_writeScanIntervalWindow(u16 connHandle, struct scan_interval_windo
 
 /******************************* ScPS Server Start **********************************************************************/
 //ScPS Server Event ID
-enum{
+enum
+{
     BASIC_EVT_SCPSS_START = BASIC_EVT_TYPE_SCPS_SERVER,
-    SCPSS_EVT_SCAN_INTERVAL_WINDOW_CHANGE,      //refer to 'struct blc_scpsc_scanIntervalWindowChangeEvt'
+    SCPSS_EVT_SCAN_INTERVAL_WINDOW_CHANGE, //refer to 'struct blc_scpsc_scanIntervalWindowChangeEvt'
 };
 
-struct blc_scpss_regParam{
-
+struct blc_scpss_regParam
+{
 };
 
-struct blc_scpsc_scanIntervalWindowChangeEvt{   //Event ID: SCPSS_EVT_SCAN_INTERVAL_WINDOW_CHANGE
+struct blc_scpsc_scanIntervalWindowChangeEvt
+{ //Event ID: SCPSS_EVT_SCAN_INTERVAL_WINDOW_CHANGE
     struct scan_interval_window param;
 };
-
 
 /**
  * @brief       for user to register scan parameters service control server module.
@@ -89,12 +87,6 @@ struct blc_scpsc_scanIntervalWindowChangeEvt{   //Event ID: SCPSS_EVT_SCAN_INTER
  */
 void blc_basic_registerSCPSControlServer(const struct blc_scpss_regParam *param);
 
-/**
- * @brief      Update the GATT server to indicate that a refresh is required for the scan parameters.
- * @param[in]  connHandle - The connection handle for the GATT server.
- * @return     int - Status of the operation, 0: success, non-zero value: error code.
- */
 int blc_scpss_updateServerRequiresRefresh(u16 connHandle);
 
 /******************************* ScPS Server End **********************************************************************/
-

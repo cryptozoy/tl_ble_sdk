@@ -930,6 +930,8 @@ int main_idle_loop(void)
 
 #if (UI_KEYBOARD_ENABLE)
     proc_keyboard(0, 0, 0);
+#elif (UI_BUTTON_ENABLE)
+    proc_button();
 #endif
 
 

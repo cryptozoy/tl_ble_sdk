@@ -1,12 +1,12 @@
 /********************************************************************************************************
  * @file    usbkeycode.h
  *
- * @brief   This is the header file for BLE SDK
+ * @brief   This is the header file for Telink RISC-V MCU
  *
- * @author  BLE GROUP
- * @date    06,2022
+ * @author  Driver Group
+ * @date    2019
  *
- * @par     Copyright (c) 2022, Telink Semiconductor (Shanghai) Co., Ltd. ("TELINK")
+ * @par     Copyright (c) 2019, Telink Semiconductor (Shanghai) Co., Ltd. ("TELINK")
  *
  *          Licensed under the Apache License, Version 2.0 (the "License");
  *          you may not use this file except in compliance with the License.
@@ -22,7 +22,6 @@
  *
  *******************************************************************************************************/
 #pragma once
-
 #define VK_NONE 0x00
 
 // function key bitmap
@@ -156,7 +155,7 @@
 #define VK_KCR   0x90 //ok,K151
 #define VK_KCL   0x91 //ok,K150
 
-//  NOT standard,  use these reserved code to distinguish ctrl keys
+//  NOT standard,  use these reserved code to distinguish ctrol keys
 #ifndef CTRL_SHIFT_E0E7
     #define CTRL_SHIFT_E0E7 1
 #endif
@@ -198,7 +197,7 @@ enum
     VK_W_SRCH      = VK_MEDIA_START,          //0xa3
     VK_WEB,                                   //0xa4
     VK_W_BACK,
-    VK_W_FORWRD,
+    VK_W_FORWARD,
     VK_W_STOP,
     VK_W_REFRESH,
     VK_W_FAV, //0xa9
@@ -252,7 +251,7 @@ enum
 
 typedef struct __attribute__((packed))
 {
-    u8 val[VK_EXT_LEN];
+    unsigned char val[VK_EXT_LEN];
 } vk_ext_t;
 
 // multi-byte keycode for media keys, cannot used directly in c code..for reference
@@ -263,7 +262,7 @@ typedef struct __attribute__((packed))
 #define VK_W_SRCH_V    {0x21, 0x02}
 #define VK_HOME_V      {0x23, 0x02}
 #define VK_W_BACK_V    {0x24, 0x02}
-#define VK_W_FORWRD_V  {0x25, 0x02}
+#define VK_W_FORWARD_V {0x25, 0x02}
 #define VK_W_STOP_V    {0x26, 0x02}
 #define VK_W_REFRESH_V {0x27, 0x02}
 // favorite

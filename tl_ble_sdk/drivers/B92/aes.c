@@ -336,7 +336,8 @@ unsigned char aes_rpa_match(unsigned char *irk, unsigned char irk_len, unsigned 
 
     reg_aes_rpase_cnt |= FLD_AES_RPASE_START;
 
-    while (BIT(30) != (reg_aes_hash_status & FLD_AES_RPASE_STA));
+    while (BIT(30) != (reg_aes_hash_status & FLD_AES_RPASE_STA))
+        ;
 
     unsigned int match_status = reg_aes_hash_status;
 

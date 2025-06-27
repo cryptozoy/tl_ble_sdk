@@ -72,11 +72,19 @@ void myudb_usb_send_response(void)
         n = 8;
     }
     myudb.response_len -= n;
+#if(MCU_CORE_TYPE != MCU_CORE_TL322X)
     usbhw_reset_ctrl_ep_ptr();
     while (n-- > 0) {
         usbhw_write_ctrl_ep_data(*myudb.response);
         ++myudb.response;
     }
+#else
+    usb1hw_reset_ctrl_ep_ptr();
+    while (n-- > 0) {
+        usb1hw_write_ctrl_ep_data(*myudb.response);
+        ++myudb.response;
+    }
+#endif
 }
 
 void myudb_usb_prepare_desc_data(void)
@@ -133,7 +141,11 @@ void myudb_usb_handle_in_class_intf_req(void)
     u8 property = control_request.bRequest;
     switch (property) {
     case 0x00:
+#if(MCU_CORE_TYPE != MCU_CORE_TL322X)
         usbhw_write_ctrl_ep_data(0x00);
+#else
+        usb1hw_write_ctrl_ep_data(0x00);
+#endif
         break;
     default:
         myudb.stall = 1;
@@ -145,8 +157,11 @@ void myudb_usb_handle_request(u8 data_request)
 {
     u8 bmRequestType = control_request.bmRequestType;
     u8 bRequest      = control_request.bRequest;
-
+#if(MCU_CORE_TYPE != MCU_CORE_TL322X)
     usbhw_reset_ctrl_ep_ptr();
+#else
+    usb1hw_reset_ctrl_ep_ptr();
+#endif
     switch (bmRequestType) {
     case (REQDIR_DEVICETOHOST | REQTYPE_STANDARD | REQREC_DEVICE):
         if (REQ_GetDescriptor == bRequest) {
@@ -162,9 +177,15 @@ void myudb_usb_handle_request(u8 data_request)
     case (REQDIR_DEVICETOHOST | REQTYPE_VENDOR | REQREC_INTERFACE):
         if (MYUDB_USB_IRQ_SETUP_REQ == data_request) {
             if (0xc0 == bRequest) { // Get board version
+#if(MCU_CORE_TYPE != MCU_CORE_TL322X)
                 usbhw_reset_ctrl_ep_ptr();
                 usbhw_write_ctrl_ep_data(myudb.id);
                 usbhw_write_ctrl_ep_data(myudb.id >> 8);
+#else
+                usb1hw_reset_ctrl_ep_ptr();
+                usb1hw_write_ctrl_ep_data(myudb.id);
+                usb1hw_write_ctrl_ep_data(myudb.id >> 8);
+#endif
             } else {
                 myudb.stall = 1;
             }
@@ -173,6 +194,7 @@ void myudb_usb_handle_request(u8 data_request)
     case (REQDIR_DEVICETOHOST | REQTYPE_VENDOR | REQREC_DEVICE): // 0xc0
         if (MYUDB_USB_IRQ_SETUP_REQ == data_request) {
             if (0xc0 == bRequest) {                              // Get board version
+#if(MCU_CORE_TYPE != MCU_CORE_TL322X)
                 usbhw_reset_ctrl_ep_ptr();
                 usbhw_write_ctrl_ep_data(0x40);
                 usbhw_write_ctrl_ep_data(0x25);
@@ -182,9 +204,25 @@ void myudb_usb_handle_request(u8 data_request)
                 usbhw_write_ctrl_ep_data(0x00);
                 usbhw_write_ctrl_ep_data(0x01);
                 usbhw_write_ctrl_ep_data(0x00);
+#else
+                usb1hw_reset_ctrl_ep_ptr();
+                usb1hw_write_ctrl_ep_data(0x40);
+                usb1hw_write_ctrl_ep_data(0x25);
+                usb1hw_write_ctrl_ep_data(0x40);
+                usb1hw_write_ctrl_ep_data(0x05);
+                usb1hw_write_ctrl_ep_data(0x03);
+                usb1hw_write_ctrl_ep_data(0x00);
+                usb1hw_write_ctrl_ep_data(0x01);
+                usb1hw_write_ctrl_ep_data(0x00);
+#endif
             } else if (0xc6 == bRequest) { //
+#if(MCU_CORE_TYPE != MCU_CORE_TL322X)
                 usbhw_reset_ctrl_ep_ptr();
                 usbhw_write_ctrl_ep_data(0x04);
+#else
+                usb1hw_reset_ctrl_ep_ptr();
+                usb1hw_write_ctrl_ep_data(0x04);
+#endif
             } else {
                 myudb.stall = 1;
             }
@@ -203,6 +241,7 @@ void myudb_usb_handle_request(u8 data_request)
 
 void myudb_usb_handle_ctl_ep_setup(void)
 {
+#if(MCU_CORE_TYPE != MCU_CORE_TL322X)
     usbhw_reset_ctrl_ep_ptr();
     control_request.bmRequestType = usbhw_read_ctrl_ep_data();
     control_request.bRequest      = usbhw_read_ctrl_ep_data();
@@ -216,10 +255,26 @@ void myudb_usb_handle_ctl_ep_setup(void)
     } else {
         usbhw_write_ctrl_ep_ctrl(FLD_EP_DAT_ACK);
     }
+#else
+    usb1hw_reset_ctrl_ep_ptr();
+    control_request.bmRequestType = usb1hw_read_ctrl_ep_data();
+    control_request.bRequest      = usb1hw_read_ctrl_ep_data();
+    control_request.wValue        = usb1hw_read_ctrl_ep_u16();
+    control_request.wIndex        = usb1hw_read_ctrl_ep_u16();
+    control_request.wLength       = usb1hw_read_ctrl_ep_u16();
+    myudb.stall                   = 0;
+    myudb_usb_handle_request(MYUDB_USB_IRQ_SETUP_REQ);
+    if (myudb.stall ) {
+      usb1hw_write_ctrl_ep_ctrl(FLD_USB1_EP_DAT_STALL);
+    } else {
+      usb1hw_write_ctrl_ep_ctrl(FLD_USB1_EP_DAT_ACK);
+    }
+#endif
 }
 
 void myudb_usb_handle_ctl_ep_data(void)
 {
+#if(MCU_CORE_TYPE != MCU_CORE_TL322X)
     usbhw_reset_ctrl_ep_ptr();
     myudb.stall = 0;
     myudb_usb_handle_request(MYUDB_USB_IRQ_DATA_REQ);
@@ -228,15 +283,33 @@ void myudb_usb_handle_ctl_ep_data(void)
     } else {
         usbhw_write_ctrl_ep_ctrl(FLD_EP_DAT_ACK);
     }
+#else
+    usb1hw_reset_ctrl_ep_ptr();
+    myudb.stall = 0;
+    myudb_usb_handle_request(MYUDB_USB_IRQ_DATA_REQ);
+    if (myudb.stall) {
+        usb1hw_write_ctrl_ep_ctrl(FLD_USB1_EP_DAT_STALL);
+    } else {
+        usb1hw_write_ctrl_ep_ctrl(FLD_USB1_EP_DAT_ACK);
+    }
+#endif
 }
 
 void myudb_usb_handle_ctl_ep_status(void)
 {
+#if(MCU_CORE_TYPE != MCU_CORE_TL322X)
     if (myudb.stall) {
         usbhw_write_ctrl_ep_ctrl(FLD_EP_STA_STALL);
     } else {
         usbhw_write_ctrl_ep_ctrl(FLD_EP_STA_ACK);
     }
+#else
+    if (myudb.stall) {
+        usb1hw_write_ctrl_ep_ctrl(FLD_USB1_EP_STA_STALL);
+    } else {
+        usb1hw_write_ctrl_ep_ctrl(FLD_USB1_EP_STA_ACK);
+    }
+#endif
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -252,8 +325,8 @@ _attribute_ram_code_ void usb_send_status_pkt(u8 status, u8 buffer_num, u8 *pkt,
     //  if (myudb_print_fifo_full()) return;        //skip if overflow
 
     u8 *p = myudb_print_fifo->p + (myudb_print_fifo->wptr & (myudb_print_fifo->num - 1)) * myudb_print_fifo->size;
-    if (len > 272) {
-        len = 272;
+    if (len > (myudb_print_fifo->size - 8)) {
+        len = (myudb_print_fifo->size - 8);
     }
     *p++ = len + 2;
     *p++ = (len + 2) >> 8;
@@ -367,10 +440,15 @@ _attribute_ram_code_ void myudb_to_usb(void)
 {
     static u16 len = 0;
     static u8 *p   = 0;
-
+#if (MCU_CORE_TYPE != MCU_CORE_TL322X)
     if (usbhw_is_ep_busy(MYUDB_EDP_IN_HCI)) {
         return;
     }
+#else
+    if (usb1hw_is_ep_busy(MYUDB_EDP_IN_HCI)) {
+        return;
+    }
+#endif
     if (!p && (myudb_print_fifo->wptr != myudb_print_fifo->rptr)) //first packet
     {
         p = myudb_print_fifo->p + (myudb_print_fifo->rptr++ & (myudb_print_fifo->num - 1)) * myudb_print_fifo->size;
@@ -381,11 +459,17 @@ _attribute_ram_code_ void myudb_to_usb(void)
     }
     if (p) {
         int n = len < 64 ? len : 64;
+#if (MCU_CORE_TYPE != MCU_CORE_TL322X)
         usbhw_reset_ep_ptr(MYUDB_EDP_IN_HCI);
         for (int i = 0; i < n; i++) {
             usbhw_write_ep_data(MYUDB_EDP_IN_HCI, *p++);
         }
         usbhw_data_ep_ack(MYUDB_EDP_IN_HCI);
+#else
+        usb1hw_reset_ep_ptr(MYUDB_EDP_IN_HCI);
+        usb1hw_write_ep_data(MYUDB_EDP_IN_HCI, p, n);
+        usb1hw_data_ep_ack(MYUDB_EDP_IN_HCI);
+#endif
         len -= n;
         if (n < 64) {
             p = 0;
@@ -453,6 +537,7 @@ int usb_send_str_int(char *str, int w)
 
 _attribute_ram_code_ int myudb_usb_get_packet(u8 *p)
 {
+#if (MCU_CORE_TYPE != MCU_CORE_TL322X)
     if (reg_usb_ep_irq_status & USB_ENDPOINT_BULK_OUT_FLAG) {
         //clear interrupt flag
         reg_usb_ep_irq_status = USB_ENDPOINT_BULK_OUT_FLAG;
@@ -469,6 +554,25 @@ _attribute_ram_code_ int myudb_usb_get_packet(u8 *p)
             return n;
         }
     }
+#else
+    if (reg_usb1_ep_irq_status & USB_ENDPOINT_BULK_OUT_FLAG) {
+        //clear interrupt flag
+        reg_usb1_ep_irq_status = USB_ENDPOINT_BULK_OUT_FLAG;
+
+        // read data
+        int n = usb1hw_get_ep_ptr(MYUDB_EDP_OUT_HCI);
+        usb1hw_reset_ep_ptr(MYUDB_EDP_OUT_HCI);
+        usb1hw_read_ep_data(MYUDB_EDP_OUT_HCI, &p[myudb.cmd_len], n);
+        usb1hw_data_ep_ack(MYUDB_EDP_OUT_HCI);
+//        tlkapi_send_string_data(0, "usb rcv cmd", &p[myudb.cmd_len], n);
+        myudb.cmd_len +=n;
+        if (n < 64) {
+            n   = myudb.cmd_len;
+            myudb.cmd_len = 0;
+            return n;
+        }
+    }
+#endif
     return 0;
 }
 
@@ -496,7 +600,6 @@ _attribute_ram_code_ int myudb_mem_cmd(u8 *p, int nbyte)
     u8  rsp[280];
 
     int ret = 0;
-
     //////////////////////////  Memory Read ////////////////////////////////////
     if (cmd == 0x28 && len >= 8) {
         usb_send_status_pkt(0x81, 8, p, 12);
@@ -519,10 +622,9 @@ _attribute_ram_code_ int myudb_mem_cmd(u8 *p, int nbyte)
         {
             flash_read_page(adr, n, rsp + 6);
         }
-
         usb_send_status_pkt(0x82, 8, rsp, n + 6);
     }
-    //////////////////////////  Memory Write ////////////////////////////////////
+    ////////////////////////  Memory Write ////////////////////////////////////
     else if (cmd == 0x2a && len > 6) {
         usb_send_status_pkt(0x81, 8, p, 12);
         rsp[0] = 0x2b;
@@ -563,7 +665,7 @@ _attribute_ram_code_ int myudb_mem_cmd(u8 *p, int nbyte)
                 }
             } else {
     //flash_erase_chip ();
-    #if (MCU_CORE_TYPE == MCU_CORE_TL721X)
+    #if (MCU_CORE_TYPE == MCU_CORE_TL721X) || (MCU_CORE_TYPE == MCU_CORE_TL322X)
                 unsigned int flash_mid = flash_read_mid_with_device_num(BLE_EXT_DRIVER_SLAVE_NUM);
     #else
                 unsigned int flash_mid = flash_read_mid();
@@ -623,6 +725,7 @@ _attribute_ram_code_ int myudb_hci_cmd_from_usb(void)
 void udb_usb_handle_irq(void)
 {
     if (1) { //  do nothing when in suspend. Maybe not unnecessary
+#if (MCU_CORE_TYPE != MCU_CORE_TL322X)
         u32 irq = usbhw_get_ctrl_ep_irq();
         if (irq & FLD_CTRL_EP_IRQ_SETUP) {
             usbhw_clr_ctrl_ep_irq(FLD_CTRL_EP_IRQ_SETUP);
@@ -643,6 +746,30 @@ void udb_usb_handle_irq(void)
             usbhw_clr_irq_status(USB_IRQ_RESET_STATUS); //Clear USB reset flag
             myudb_usb_bulkout_ready();
         }
+#else
+        unsigned int irq = usb1hw_get_ctrl_ep_irq();
+         if (irq & FLD_USB1_CTRL_EP_IRQ_SETUP) {
+             usb1hw_clr_ctrl_ep_irq(FLD_USB1_CTRL_EP_IRQ_SETUP);
+             myudb_usb_handle_ctl_ep_setup();
+             if (!myudb.tick_sync) {
+                 myudb.tick_sync = clock_time() | 1;
+             }
+         }
+         if (irq & FLD_USB1_CTRL_EP_IRQ_DATA) {
+             usb1hw_clr_ctrl_ep_irq(FLD_USB1_CTRL_EP_IRQ_DATA);
+             myudb_usb_handle_ctl_ep_data();
+         }
+         if (irq & FLD_USB1_CTRL_EP_IRQ_STA) {
+             usb1hw_clr_ctrl_ep_irq(FLD_USB1_CTRL_EP_IRQ_STA);
+             myudb_usb_handle_ctl_ep_status();
+         }
+
+         if (usb1hw_get_irq_status(USB1_IRQ_RESET_STATUS)) {
+             usb1hw_clr_irq_status(USB1_IRQ_RESET_STATUS); /* clear USB reset flag */
+             myudb_usb_bulkout_ready();
+         }
+
+#endif
         myudb.stall = 0;
     }
 
@@ -664,7 +791,11 @@ void udb_usb_handle_irq(void)
 
 void myudb_usb_bulkout_ready(void)
 {
+#if (MCU_CORE_TYPE != MCU_CORE_TL322X)
     reg_usb_ep_ctrl(MYUDB_EDP_OUT_HCI) = FLD_EP_DAT_ACK;
+#else
+    reg_usb1_ep_ctrl(MYUDB_EDP_OUT_HCI) = FLD_USB1_EP_DAT_ACK;
+#endif
 }
 
 void myudb_usb_init(u16 id, void *p_print)
@@ -679,6 +810,12 @@ void myudb_usb_init(u16 id, void *p_print)
     myudb.id = id;
 
     /*!< usb init */
+    #if (MCU_CORE_TYPE == MCU_CORE_TL751X)
+    //enable USB manual interrupt(in auto interrupt mode,USB device would be USB printer device)
+    usbhw_init();
+    /* set control endpoint size */
+    usbhw_set_ctrl_ep_size(SIZE_64_BYTE);
+    #endif
 
     #if (MCU_CORE_TYPE == MCU_CORE_TL321X || MCU_CORE_TYPE == MCU_CORE_TL721X)
     usbhw_init();
@@ -686,12 +823,16 @@ void myudb_usb_init(u16 id, void *p_print)
     usbhw_set_ctrl_ep_size(SIZE_64_BYTE);
     #endif
 
-    #if (MCU_CORE_TYPE == MCU_CORE_TL321X)
+    #if (MCU_CORE_TYPE == MCU_CORE_TL321X || MCU_CORE_TYPE == MCU_CORE_TL751X)
     usbhw_enable_hw_feature(FLD_USB_AUTO_HALT_CLR | FLD_USB_AUTO_HALT_STALL);
     #endif
 
+    #if (MCU_CORE_TYPE == MCU_CORE_TL322X)
+    usb1hw_init();
+    #endif
 
     /*!< usb endpoint init */
+#if (MCU_CORE_TYPE != MCU_CORE_TL322X)
     /* set data endpoint buffer size and addr */
     usbhw_set_eps_max_size(MYUDB_EDP_INOUT_SIZE); /* max 64 */
     usbhw_set_ep_addr(MYUDB_EDP_IN_VCD, 0);
@@ -703,9 +844,23 @@ void myudb_usb_init(u16 id, void *p_print)
     reg_usb_mdev &= ~BIT(3);
 
     usbhw_enable_manual_interrupt(FLD_CTRL_EP_AUTO_STD | FLD_CTRL_EP_AUTO_DESC);
-
     usbhw_data_ep_ack(MYUDB_EDP_OUT_HCI);
     usbhw_data_ep_ack(MYUDB_EDP_IN_HCI); //add log 1st log info
+#else
+    reg_usb1_ep_max_size    = (128 >> 2);
+    reg_usb1_ep8_send_thres = 0x40;
+    usb1hw_set_ep_addr(MYUDB_EDP_IN_HCI, 128);
+    usb1hw_set_ep_addr(MYUDB_EDP_OUT_HCI, 192);
+    usb1hw_set_ep_addr(MYUDB_EDP_IN_VCD, 0);
+    reg_usb1_ep8_fifo_mode = 1;
+    reg_usb1_mdev &= ~BIT(3); /* vendor command: bRequest[7] = 0. */
+    usb1hw_enable_manual_interrupt(FLD_USB1_CTRL_EP_AUTO_STD | FLD_USB1_CTRL_EP_AUTO_DESC);
+    reg_usb1_ep_ctrl(MYUDB_EDP_OUT_HCI) = FLD_USB1_EP_DAT_ACK;
+    reg_usb1_ep_ctrl(MYUDB_EDP_IN_HCI) = FLD_USB1_EP_DAT_ACK;
+
+    usb1hw_set_eps_en(BIT(MYUDB_EDP_IN_HCI) | BIT(MYUDB_EDP_OUT_HCI) | BIT(MYUDB_EDP_IN_VCD & 0x07));
+#endif
+
 }
 
 

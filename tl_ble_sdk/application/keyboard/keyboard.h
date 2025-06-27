@@ -1,12 +1,12 @@
 /********************************************************************************************************
  * @file    keyboard.h
  *
- * @brief   This is the header file for BLE SDK
+ * @brief   This is the header file for Telink RISC-V MCU
  *
- * @author  BLE GROUP
- * @date    06,2022
+ * @author  Driver Group
+ * @date    2019
  *
- * @par     Copyright (c) 2022, Telink Semiconductor (Shanghai) Co., Ltd. ("TELINK")
+ * @par     Copyright (c) 2019, Telink Semiconductor (Shanghai) Co., Ltd. ("TELINK")
  *
  *          Licensed under the Apache License, Version 2.0 (the "License");
  *          you may not use this file except in compliance with the License.
@@ -23,9 +23,9 @@
  *******************************************************************************************************/
 #pragma once
 
-#include "drivers.h"
+#include "../app/usbkb.h"
 
-#define KB_RETURN_KEY_MAX         6
+/*#define KB_RETURN_KEY_MAX 6*/
 
 #define KB_NUMLOCK_STATUS_INVALID BIT(7)
 #define KB_NUMLOCK_STATUS_POWERON BIT(15)
@@ -52,16 +52,7 @@ typedef struct
     unsigned int  key_change_tick;
 } repeatKey_t;
 
-extern repeatKey_t repeat_key;
-
-typedef struct
-{
-    unsigned char cnt;
-    unsigned char ctrl_key;
-    unsigned char keycode[KB_RETURN_KEY_MAX];
-    //unsigned char padding[2]; //  for  32 bit padding,  if KB_RETURN_KEY_MAX change,  this should be changed
-} kb_data_t;
-
+extern repeatKey_t   repeat_key;
 extern kb_data_t     kb_event;
 extern kb_data_t     kb_event_cache;
 extern unsigned char deepback_key_state;
@@ -77,6 +68,17 @@ extern unsigned int  deepback_key_tick;
     #define STUCK_KEY_PROCESS_ENABLE 0
 #endif
 
+
+///**
+//* @brief This function read a pin's cache from the buffer.
+//* @param[in] pin - the pin needs to read.
+//* @param[in] p - the buffer from which to read the pin's level.
+//* @return the state of the pin.
+//*/
+//static inline unsigned int gpio_read_cache(gpio_pin_e pin, unsigned char *p)
+//{
+//    return p[pin >> 8] & (pin & 0xff);
+//}
 
 int kb_is_data_same(kb_data_t *a, kb_data_t *b);
 

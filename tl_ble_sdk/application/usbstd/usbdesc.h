@@ -1,12 +1,12 @@
 /********************************************************************************************************
  * @file    usbdesc.h
  *
- * @brief   This is the header file for BLE SDK
+ * @brief   This is the header file for Telink RISC-V MCU
  *
- * @author  BLE GROUP
- * @date    06,2022
+ * @author  Driver Group
+ * @date    2019
  *
- * @par     Copyright (c) 2022, Telink Semiconductor (Shanghai) Co., Ltd. ("TELINK")
+ * @par     Copyright (c) 2019, Telink Semiconductor (Shanghai) Co., Ltd. ("TELINK")
  *
  *          Licensed under the Apache License, Version 2.0 (the "License");
  *          you may not use this file except in compliance with the License.
@@ -22,26 +22,26 @@
  *
  *******************************************************************************************************/
 #pragma once
-
-#include <application/usbstd/AudioClassCommon.h>
-#include <application/usbstd/CDCClassCommon.h>
-#include <application/usbstd/HIDClassCommon.h>
-#include <application/usbstd/PrinterClassCommon.h>
-#include <application/usbstd/USBController.h>
-
 /* Enable C linkage for C++ Compilers: */
 #if defined(__cplusplus)
 extern "C"
 {
 #endif
+#include "AudioClassCommon.h"
+#include "CDCClassCommon.h"
+#include "HIDClassCommon.h"
+#include "PrinterClassCommon.h"
+#include "MassStorageClassCommon.h"
+#include "USBController.h"
+#include "USBController.h"
+#include "StdRequestType.h"
+#include "stdDescriptors.h"
+#include "tl_common.h"
+#include "usbdesc.h"
 
     // interface id
     typedef enum
     {
-
-#if AUDIO_HOGP
-        USB_INTF_AUDIO_HOGP, //Must place in this position
-#endif
 
 #if USB_CDC_ENABLE
         USB_INTF_CDC_CCI,
@@ -72,18 +72,22 @@ extern "C"
 #if USB_SOMATIC_ENABLE
         USB_INTF_SOMATIC,
 #endif
+#if USB_MASS_STORAGE_ENABLE
+        USB_INTF_MASS_STORAGE,
+#endif
         USB_INTF_MAX,
     } USB_INTF_ID_E;
 
-    //enum {
-    //  USB_SPEAKER_FEATURE_UNIT = USB_SPEAKER_ENABLE,
-    //  USB_MIC_FEATURE_UNIT = USB_MIC_ENABLE,
-    //};
+    enum
+    {
+        USB_SPEAKER_FEATURE_UNIT = USB_SPEAKER_ENABLE,
+        USB_MIC_FEATURE_UNIT     = USB_MIC_ENABLE,
+    };
 
     enum
     {
         USB_SPEAKER_INPUT_TERMINAL_ID = 1,
-        USB_SPEAKER_FEATURE_UNIT_ID,
+        USB_SPEAKER_FEATURE_UNIT_ID, //
         USB_SPEAKER_OUTPUT_TERMINAL_ID,
         USB_MIC_INPUT_TERMINAL_ID,
         USB_MIC_FEATURE_UNIT_ID,
@@ -99,12 +103,13 @@ extern "C"
     };
 
 #if (USB_MIC_ENABLE)
-    #define USB_MIC_CHANNELS_LEN (MIC_CHANNEL_COUNT * (MIC_SAMPLE_RATE * MIC_RESOLUTION_BIT / 1000 / 8))
+    #define USB_MIC_CHANNELS_LEN (MIC_CHANNEL_COUNT * (MIC_SAMPLE_RATE * MIC_RESOLUTION_BIT / 1000 / 8)) //=20
 #endif
 
 #if (USB_SPEAKER_ENABLE)
-    #define USB_SPK_CHANNELS_LEN (SPK_CHANNEL_COUNT * (SPK_SAMPLE_RATE * SPK_RESOLUTION_BIT / 1000 / 8))
+    #define USB_SPK_CHANNELS_LEN (SPK_CHANNEL_COUNT * (SPEAKER_SAMPLE_RATE * SPK_RESOLUTION_BIT / 1000 / 8))
 #endif
+
 
     enum
     {
@@ -232,7 +237,9 @@ extern "C"
 
 #if (USB_CDC_ENABLE)
     /** Endpoint number of the CDC device-to-host notification IN endpoint. */
-    #define CDC_NOTIFICATION_EPNUM 3
+    #ifndef CDC_NOTIFICATION_EPNUM
+        #define CDC_NOTIFICATION_EPNUM 2
+    #endif
 
     /** Endpoint number of the CDC device-to-host data IN endpoint. */
     #ifndef CDC_TX_EPNUM
@@ -240,41 +247,51 @@ extern "C"
     #endif
 
     /** Endpoint number of the CDC host-to-device data OUT endpoint. */
-    #define CDC_RX_EPNUM 5 ///4
+    #ifndef CDC_RX_EPNUM
+        #define CDC_RX_EPNUM 5 ///4
+    #endif
 
     /** Size in bytes of the CDC device-to-host notification IN endpoint. */
     #define CDC_NOTIFICATION_EPSIZE 8
 
     /** Size in bytes of the CDC data IN and OUT endpoints. */
     #define CDC_TXRX_EPSIZE 64
-#endif /* USB_CDC_ENABLE */
+#endif
 
-    typedef struct __attribute__((packed))
+#if USB_MASS_STORAGE_ENABLE
+    /** Endpoint number of the device-to-host data IN endpoint. */
+    #define MASS_STORAGE_IN_EPNUM USB_EDP_MS_IN
+    /** Endpoint number of the host-to-device data OUT endpoint. */
+    #define MASS_STORAGE_OUT_EPNUM USB_EDP_MS_OUT
+    /** Size in bytes of the  data IN and OUT endpoints. */
+    #define MASS_STORAGE_TXRX_EPSIZE 64
+#endif
+    typedef struct
     {
         USB_HID_Descriptor_HID_t  audio_hid;
         USB_Descriptor_Endpoint_t audio_in_endpoint;
-    } USB_HID_Descriptor_HID_Audio_t;
+    } __attribute__((packed)) USB_HID_Descriptor_HID_Audio_t;
 
-    typedef struct __attribute__((packed))
+    typedef struct
     {
         USB_HID_Descriptor_HID_t  mouse_hid;
         USB_Descriptor_Endpoint_t mouse_in_endpoint;
-    } USB_HID_Descriptor_HID_Mouse_t;
+    } __attribute__((packed)) USB_HID_Descriptor_HID_Mouse_t;
 
-    typedef struct __attribute__((packed))
+    typedef struct
     {
         USB_HID_Descriptor_HID_t  keyboard_hid;
         USB_Descriptor_Endpoint_t keyboard_in_endpoint;
-    } USB_HID_Descriptor_HID_Keyboard_t;
+    } __attribute__((packed)) USB_HID_Descriptor_HID_Keyboard_t;
 
-    typedef struct __attribute__((packed))
+    typedef struct
     {
         USB_HID_Descriptor_HID_t  somatic_hid;
         USB_Descriptor_Endpoint_t somatic_in_endpoint;
         USB_Descriptor_Endpoint_t somatic_out_endpoint;
-    } USB_HID_Descriptor_HID_Somatic_t;
+    } __attribute__((packed)) USB_HID_Descriptor_HID_Somatic_t;
 
-    typedef struct __attribute__((packed))
+    typedef struct
     {
         // CDC Control Interface
         USB_CDC_Descriptor_FunctionalHeader_t CDC_Functional_Header;
@@ -287,21 +304,16 @@ extern "C"
         USB_Descriptor_Interface_t CDC_DCI_Interface;
         USB_Descriptor_Endpoint_t  CDC_DataOutEndpoint;
         USB_Descriptor_Endpoint_t  CDC_DataInEndpoint;
-    } USB_CDC_Descriptor_t;
+    } __attribute__((packed)) USB_CDC_Descriptor_t;
 
-    typedef struct __attribute__((packed))
+    typedef struct
     {
         USB_Descriptor_Configuration_Hdr_t Config;
 
-#if AUDIO_HOGP
-        USB_Descriptor_Interface_t        audio_hogp_interface;
-        USB_HID_Descriptor_HID_Keyboard_t audio_hogp_descriptor;
-#endif
-
 #if (USB_CDC_ENABLE)
-    #if DESC_IAD_ENABLE
-        // IAD0
-        USB_Descriptor_Interface_Association_t cdc_iad;
+    #if 0
+    // IAD0
+    USB_Descriptor_Interface_Association_t cdc_iad;
     #endif
         // CDC Interface
         USB_Descriptor_Interface_t cdc_interface;
@@ -317,9 +329,6 @@ extern "C"
     #endif
 #endif
 #if (USB_MIC_ENABLE || USB_SPEAKER_ENABLE)
-    #if DESC_IAD_ENABLE
-        USB_Descriptor_Interface_Association_t audio_iad;
-    #endif
         USB_Descriptor_Interface_t audio_control_interface;
     #if (USB_MIC_ENABLE && USB_SPEAKER_ENABLE)
         USB_Audio_Descriptor_Interface_AC_TL_t audio_control_interface_ac;
@@ -364,17 +373,11 @@ extern "C"
         USB_HID_Descriptor_HID_Audio_t audio_descriptor;
 #endif
 #if (USB_KEYBOARD_ENABLE)
-    #if DESC_IAD_ENABLE
-        USB_Descriptor_Interface_Association_t keyboard_iad;
-    #endif
         // Keyboard HID Interface
         USB_Descriptor_Interface_t        keyboard_interface;
         USB_HID_Descriptor_HID_Keyboard_t keyboard_descriptor;
 #endif
 #if (USB_MOUSE_ENABLE)
-    #if DESC_IAD_ENABLE
-        USB_Descriptor_Interface_Association_t mouse_iad;
-    #endif
         // Mouse HID Interface
         USB_Descriptor_Interface_t     mouse_interface;
         USB_HID_Descriptor_HID_Mouse_t mouse_descriptor;
@@ -384,59 +387,65 @@ extern "C"
         USB_Descriptor_Interface_t       somatic_interface;
         USB_HID_Descriptor_HID_Somatic_t somatic_descriptor;
 #endif
-    } USB_Descriptor_Configuration_t;
+#if (USB_MASS_STORAGE_ENABLE)
+        USB_Descriptor_Interface_t disk_interface;
+        USB_Descriptor_Endpoint_t  disk_in_endpoint;
+        USB_Descriptor_Endpoint_t  disk_out_endpoint;
+#endif
 
-    typedef struct __attribute__((packed))
+    } __attribute__((packed)) USB_Descriptor_Configuration_t;
+
+    typedef struct
     {
-        u32 dwLength;    // length, in bytes, of the complete extended compat ID descriptor
-        u16 bcdVersion;  // BCD The descriptors version number, in binary coded decimal (BCD) format
-        u16 wIndex;      // An index that identifies the particular OS feature descriptor
-        u8  bCount;      //The number of custom property sections
-        u8  RESERVED[7]; //Reserved
+        unsigned int   dwLength;    // length, in bytes, of the complete extended compat ID descriptor
+        unsigned short bcdVersion;  // BCD The descriptors version number, in binary coded decimal (BCD) format
+        unsigned short wIndex;      // An index that identifies the particular OS feature descriptor
+        unsigned char  bCount;      //The number of custom property sections
+        unsigned char  RESERVED[7]; //Reserved
 
-    } USB_MS_OS_compatID_Header_t;
+    } __attribute__((packed)) USB_MS_OS_compatID_Header_t;
 
-    typedef struct __attribute__((packed))
+    typedef struct
     {
-        u8 bFirstInterfaceNumber; //The interface or function number
-        u8 RESERVED1;             //Reserved
-        u8 compatibleID[8];       //The functions compatible ID
-        u8 subCompatibleID[8];    //The functions subcompatible ID
-        u8 RESERVED2[6];          //Reserved
+        unsigned char bFirstInterfaceNumber; //The interface or function number
+        unsigned char RESERVED1;             //Reserved
+        unsigned char compatibleID[8];       //The functions compatible ID
+        unsigned char subCompatibleID[8];    //The functions subcompatible ID
+        unsigned char RESERVED2[6];          //Reserved
 
-    } USB_MS_OS_compatID_Function_t;
+    } __attribute__((packed)) USB_MS_OS_compatID_Function_t;
 
-    typedef struct __attribute__((packed))
+    typedef struct
     {
         USB_MS_OS_compatID_Header_t   compatID_Header;
         USB_MS_OS_compatID_Function_t compatID_Function[];
-    } USB_MS_OS_compatID_t;
+    } __attribute__((packed)) USB_MS_OS_compatID_t;
 
-    u8 *usbdesc_get_language(void);
-    u8 *usbdesc_get_vendor(void);
-    u8 *usbdesc_get_product(void);
-    u8 *usbdesc_get_serial(void);
-    u8 *usbdesc_get_device(void);
-    u8 *usbdesc_get_configuration(void);
+    unsigned char *usbdesc_get_language(void);
+    unsigned char *usbdesc_get_vendor(void);
+    unsigned char *usbdesc_get_product(void);
+    unsigned char *usbdesc_get_serial(void);
+    unsigned char *usbdesc_get_device(void);
+    unsigned char *usbdesc_get_configuration(void);
 
 #if (USB_MIC_ENABLE || USB_SPEAKER_ENABLE)
-    u8 *usbdesc_get_audio(void);
+    unsigned char *usbdesc_get_audio(void);
 #endif
 
 #if (USB_MOUSE_ENABLE)
-    u8 *usbdesc_get_mouse(void);
+    unsigned char *usbdesc_get_mouse(void);
 #endif
 
 #if (USB_KEYBOARD_ENABLE)
-    u8 *usbdesc_get_keyboard(void);
+    unsigned char *usbdesc_get_keyboard(void);
 #endif
 
 #if (USB_SOMATIC_ENABLE)
-    u8 *usbdesc_get_somatic(void);
+    unsigned char *usbdesc_get_somatic(void);
 #endif
 
-#if (USB_CRC_ENABLE)
-    u8 *usbdesc_get_cdc(void);
+#if (USB_CDC_ENABLE)
+    unsigned char *usbdesc_get_cdc(void);
 #endif
 
 /* Disable C linkage for C++ Compilers: */

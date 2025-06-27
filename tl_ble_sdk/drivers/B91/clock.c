@@ -51,7 +51,7 @@ sys_clk_t sys_clk = {
     .mspi_clk = 24,
 };
 _attribute_data_retention_sec_ unsigned char tl_24mrc_cal;
-clk_32k_type_e                               g_clk_32k_src;
+_attribute_data_retention_sec_ clk_32k_type_e g_clk_32k_src;
 
 /**********************************************************************************************************************
  *                                              local variable                                                     *
@@ -145,7 +145,7 @@ unsigned char clock_kick_32k_xtal(unsigned char xtal_times)
 }
 
 /**
- * @brief     This function performs to select 24M as the system clock source.
+ * @brief     This function serves to calibrate 24M RC.
  *            24M RC is inaccurate, and it is greatly affected by temperature, if need use it so real-time calibration is required
  *            The 24M RC needs to be calibrated before the pm_sleep_wakeup function,
  *            because this clock will be used to kick 24m xtal start after wake up,
@@ -161,7 +161,8 @@ void clock_cal_24m_rc(void)
 
     analog_write_reg8(0xc7, 0x0e);
     analog_write_reg8(0xc7, 0x0f);
-    while ((analog_read_reg8(0xcf) & 0x80) == 0);
+    while ((analog_read_reg8(0xcf) & 0x80) == 0)
+        ;
     unsigned char cap = analog_read_reg8(0xcb);
     analog_write_reg8(0x52, cap); //write 24m cap into manual register
 
@@ -172,7 +173,7 @@ void clock_cal_24m_rc(void)
 }
 
 /**
- * @brief     This function performs to select 32K as the system clock source.
+ * @brief     This function serves to calibrate 32K RC.
  * @return    none.
  */
 void clock_cal_32k_rc(void)
@@ -191,14 +192,15 @@ void clock_cal_32k_rc(void)
 }
 
 /**
- * @brief  This function serves to set the 32k tick.
+ * @brief  This function serves to set the 32k tick for sleep.
  * @param  tick - the value of to be set to 32k.
  * @return none.
  */
 _attribute_ram_code_sec_noinline_ void clock_set_32k_tick(unsigned int tick)
 {
     reg_system_ctrl |= FLD_SYSTEM_32K_WR_EN; //r_32k_wr = 1;
-    while (reg_system_st & FLD_SYSTEM_RD_BUSY);
+    while (reg_system_st & FLD_SYSTEM_RD_BUSY)
+        ;
     reg_system_timer_set_32k = tick;
 
     reg_system_st = FLD_SYSTEM_CMD_SYNC; //cmd_sync = 1,trig write
@@ -219,12 +221,13 @@ _attribute_ram_code_sec_noinline_ void clock_set_32k_tick(unsigned int tick)
     __asm__("nop");
     __asm__("nop");
     __asm__("nop");
-    while (reg_system_st & FLD_SYSTEM_CMD_SYNC); //wait wr_busy = 0
+    while (reg_system_st & FLD_SYSTEM_CMD_SYNC)
+        ; //wait wr_busy = 0
 }
 
 /**
- * @brief  This function serves to get the 32k tick.
- * @return none.
+ * @brief  This function serves to get the 32k tick currently.
+ * @return the current 32k tick.
  */
 #if 0
 unsigned int clock_get_32k_tick(void)
@@ -307,7 +310,8 @@ _attribute_ram_code_sec_noinline_ void clock_init_ram(sys_pll_clk_e             
 
     //wait for PLL stable
     analog_write_reg8(0x81, (analog_read_reg8(0x81) | BIT(6)));
-    while (BIT(5) != (analog_read_reg8(0x88) & BIT(5)));
+    while (BIT(5) != (analog_read_reg8(0x88) & BIT(5)))
+        ;
     analog_write_reg8(0x81, (analog_read_reg8(0x81) & ~BIT(6)));
 
     //change mspi clock should be ram code.

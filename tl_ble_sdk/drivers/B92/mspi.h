@@ -404,7 +404,8 @@ _attribute_ram_code_sec_optimize_o2_ static inline void mspi_stop_xip(void)
 {
     mspi_set_xip_stop(1);
 
-    while (0 != (reg_mspi_status & 0x30));
+    while (0 != (reg_mspi_status & 0x30))
+        ;
 
     mspi_wait();
     mspi_set_xip_dis();
@@ -528,7 +529,8 @@ _attribute_ram_code_sec_ static inline unsigned char mspi_txfifo_is_empty(void)
 _attribute_ram_code_sec_ static inline void mspi_soft_reset(void)
 {
     reg_mspi_status = FLD_MSPI_SOFT_RESET;
-    while (FLD_MSPI_SOFT_RESET == (reg_mspi_status & FLD_MSPI_SOFT_RESET));
+    while (FLD_MSPI_SOFT_RESET == (reg_mspi_status & FLD_MSPI_SOFT_RESET))
+        ;
 }
 
 /**
@@ -539,7 +541,8 @@ _attribute_ram_code_sec_ static inline void mspi_soft_reset(void)
 _attribute_ram_code_sec_ static inline void mspi_tx_fifo_clr(void)
 {
     BM_SET(reg_mspi_status, FLD_MSPI_TXFIFO_CLR_LEVEL);
-    while (FLD_MSPI_TXFIFO_CLR_LEVEL == (reg_mspi_status & FLD_MSPI_TXFIFO_CLR_LEVEL));
+    while (FLD_MSPI_TXFIFO_CLR_LEVEL == (reg_mspi_status & FLD_MSPI_TXFIFO_CLR_LEVEL))
+        ;
 }
 
 /**
@@ -550,7 +553,8 @@ _attribute_ram_code_sec_ static inline void mspi_tx_fifo_clr(void)
 _attribute_ram_code_sec_ static inline void mspi_rx_fifo_clr(void)
 {
     BM_SET(reg_mspi_status, FLD_MSPI_RXFIFO_CLR_LEVEL);
-    while (FLD_MSPI_RXFIFO_CLR_LEVEL == (reg_mspi_status & FLD_MSPI_RXFIFO_CLR_LEVEL));
+    while (FLD_MSPI_RXFIFO_CLR_LEVEL == (reg_mspi_status & FLD_MSPI_RXFIFO_CLR_LEVEL))
+        ;
 }
 
 /**

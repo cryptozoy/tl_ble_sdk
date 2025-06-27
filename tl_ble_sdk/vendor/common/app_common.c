@@ -34,6 +34,12 @@
  */
 void blc_app_setDeepsleepRetentionSramSize(void)
 {
+    #if  ((MCU_CORE_TYPE == MCU_CORE_TL721X) || (MCU_CORE_TYPE == MCU_CORE_TL321X))
+    __asm__ volatile (
+        ".option push\n"
+        ".option norelax\n"
+    );
+    #endif
     extern u32 _RETENTION_RESET_VMA_START;
     u32        deepret_start = (u32)&_RETENTION_RESET_VMA_START;
 
@@ -41,7 +47,11 @@ void blc_app_setDeepsleepRetentionSramSize(void)
     u32        deepret_end = (u32)&_RAMCODE_VMA_END;
 
     u32 deepret_size = deepret_end - deepret_start;
-
+    #if  ((MCU_CORE_TYPE == MCU_CORE_TL721X) || (MCU_CORE_TYPE == MCU_CORE_TL321X))
+    __asm__ volatile (
+        ".option pop\n"
+    );
+    #endif
     if (deepret_size <= 0x8000) {
         blc_pm_setDeepsleepRetentionType(DEEPSLEEP_MODE_RET_SRAM_LOW32K);
         tlkapi_printf(APP_LOG_COMMON_EN, "[APP][COMMON] deep retention size 32K\r\n");
@@ -69,6 +79,7 @@ void blc_app_setDeepsleepRetentionSramSize(void)
         /* retention size too large, overflow. deep retention size setting err*/
         tlkapi_printf(APP_LOG_COMMON_EN, "[APP][COMMON] deep retention size setting err");
     }
+
 }
 #endif //#if PM_DEEPSLEEP_RETENTION_ENABLE
 

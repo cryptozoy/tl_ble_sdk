@@ -202,3 +202,151 @@ void proc_central_role_unpair(void)
         }
     }
 }
+
+
+#if (UI_BUTTON_ENABLE)
+
+/////////////////////////////////////////////////////////////////////
+    #define MAX_BTN_SIZE    2
+    #define BTN_VALID_LEVEL 0
+    #define BTN_PAIR        0x01
+    #define BTN_UNPAIR      0x02
+
+u32 ctrl_btn[]            = {GPIO_PE3, GPIO_PE5};
+u8  btn_map[MAX_BTN_SIZE] = {BTN_PAIR, BTN_UNPAIR};
+
+/**
+     * @brief   record the result of key detect
+     */
+typedef struct
+{
+    u8 cnt;                   //count button num
+    u8 btn_press;
+    u8 keycode[MAX_BTN_SIZE]; //6 btn
+} vc_data_t;
+
+vc_data_t vc_event;
+
+/**
+     * @brief   record the status of button process
+     */
+typedef struct
+{
+    u8 btn_history[4]; //vc history btn save
+    u8 btn_filter_last;
+    u8 btn_not_release;
+    u8 btn_new;        //new btn  flag
+} btn_status_t;
+
+btn_status_t btn_status;
+
+/**
+     * @brief      Debounce processing during button detection
+     * @param[in]  btn_v - vc_event.btn_press
+     * @return     1:Detect new button;0:Button isn't changed
+     */
+u8 btn_debounce_filter(u8 *btn_v)
+{
+    u8 change = 0;
+
+    for (int i = 3; i > 0; i--) {
+        btn_status.btn_history[i] = btn_status.btn_history[i - 1];
+    }
+    btn_status.btn_history[0] = *btn_v;
+
+    if (btn_status.btn_history[0] == btn_status.btn_history[1] && btn_status.btn_history[1] == btn_status.btn_history[2] &&
+        btn_status.btn_history[0] != btn_status.btn_filter_last) {
+        change = 1;
+
+        btn_status.btn_filter_last = btn_status.btn_history[0];
+    }
+
+    return change;
+}
+
+/**
+     * @brief      This function is key detection processing
+     * @param[in]  read_key - Decide whether to return the key detection result
+     * @return     1:Detect new button;0:Button isn't changed
+     */
+u8 vc_detect_button(int read_key)
+{
+    u8 btn_changed, i;
+    memset(&vc_event, 0, sizeof(vc_data_t)); //clear vc_event
+    //vc_event.btn_press = 0;
+
+    for (i = 0; i < MAX_BTN_SIZE; i++) {
+        if (BTN_VALID_LEVEL != !gpio_read(ctrl_btn[i])) {
+            vc_event.btn_press |= BIT(i);
+        }
+    }
+
+    btn_changed = btn_debounce_filter(&vc_event.btn_press);
+
+
+    if (btn_changed && read_key) {
+        for (i = 0; i < MAX_BTN_SIZE; i++) {
+            if (vc_event.btn_press & BIT(i)) {
+                vc_event.keycode[vc_event.cnt++] = btn_map[i];
+            }
+        }
+
+        return 1;
+    }
+
+    return 0;
+}
+
+/**
+     * @brief       this function is used to detect if button pressed or released.
+     * @param[in]   none
+     * @return      none
+     */
+void proc_button(void)
+{
+    static u32 button_det_tick;
+    if (clock_time_exceed(button_det_tick, 10 * 1000)) {
+        button_det_tick = clock_time();
+    } else {
+        return;
+    }
+
+    int det_key = vc_detect_button(1);
+
+    if (det_key)                      //key change: press or release
+    {
+        u8 key0 = vc_event.keycode[0];
+        if (vc_event.cnt == 2)        //two key press
+        {
+        } else if (vc_event.cnt == 1) //one key press
+        {
+            if (key0 == BTN_PAIR) {
+                central_pairing_enable = 1;
+                tlkapi_send_string_data(APP_PAIR_LOG_EN, "[UI][PAIR] Pair begin", 0, 0);
+            } else if (key0 == BTN_UNPAIR) {
+                /*Here is just Telink Demonstration effect. Cause the demo board has limited key to use, only one "un_pair" key is
+                     available. When "un_pair" key pressed, we will choose and un_pair one device in connection state */
+                if (acl_conn_central_num) {               //at least 1 central connection exist
+
+                    if (!central_disconnect_connhandle) { //if one central un_pair disconnection flow not finish, here new un_pair not accepted
+
+                        // We choose the earliest connected device to un_pair, conn_dev_list[0] is the earliest connected device.
+                        // Attention: when acl_conn_central_num none zero, conn_dev_list[0].conn_state is definite 1, no need to judge
+                        central_unpair_enable = conn_dev_list[0].conn_handle; //mark connHandle on central_unpair_enable
+                        tlkapi_send_string_data(APP_PAIR_LOG_EN, "[UI][PAIR] Unpair", &central_unpair_enable, 2);
+                    }
+                }
+            }
+        } else { //release
+            if (central_pairing_enable) {
+                central_pairing_enable = 0;
+                tlkapi_send_string_data(APP_PAIR_LOG_EN, "[UI][PAIR] Pair end", 0, 0);
+            }
+
+            if (central_unpair_enable) {
+                central_unpair_enable = 0;
+            }
+        }
+    }
+}
+#endif //end of UI_BUTTON_ENABLE

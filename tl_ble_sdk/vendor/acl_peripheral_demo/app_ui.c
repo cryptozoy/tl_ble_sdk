@@ -52,25 +52,9 @@ void key_change_proc(void)
     // u8 key_buf[8] = {0,0,0,0,0,0,0,0};
 
     key_not_released = 1;
-    if (kb_event.cnt == 2) { //two key press
-    #if (APP_EMI_TEST_ENABLE)
-        u8 key1 = kb_event.keycode[1];
-        /*if CR_VOL_UP and CR_VOL_DN are pressed, enter EMI test mode*/
-        if ((key0 == CR_VOL_UP && key1 == CR_VOL_DN) || (key0 == CR_VOL_DN && key1 == CR_VOL_UP)) {
-        #if (UI_LED_ENABLE)
-            gpio_write(GPIO_LED_RED, LED_ON_LEVEL);
-        #endif
-            rf_set_tx_rx_off_auto_mode();
-            irq_disable();
-            emi_setting_init();
-            app_user_init_emi();
-
-            /* attention: user can not exit this function once enter it, because there is "while(1)" in emi_serviceloop()*/
-            emi_serviceloop();
-        }
-    #endif
-    } else if (kb_event.cnt == 1) {
-        if (key0 >= CR_VOL_UP) {            //volume up/down
+    if (kb_event.cnt == 1) {
+        if (key0 >= CR_VOL_UP) //volume up/down
+        {
             key_type = CONSUMER_KEY;
             u16 consumer_key;
             if (key0 == CR_VOL_UP) {        //volume up
@@ -208,3 +192,152 @@ void keyboard_init(void)
 
 
 #endif //end of UI_KEYBOARD_ENABLE
+
+
+#if (UI_BUTTON_ENABLE)
+
+/////////////////////////////////////////////////////////////////////
+    #define MAX_BTN_SIZE    2
+    #define BTN_VALID_LEVEL 0
+    #define BTN_VOL_UP        0x01
+    #define BTN_VOL_DOWN      0x02
+
+u32 ctrl_btn[]            = {GPIO_PE3, GPIO_PE5};
+u8  btn_map[MAX_BTN_SIZE] = {BTN_VOL_UP, BTN_VOL_DOWN};
+_attribute_ble_data_retention_ static u32 button_det_tick;
+/**
+     * @brief   record the result of key detect
+     */
+typedef struct
+{
+    u8 cnt;                   //count button num
+    u8 btn_press;
+    u8 keycode[MAX_BTN_SIZE]; //6 btn
+} vc_data_t;
+
+vc_data_t vc_event;
+
+/**
+     * @brief   record the status of button process
+     */
+typedef struct
+{
+    u8 btn_history[4]; //vc history btn save
+    u8 btn_filter_last;
+    u8 btn_not_release;
+    u8 btn_new;        //new btn  flag
+} btn_status_t;
+
+_attribute_ble_data_retention_ btn_status_t btn_status;
+
+/**
+     * @brief      Debounce processing during button detection
+     * @param[in]  btn_v - vc_event.btn_press
+     * @return     1:Detect new button;0:Button isn't changed
+     */
+u8 btn_debounce_filter(u8 *btn_v)
+{
+    u8 change = 0;
+
+    for (int i = 3; i > 0; i--) {
+        btn_status.btn_history[i] = btn_status.btn_history[i - 1];
+    }
+    btn_status.btn_history[0] = *btn_v;
+
+    if (btn_status.btn_history[0] == btn_status.btn_history[1] && btn_status.btn_history[1] == btn_status.btn_history[2] &&
+        btn_status.btn_history[0] != btn_status.btn_filter_last) {
+        change = 1;
+
+        btn_status.btn_filter_last = btn_status.btn_history[0];
+    }
+
+    return change;
+}
+
+/**
+     * @brief      This function is key detection processing
+     * @param[in]  read_key - Decide whether to return the key detection result
+     * @return     1:Detect new button;0:Button isn't changed
+     */
+u8 vc_detect_button(int read_key)
+{
+    u8 btn_changed, i;
+    memset(&vc_event, 0, sizeof(vc_data_t)); //clear vc_event
+    //vc_event.btn_press = 0;
+
+    for (i = 0; i < MAX_BTN_SIZE; i++) {
+        if (BTN_VALID_LEVEL != !gpio_read(ctrl_btn[i])) {
+            vc_event.btn_press |= BIT(i);
+        }
+    }
+
+    btn_changed = btn_debounce_filter(&vc_event.btn_press);
+
+
+    if (btn_changed && read_key) {
+        for (i = 0; i < MAX_BTN_SIZE; i++) {
+            if (vc_event.btn_press & BIT(i)) {
+                vc_event.keycode[vc_event.cnt++] = btn_map[i];
+            }
+        }
+
+        return 1;
+    }
+
+    return 0;
+}
+
+/**
+     * @brief       this function is used to detect if button pressed or released.
+     * @param[in]   none
+     * @return      none
+     */
+void proc_button(void)
+{
+
+    if (clock_time_exceed(button_det_tick, 10 * 1000)) {
+        button_det_tick = clock_time();
+    } else {
+        return;
+    }
+
+    int det_key = vc_detect_button(1);
+
+    if (det_key)                      //key change: press or release
+    {
+        u8 key0 = vc_event.keycode[0];
+        if (vc_event.cnt == 2)        //two key press
+        {
+        } else if (vc_event.cnt == 1) //one key press
+        {
+            u16 consumer_key;
+            if (key0 == BTN_VOL_UP) {
+                consumer_key = MKEY_VOL_UP;
+                tlkapi_send_string_data(APP_BUTTON_LOG_EN, "[UI][BUTTON] Vol +", 0, 0);
+            } else if (key0 == BTN_VOL_DOWN) {
+                consumer_key = MKEY_VOL_DN;
+                tlkapi_send_string_data(APP_BUTTON_LOG_EN, "[UI][BUTTON] Vol-", 0, 0);
+            }
+
+            /*Here is just Telink Demonstration effect. Cause the demo board has limited key to use, when Vol+/Vol- key pressed, we
+            send media key "Vol+" or "Vol-" to central for all peripheral role in connection.
+            For users, you should known that this is not a good method, you should manage your device and GATT data transfer
+            according to  conn_dev_list[]
+             * */
+            for (int i = ACL_CENTRAL_MAX_NUM; i < (ACL_CENTRAL_MAX_NUM + ACL_PERIPHR_MAX_NUM); i++) { //peripheral index is from "ACL_CENTRAL_MAX_NUM" to "ACL_CENTRAL_MAX_NUM + ACL_PERIPHR_MAX_NUM - 1"
+                if (conn_dev_list[i].conn_state) {
+                    blc_gatt_pushHandleValueNotify(conn_dev_list[i].conn_handle, HID_CONSUME_REPORT_INPUT_DP_H, (u8 *)&consumer_key, 2);
+                }
+            }
+        } else { //release
+            u16 consumer_key = 0;
+            //Here is just Telink Demonstration effect. for all peripheral in connection, send release for previous "Vol+" or "Vol-" to central
+            for (int i = ACL_CENTRAL_MAX_NUM; i < (ACL_CENTRAL_MAX_NUM + ACL_PERIPHR_MAX_NUM); i++) { //peripheral index is from "ACL_CENTRAL_MAX_NUM" to "ACL_CENTRAL_MAX_NUM + ACL_PERIPHR_MAX_NUM - 1"
+                if (conn_dev_list[i].conn_state) {
+                    blc_gatt_pushHandleValueNotify(conn_dev_list[i].conn_handle, HID_CONSUME_REPORT_INPUT_DP_H, (u8 *)&consumer_key, 2);
+                }
+            }
+        }
+    }
+}
+#endif //end of UI_BUTTON_ENABLE

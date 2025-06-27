@@ -26,7 +26,12 @@
 
 #include "macro_trick.h"
 
+#ifndef BLC_ZEPHYR_BLE_INTEGRATION
 #define BIT(n) (1ULL << (n))
+#else
+#undef BIT
+#define BIT(n) (1ULL << (n))
+#endif
 
 // BITSx  are internal used macro, please use BITS instead
 #define BITS1(a)                      BIT(a)
@@ -67,7 +72,10 @@
 #define BIT_IS_SET_HIGH(x)          ((x) & BIT((sizeof((x)) * 8 - 1)))   // check the highest bit
 
 #define BIT_MASK_LEN(len)           (BIT(len) - 1)
+
+#ifndef BLC_ZEPHYR_BLE_INTEGRATION
 #define BIT_MASK(start, len)        (BIT_MASK_LEN(len) << (start))
+#endif
 
 //! Prepare a bitmask for insertion or combining.
 #define BIT_PREP(x, start, len) ((x) & BIT_MASK(start, len))

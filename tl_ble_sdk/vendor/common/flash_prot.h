@@ -202,6 +202,11 @@ extern flash_prot_op_callback_t flash_prot_op_cb;
 /* stack layer event, SMP switch pairing information area end , may need restore locking flash */
 #define FLASH_OP_EVT_STACK_SMP_SWITCH_PAIRING_INFO_END 27
 
+/* may need unlock flash */
+#define FLASH_OP_EVT_APP_TAG_INFO_BEGIN 28
+/*  may need restore locking flash */
+#define FLASH_OP_EVT_APP_TAG_INFO_END 29
+
 
 /**
  * @brief      this function is used to initialize flash protection.

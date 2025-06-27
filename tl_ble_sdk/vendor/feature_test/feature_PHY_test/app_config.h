@@ -43,7 +43,6 @@
     #define APP_DEFAULT_BUFFER_ACL_OCTETS_MTU_SIZE_MINIMUM 1
     #define APP_DEFAULT_HID_BATTERY_OTA_ATTRIBUTE_TABLE    1
 
-
     ///////////////////////// UI Configuration ////////////////////////////////////////////////////
     #define UI_LED_ENABLE      1
     #define UI_KEYBOARD_ENABLE 1
@@ -75,6 +74,10 @@
     #elif (MCU_CORE_TYPE == MCU_CORE_TL321X)
         #define UART_TX_PIN GPIO_PC6
         #define UART_RX_PIN GPIO_PC7
+        #define BAUDRATE    115200
+    #elif (MCU_CORE_TYPE == MCU_CORE_TL322X)
+        #define UART_TX_PIN GPIO_PD7
+        #define UART_RX_PIN GPIO_PD6
         #define BAUDRATE    115200
     #endif
     /**

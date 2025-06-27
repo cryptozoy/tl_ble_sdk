@@ -167,16 +167,6 @@ void rf_set_channel_power_calibration(unsigned char *channel_power);
 */
 void rf_set_channel_power_enable(unsigned char enable);
 #endif
-
-/**
- * @brief    This function serves to enable zb_rt interrupt source initialize
- * the default index value for CS SYNC and the base index for mode2 antenna index.
- * @param[in] antsel0_pin : the first pin of the switch control
- * @param[in] antsel1_pin : the second pin of the switch control
- * @param[in] antsel2_pin : the third pin of the switch control
- * @return  none
- */
-void rf_cs_ant_switch_pin_init(gpio_pin_e antsel0_pin, gpio_pin_e antsel1_pin, gpio_pin_e antsel2_pin);
 /******************************* rf end  **********************************************************************/
 
 
@@ -301,5 +291,23 @@ enum{//todo: SunWei &YeYang
 };
 /******************************* plic_end ********************************************************************/
 
+/******************************* cs_ant_switch_start *********************************************************/
+typedef struct{
+    gpio_pin_e  pin;
+    gpio_func_e  pin_fun;
+}rf_cs_ant_switch_ctrl;
+
+/**
+ * @brief        * This function initializes the GPIO pins used for antenna switching according to the specified configuration.
+ *                 It disables the input and output functions of the GPIO pins, sets the pull-down resistance, and configures
+ *                 the multiplexing function of the pins.
+ *
+ * @param[in]   switch_ctrl    - Pointer to the antenna switch control structure array.
+ * @param[in]   num            - Number of antenna switch pins
+ * @return      none.
+ */
+void rf_cs_ant_switch_pin_init(rf_cs_ant_switch_ctrl *switch_ctrl, u8 num);
+
+/******************************* cs_ant_switch_end **********************************************************/
 
 #endif /* DRIVERS_B92_EXT_MISC_H_ */

@@ -54,5 +54,11 @@ void proc_central_role_unpair(void);
  */
 void keyboard_init(void);
 
+/**
+ * @brief       this function is used to detect if button pressed or released.
+ * @param[in]   none
+ * @return      none
+ */
+void proc_button(void);
 
 #endif /* APP_UI_H_ */

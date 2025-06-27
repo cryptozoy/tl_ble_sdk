@@ -33,21 +33,24 @@
 
 /******************************* BAS Client Start **********************************************************************/
 //BAS Client Event ID
-enum{
+enum
+{
     BASIC_EVT_BASC_START = BASIC_EVT_TYPE_BAS_CLIENT,
-    BASC_EVT_BATTERY_LEVEL_CHANGE,          //refer to 'struct blc_basc_batteryLevelChangeEvt'
-    BASC_EVT_BATTERY_POWER_STATE_CHANGE,    //refer to 'struct blc_basc_batteryPowerStateChangeEvt'
+    BASC_EVT_BATTERY_LEVEL_CHANGE,       //refer to 'struct blc_basc_batteryLevelChangeEvt'
+    BASC_EVT_BATTERY_POWER_STATE_CHANGE, //refer to 'struct blc_basc_batteryPowerStateChangeEvt'
 };
 
-struct blc_basc_regParam{
-
+struct blc_basc_regParam
+{
 };
 
-struct blc_basc_batteryLevelChangeEvt{      //Event ID: BASC_EVT_BATTERY_LEVEL_CHANGE
+struct blc_basc_batteryLevelChangeEvt
+{ //Event ID: BASC_EVT_BATTERY_LEVEL_CHANGE
     u8 batteryLevel;
 };
 
-struct blc_basc_batteryPowerStateChangeEvt{ //Event ID: BASC_EVT_BATTERY_POWER_STATE_CHANGE
+struct blc_basc_batteryPowerStateChangeEvt
+{ //Event ID: BASC_EVT_BATTERY_POWER_STATE_CHANGE
     u8 batteryPowerState;
 };
 
@@ -59,52 +62,27 @@ struct blc_basc_batteryPowerStateChangeEvt{ //Event ID: BASC_EVT_BATTERY_POWER_S
 void blc_basic_registerBASControlClient(const struct blc_basc_regParam *param);
 
 //BAS Client Read Characteristic Value Operation API
-/**
- * @brief      Read the battery level of the device associated with the given connection handle.
- * @param[in]  connHandle - The connection handle for the device whose battery level is to be read.
- * @param[in]  readCb - Callback function to handle the battery level data once it is read.
- * @return     int - 0: success, non-zero value: error code.
- */
 int blc_basc_readBatteryLevel(u16 connHandle, prf_read_cb_t readCb);
-
-/**
- * @brief      Read the battery power state of the device associated with the given connection handle.
- * @param[in]  connHandle - The connection handle for the device whose battery power state is to be read.
- * @param[in]  readCb - Callback function to handle the battery power state data once it is read.
- * @return     int - 0: success, non-zero value: error code.
- */
 int blc_basc_readBatteryPowerState(u16 connHandle, prf_read_cb_t readCb);
 
 //BAS Client Get Characteristic Value Operation API
-/**
- * @brief      Get the battery level of the device associated with the given connection handle.
- * @param[in]  connHandle - The connection handle for the device whose battery level is to be queried.
- * @param[out] batteryLevel - Pointer to the variable where the battery level will be stored (0-100%).
- * @return     int - 0: success, non-zero value: error code.
- */
-int blc_basc_getBatteryLevel(u16 connHandle, u8* batteryLevel);
-
-/**
- * @brief      Get the battery power state of the device associated with the given connection handle.
- * @param[in]  connHandle - The connection handle for the device whose battery power state is to be queried.
- * @param[out] batteryPowerState - Pointer to the variable where the battery power state will be stored.
- *                                  Possible values: 0 - battery is low, 1 - battery is ok, etc.
- * @return     int - 0: success, non-zero value: error code.
- */
-int blc_basc_getBatteryPowerState(u16 connHandle, u8* batteryPowerState);
+int blc_basc_getBatteryLevel(u16 connHandle, u8 *batteryLevel);
+int blc_basc_getBatteryPowerState(u16 connHandle, u8 *batteryPowerState);
 
 /******************************* BAS Client End **********************************************************************/
 
 
 /******************************* BAS Server Start **********************************************************************/
 //BAS Server Event ID
-enum{
+enum
+{
     BASIC_EVT_BASS_START = BASIC_EVT_TYPE_BAS_SERVER,
 };
 
-struct blc_bass_regParam{
-    u8 batteryLevel;        //range in 0-100.
-    u8 powerState;          //value is blc_bas_battery_power_state_enum.
+struct blc_bass_regParam
+{
+    u8 batteryLevel; //range in 0-100.
+    u8 powerState;   //value is blc_bas_battery_power_state_enum.
 };
 
 /**

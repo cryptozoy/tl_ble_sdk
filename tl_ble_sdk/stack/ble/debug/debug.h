@@ -40,8 +40,6 @@ typedef enum
 
     STK_LOG_SMP_LTK = BIT(10),
 
-    STK_LOG_PRF_CS = BIT(12),
-
     STK_LOG_OTA_FLOW = BIT(15),
     STK_LOG_OTA_DATA = BIT(16),
 
@@ -52,7 +50,8 @@ typedef enum
 
     STK_LOG_LL_RX = BIT(26),
     STK_LOG_LL_TX = BIT(27),
-
+    STK_LOG_HCI_HDT = BIT(28),
+    STK_LOG_LL_HDT  = BIT(29),
     STK_LOG_SNIF_ACL = BIT(30),
     STK_LOG_SNIF_CS  = BIT(31),
 

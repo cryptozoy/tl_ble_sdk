@@ -46,7 +46,7 @@ unsigned short flash_read_status_mid1560c8(void)
 /**
  * @brief       This function write the status of flash.
  * @param[in]   data    - the status value of the flash after the mask.
- * @param[in]   mask        - mid1560c8_write_status_mask_e.
+ * @param[in]   mask    - mid1560c8_write_status_mask_e.
  * @return      1: success, 0: error, 2: parameter error.
  * @note        Attention: Before calling the FLASH function, please check the power supply voltage of the chip.
  *              Only if the detected voltage is greater than the safe voltage value, the FLASH function can be called.

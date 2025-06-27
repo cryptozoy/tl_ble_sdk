@@ -56,6 +56,7 @@
 //When adding flash later, if tRES1 is greater than 25us, this waiting time needs to be updated. (flash tRES1, which can be viewed in the comments of the variable flash_support_mid.)
 //(add by weihua.zhang 20230811)
 #define EFUSE_LOAD_AND_FLASH_WAKEUP_LOOP_NUM        320 //25us
+#define FLASH_LOOP_NUM_TEST                         0
 
     .section .vectors, "ax"
     .global __BOOT_SWITCH_FLASH_ADDR
@@ -75,7 +76,11 @@
 _RESET_ENTRY:
     j        _START
     //free the 6th ~ 7th byte to store the crc type of the bin file
-
+    /* This configuration is specifically for RF_Certification and does not need to be enabled for other scenarios */
+#ifdef RF_CERTIFICATION_CGF_EN
+    .org 0x10
+    .word(_RF_CERTIFICATION_CFG_ADDR_OFFSET)
+#endif
 /* used to check flash protection function consistency between the old and new  firmware when OTA upgrading */
 #if APP_FLASH_PROTECTION_ENABLE
     .org 0x15    //correspond to "FIRMWARE_FLASH_PROTECTION_FLAG_ADDR" in mcu_boot.h
@@ -89,21 +94,21 @@ _RESET_ENTRY:
 
     .org 0x26
     //.short (0x070B)           //FREAD:   cmd:1x, addr:1x, data:1x, dummy cycle:8
-    .short (0x173B)             //DREAD:   cmd:1x, addr:1x, data:2x, dummy cycle:8
+    .short (0x173B)           //DREAD:   cmd:1x, addr:1x, data:2x, dummy cycle:8
     //.short (0x53BB)           //X2READ:  cmd:1x, addr:2x, data:2x, dummy cycle:4
     //.short (0x276B)           //QREAD:   cmd:1x, addr:1x, data:4x, dummy cycle:8
-    //.short (0x65EB)           //X4READ:  cmd:1x, addr:4x, data:4x, dummy cycle:6
+    //.short (0x65EB)             //X4READ:  cmd:1x, addr:4x, data:4x, dummy cycle:6
     .option pop
     .align 2
 
 _START:
 #if 0
     // add debug, PB4 output 1
-    lui     t0,0x80140          //0x8014030a
+    lui     t0, 0x80140         //0x8014030a
     li      t1, 0xef
     li      t2, 0x10
-    sb      t1 , 0x30a(t0)       //0x8014030a  PB oen     =  0xef
-    sb      t2 , 0x30b(t0)       //0x8014030b  PB output  =  0x10
+    sb      t1, 0x30a(t0)       //0x8014030a  PB oen     =  0xef
+    sb      t2, 0x30b(t0)       //0x8014030b  PB output  =  0x10
 #endif
 
     /* timer rst enable. */
@@ -125,7 +130,7 @@ _START:
     li      t0, 0x80140142 /* tim_ctrl2 register address. */
     li      t1, 0x80       /* bit7=1 watchdog enable(reset velue 0x00). */
     sb      t1, 0x0(t0)    /* (*(volatile unsigned char*)(0x80140142))= 0x80. */
-    
+
     /* Initialize global pointer */
     .option push
     .option norelax
@@ -162,15 +167,7 @@ _START:
 
     /* Enable vectored external plic interrupt */
     csrsi  mmisc_ctl, 2
-/*
-*#if (SUPPORT_PFT_ARCH)
-*   plic_set_feature(FLD_FEATURE_PREEMPT_PRIORITY_INT_EN | FLD_FEATURE_VECTOR_MODE_EN);//enable vectored in PLIC
-*   =(0xe4000000))= 0x03
-*#else
-*   plic_set_feature(FLD_FEATURE_VECTOR_MODE_EN);//enable vectored in PLIC
-*   =(0xe4000000))= 0x02
-*#endif
-*/
+
     /*vector mode enable bit (VECTORED) of the Feature Enable Register */
     lui     t0, 0xe4000
     li      t1, 0x02
@@ -224,7 +221,6 @@ _RAMCODE_INIT_BEGIN:
     addi   t2, t2, 4
     j      _RAMCODE_INIT_BEGIN
 
-
     /* Move Data from flash to sram */
 _DATA_INIT:
     la     t1, _DATA_LMA_START
@@ -237,7 +233,6 @@ _DATA_INIT_BEGIN:
     addi   t1, t1, 4
     addi   t2, t2, 4
     j      _DATA_INIT_BEGIN
-
 
 
     /* Zero .bss section in sram */
@@ -317,14 +312,13 @@ _IRESET_ENTRY:
     .org 0x24
 
 _ISTART:
-/* GPIO_DEBUG */
 #if 0
     // add debug, PB4 output 1
-    lui     t0, 0x80140             //0x8014030a
+    lui     t0, 0x80140         //0x8014030a
     li      t1, 0xef
     li      t2, 0x10
-    sb      t1 , 0x30a(t0)       //0x8014030a  PB oen     =  0xef
-    sb      t2 , 0x30b(t0)       //0x8014030b  PB output  =  0x10
+    sb      t1, 0x30a(t0)       //0x8014030a  PB oen     =  0xef
+    sb      t2, 0x30b(t0)       //0x8014030b  PB output  =  0x10
 #endif
 
     /* timer rst enable. */
@@ -386,15 +380,6 @@ _ISWS_USB_DIS:
     /* Enable vectored external plic interrupt */
     csrsi  mmisc_ctl, 2
 
-/*
-*#if (SUPPORT_PFT_ARCH)
-*   plic_set_feature(FLD_FEATURE_PREEMPT_PRIORITY_INT_EN | FLD_FEATURE_VECTOR_MODE_EN);//enable vectored in PLIC
-*   =(0xe4000000))= 0x03
-*#else
-*   plic_set_feature(FLD_FEATURE_VECTOR_MODE_EN);//enable vectored in PLIC
-*   =(0xe4000000))= 0x02
-*#endif
-*/
     /*vector mode enable bit (VECTORED) of the Feature Enable Register */
     lui     t0, 0xe4000
     li      t1, 0x02
@@ -424,35 +409,36 @@ _MSPI_WAIT:
     li      t4 , 0x10
     beq     t3 , t2 ,_MSPI_WAIT
     sb      t4 , 0x101(t0)          //cs_high           :0x140101:0x10
-#if 0
+
+#if FLASH_LOOP_NUM_TEST
     // add debug, PB4 output 1
-    lui     t0,0x80140          //0x8014030a
-    li      t1, 0x00
-    sb      t1 , 0x30b(t0)       //0x8014030b  PB output  =  0x00
+    lui     t0, 0x80140         //0x8014030a
+    li      t1, 0xef
+    li      t2, 0x10
+    sb      t1, 0x30a(t0)       //0x8014030a  PB oen     =  0xef
+    sb      t2, 0x30b(t0)       //0x8014030b  PB output  =  0x10
 #endif
 
     /*flash wakeup need delay about 20us */
     /*efuse load need delay about 18us */
-    li      t0 , 0
-    li      t1 , EFUSE_LOAD_AND_FLASH_WAKEUP_LOOP_NUM
+    li      t0, 0
+    li      t1, EFUSE_LOAD_AND_FLASH_WAKEUP_LOOP_NUM
 _WAIT_EFUSE_LOAD_AND_FLASH_WAKEUP_FINISH:
-    addi    t0 , t0 , 1
-    bgeu    t1 , t0 , _WAIT_EFUSE_LOAD_AND_FLASH_WAKEUP_FINISH
+    addi    t0, t0 , 1
+    bgeu    t1, t0 , _WAIT_EFUSE_LOAD_AND_FLASH_WAKEUP_FINISH
 
-#if 0
-    // add debug, PB4 output 1
-    lui     t0,0x80140          //0x8014030a
-    li      t1, 0x10
-    sb      t1 , 0x30b(t0)       //0x8014030b  PB output  =  0x00
+#if FLASH_LOOP_NUM_TEST
+    // add debug, PB4 output 0
+    lui     t0, 0x80140         //0x8014030a
+    li      t2, 0x00
+    sb      t2, 0x30b(t0)       //0x8014030b  PB output  =  0x00
 #endif
 
-
 _MULTI_ADDRESS_BEGIN:
-    lui     t0 , 0x80140
-    la      t1 , g_pm_mspi_cfg
-    lw      t2 , 0(t1)
-    sw      t2 , 0x104(t0)           //g_pm_mspi_cfg->0x80140104
-
+    lui     t0, 0x80140
+    la      t1, g_pm_mspi_cfg
+    lw      t2, 0(t1)
+    sw      t2, 0x104(t0)            //g_pm_mspi_cfg->0x80140104
 
 #if 0
     /* Move ramcode from flash to sram */
@@ -492,7 +478,6 @@ _IZERO_AES_BEGIN:
     addi   t2, t2, 4
     j      _IZERO_AES_BEGIN
 
-
     /* Fill the remaining section in sram */
 _IFILL_STK:
 #if 0
@@ -506,8 +491,9 @@ _IFILL_STK_BEGIN:
     addi   t2, t2, 4
     j      _IFILL_STK_BEGIN
 #endif
+
     /* Move Data from flash to sram */
-    //Read the flash as late as possible to lengthen the time from the wake up to the operation of the flash.
+//Read the flash as late as possible to lengthen the time from the wake up to the operation of the flash.
 _IDATA_INIT:
     la     t1, _DATA_LMA_START
     la     t2, _DATA_VMA_START

@@ -153,12 +153,13 @@ int app_le_ext_adv_report_event_handle(u8 *p, int evt_data_len)
  */
 int app_le_enhanced_connection_complete_event_handle(u8 *p)
 {
-    hci_le_connectionCompleteEvt_t *pConnEvt = (hci_le_connectionCompleteEvt_t *)p;
-    tlkapi_printf(APP_CONTR_EVT_LOG_EN, "le_connection_complete connHandle:%04X mac:%02X %02X %02X %02X %02X %02X", pConnEvt->connHandle, pConnEvt->peerAddr[0], pConnEvt->peerAddr[1], pConnEvt->peerAddr[2], pConnEvt->peerAddr[3], pConnEvt->peerAddr[4], pConnEvt->peerAddr[5]);
+    hci_le_enhancedConnCompleteEvt_t *pConnEvt = (hci_le_enhancedConnCompleteEvt_t *)p;
+    tlkapi_printf(APP_CONTR_EVT_LOG_EN, "le_enhanced_connection_complete connHandle:%04X mac:%02X %02X %02X %02X %02X %02X", pConnEvt->connHandle, pConnEvt->PeerAddr[0], pConnEvt->PeerAddr[1], pConnEvt->PeerAddr[2], pConnEvt->PeerAddr[3], pConnEvt->PeerAddr[4], pConnEvt->PeerAddr[5]);
     if (pConnEvt->status == BLE_SUCCESS) {
-        dev_char_info_insert_by_conn_event(pConnEvt);
+        dev_char_info_insert_by_enhanced_conn_event(pConnEvt);
 
-        if (pConnEvt->role == ACL_ROLE_CENTRAL) {       // central role, process SMP and SDP if necessary
+        if (pConnEvt->role == ACL_ROLE_CENTRAL)         // central role, process SMP and SDP if necessary
+        {
     #if (ACL_CENTRAL_SMP_ENABLE)
             central_smp_pending = pConnEvt->connHandle; // this connection need SMP
     #endif
@@ -167,14 +168,14 @@ int app_le_enhanced_connection_complete_event_handle(u8 *p)
     #if (ACL_CENTRAL_SIMPLE_SDP_ENABLE)
             memset(&cur_sdp_device, 0, sizeof(dev_char_info_t));
             cur_sdp_device.conn_handle  = pConnEvt->connHandle;
-            cur_sdp_device.peer_adrType = pConnEvt->peerAddrType;
-            memcpy(cur_sdp_device.peer_addr, pConnEvt->peerAddr, 6);
+            cur_sdp_device.peer_adrType = pConnEvt->PeerAddrType;
+            memcpy(cur_sdp_device.peer_addr, pConnEvt->PeerAddr, 6);
 
             u8         temp_buff[sizeof(dev_att_t)];
             dev_att_t *pdev_att = (dev_att_t *)temp_buff;
 
             /* att_handle search in flash, if success, load char_handle directly from flash, no need SDP again */
-            if (dev_char_info_search_peer_att_handle_by_peer_mac(pConnEvt->peerAddrType, pConnEvt->peerAddr, pdev_att)) {
+            if (dev_char_info_search_peer_att_handle_by_peer_mac(pConnEvt->PeerAddrType, pConnEvt->PeerAddr, pdev_att)) {
                 //cur_sdp_device.char_handle[1] =                                   //Speaker
                 cur_sdp_device.char_handle[2] = pdev_att->char_handle[2]; //OTA
                 cur_sdp_device.char_handle[3] = pdev_att->char_handle[3]; //consume report

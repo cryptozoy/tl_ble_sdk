@@ -54,4 +54,12 @@ void app_set_kb_wakeup(u8 e, u8 *p, int n);
  */
 void keyboard_init(void);
 
+/**
+ * @brief       this function is used to detect if button pressed or released.
+ * @param[in]   none
+ * @return      none
+ */
+void proc_button(void);
+
+
 #endif /* APP_UI_H_ */

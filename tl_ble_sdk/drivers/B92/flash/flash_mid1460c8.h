@@ -6,7 +6,7 @@
  * @author  Driver Group
  * @date    2024
  *
- * @par     Copyright (c) 2022, Telink Semiconductor (Shanghai) Co., Ltd. ("TELINK")
+ * @par     Copyright (c) 2024, Telink Semiconductor (Shanghai) Co., Ltd. ("TELINK")
  *
  *          Licensed under the Apache License, Version 2.0 (the "License");
  *          you may not use this file except in compliance with the License.
@@ -135,7 +135,7 @@ unsigned short flash_read_status_mid1460c8(void);
 /**
  * @brief       This function write the status of flash.
  * @param[in]   data    - the status value of the flash after the mask.
- * @param[in]   mask        - mid1460c8_write_status_mask_e.
+ * @param[in]   mask    - mid1460c8_write_status_mask_e.
  * @return      1: success, 0: error, 2: parameter error.
  * @note        Attention: Before calling the FLASH function, please check the power supply voltage of the chip.
  *              Only if the detected voltage is greater than the safe voltage value, the FLASH function can be called.
@@ -152,7 +152,7 @@ unsigned char flash_write_status_mid1460c8(unsigned short data, unsigned int mas
 /**
  * @brief       This function serves to set the protection area of the flash.
  * @param[in]   data    - mid1460c8_lock_block_e.
- * @return      1: success, 0: error.
+ * @return      1: success, 0: error, 2: parameter error.
  * @note        Attention: Before calling the FLASH function, please check the power supply voltage of the chip.
  *              Only if the detected voltage is greater than the safe voltage value, the FLASH function can be called.
  *              Taking into account the factors such as power supply fluctuations, the safe voltage value needs to be greater
@@ -167,7 +167,7 @@ unsigned char flash_lock_mid1460c8(unsigned int data);
 
 /**
  * @brief       This function serves to flash release protection.
- * @return      1: success, 0: error.
+ * @return      1: success, 0: error, 2: parameter error.
  * @note        Attention: Before calling the FLASH function, please check the power supply voltage of the chip.
  *              Only if the detected voltage is greater than the safe voltage value, the FLASH function can be called.
  *              Taking into account the factors such as power supply fluctuations, the safe voltage value needs to be greater
@@ -277,6 +277,4 @@ void flash_erase_otp_mid1460c8(mid1460c8_otp_block_e addr);
  *              If an abnormality occurs, the firmware and user data may be rewritten, resulting in the final Product failure)
  */
 void flash_lock_otp_mid1460c8(mid1460c8_lock_otp_e data);
-
-
 #endif

@@ -1,12 +1,12 @@
 /********************************************************************************************************
  * @file    AudioClassCommon.h
  *
- * @brief   This is the header file for BLE SDK
+ * @brief   This is the header file for Telink RISC-V MCU
  *
- * @author  BLE GROUP
- * @date    06,2022
+ * @author  Driver Group
+ * @date    2019
  *
- * @par     Copyright (c) 2022, Telink Semiconductor (Shanghai) Co., Ltd. ("TELINK")
+ * @par     Copyright (c) 2019, Telink Semiconductor (Shanghai) Co., Ltd. ("TELINK")
  *
  *          Licensed under the Apache License, Version 2.0 (the "License");
  *          you may not use this file except in compliance with the License.
@@ -22,16 +22,13 @@
  *
  *******************************************************************************************************/
 #pragma once
-
-/* Includes: */
-#include "tl_common.h"
-#include "stdDescriptors.h"
-
 /* Enable C linkage for C++ Compilers: */
 #if defined(__cplusplus)
 extern "C"
 {
 #endif
+/* Includes: */
+#include "stdDescriptors.h"
 
 #define AUDIO_CHANNEL_LEFT_FRONT         BIT(0)
 #define AUDIO_CHANNEL_RIGHT_FRONT        BIT(1)
@@ -76,10 +73,10 @@ extern "C"
 #define AUDIO_TERMINAL_OUT_COMMUNICATION (0x306)
 #define AUDIO_TERMINAL_OUT_LOWFREQ       (0x307)
 
-#define AUDIO_SAMPLE_FREQ(freq)          { \
-    .Byte1 = ((u32)freq & 0xFF),           \
-    .Byte2 = (((u32)freq >> 8) & 0xFF),    \
-    .Byte3 = (((u32)freq >> 16) & 0xFF)}
+#define AUDIO_SAMPLE_FREQ(freq)          {       \
+    .Byte1 = ((unsigned int)freq & 0xFF),        \
+    .Byte2 = (((unsigned int)freq >> 8) & 0xFF), \
+    .Byte3 = (((unsigned int)freq >> 16) & 0xFF)}
 
 
 #define AUDIO_EP_FULL_PACKETS_ONLY     BIT(7)
@@ -142,208 +139,208 @@ extern "C"
         AUDIO_EPCONTROL_Pitch,
     };
 
-    typedef struct __attribute__((packed))
+    typedef struct
     {
         USB_Descriptor_Hdr_t Header;
-        u8                   Subtype;
-        u8                   TerminalID;
-        u16                  TerminalType;
-        u8                   AssociatedOutputTerminal;
-        u8                   TotalChannels;
-        u16                  ChannelConfig;
-        u8                   ChannelStrIndex;
-        u8                   TerminalStrIndex;
-    } USB_Audio_Descriptor_InputTerminal_t;
+        unsigned char        Subtype;
+        unsigned char        TerminalID;
+        unsigned short       TerminalType;
+        unsigned char        AssociatedOutputTerminal;
+        unsigned char        TotalChannels;
+        unsigned short       ChannelConfig;
+        unsigned char        ChannelStrIndex;
+        unsigned char        TerminalStrIndex;
+    } __attribute__((packed)) USB_Audio_Descriptor_InputTerminal_t;
 
-    typedef struct __attribute__((packed))
+    typedef struct
     {
-        u8  Length;
-        u8  DescriptorType;
-        u8  DescriptorSubtype;
-        u8  TerminalID;
-        u16 TerminalType;
-        u8  AssocTerminal;
-        u8  NrChannels;
-        u16 ChannelConfig;
-        u8  ChannelNames;
-        u8  Terminal;
-    } USB_Audio_StdDescriptor_InputTerminal_t;
+        unsigned char  Length;
+        unsigned char  DescriptorType;
+        unsigned char  DescriptorSubtype;
+        unsigned char  TerminalID;
+        unsigned short TerminalType;
+        unsigned char  AssocTerminal;
+        unsigned char  NrChannels;
+        unsigned short ChannelConfig;
+        unsigned char  ChannelNames;
+        unsigned char  Terminal;
+    } __attribute__((packed)) USB_Audio_StdDescriptor_InputTerminal_t;
 
-    typedef struct __attribute__((packed))
-    {
-        USB_Descriptor_Hdr_t Header;
-        u8                   Subtype;
-        u8                   TerminalID;
-        u16                  TerminalType;
-        u8                   AssociatedInputTerminal;
-        u8                   SourceID;
-        u8                   TerminalStrIndex;
-    } USB_Audio_Descriptor_OutputTerminal_t;
-
-    typedef struct __attribute__((packed))
-    {
-        u8  Length;
-        u8  DescriptorType;
-        u8  DescriptorSubtype;
-        u8  TerminalID;
-        u16 TerminalType;
-        u8  AssocTerminal;
-        u8  SourceID;
-        u8  Terminal;
-    } USB_Audio_StdDescriptor_OutputTerminal_t;
-
-    typedef struct __attribute__((packed))
+    typedef struct
     {
         USB_Descriptor_Hdr_t Header;
-        u8                   Subtype;
-        u8                   ACSpecification[2];
-        u8                   TotalLength[2];
-        u8                   InCollection;
-        u8                   InterfaceNumber;
-    } USB_Audio_Descriptor_Interface_AC_t;
+        unsigned char        Subtype;
+        unsigned char        TerminalID;
+        unsigned short       TerminalType;
+        unsigned char        AssociatedInputTerminal;
+        unsigned char        SourceID;
+        unsigned char        TerminalStrIndex;
+    } __attribute__((packed)) USB_Audio_Descriptor_OutputTerminal_t;
 
-    typedef struct __attribute__((packed))
+    typedef struct
+    {
+        unsigned char  Length;
+        unsigned char  DescriptorType;
+        unsigned char  DescriptorSubtype;
+        unsigned char  TerminalID;
+        unsigned short TerminalType;
+        unsigned char  AssocTerminal;
+        unsigned char  SourceID;
+        unsigned char  Terminal;
+    } __attribute__((packed)) USB_Audio_StdDescriptor_OutputTerminal_t;
+
+    typedef struct
     {
         USB_Descriptor_Hdr_t Header;
-        u8                   Subtype;
-        u8                   ACSpecification[2];
-        u8                   TotalLength[2];
-        u8                   InCollection;
-        u8                   InterfaceNumber_speaker;
-        u8                   InterfaceNumber_mic;
-    } USB_Audio_Descriptor_Interface_AC_TL_t;
+        unsigned char        Subtype;
+        unsigned char        ACSpecification[2];
+        unsigned char        TotalLength[2];
+        unsigned char        InCollection;
+        unsigned char        InterfaceNumber;
+    } __attribute__((packed)) USB_Audio_Descriptor_Interface_AC_t;
 
-    typedef struct __attribute__((packed))
-    {
-        u8 Length;
-        u8 DescriptorType;
-        u8 DescriptorSubtype;
-        u8 BcdADC[2];
-        u8 TotalLength[2];
-        u8 InCollection;
-        u8 InterfaceNumbers;
-    } USB_Audio_StdDescriptor_Interface_AC_t;
-
-    typedef struct __attribute__((packed))
+    typedef struct
     {
         USB_Descriptor_Hdr_t Header;
-        u8                   Subtype;
-        u8                   UnitID;
-        u8                   SourceID;
-        u8                   ControlSize;
-        u8                   ChannelControls[3];
-        u8                   FeatureUnitStrIndex;
-    } USB_Audio_Descriptor_FeatureUnit_t;
+        unsigned char        Subtype;
+        unsigned char        ACSpecification[2];
+        unsigned char        TotalLength[2];
+        unsigned char        InCollection;
+        unsigned char        InterfaceNumber_speaker;
+        unsigned char        InterfaceNumber_mic;
+    } __attribute__((packed)) USB_Audio_Descriptor_Interface_AC_TL_t;
 
-    typedef struct __attribute__((packed))
+    typedef struct
+    {
+        unsigned char Length;
+        unsigned char DescriptorType;
+        unsigned char DescriptorSubtype;
+        unsigned char BcdADC[2];
+        unsigned char TotalLength[2];
+        unsigned char InCollection;
+        unsigned char InterfaceNumbers;
+    } __attribute__((packed)) USB_Audio_StdDescriptor_Interface_AC_t;
+
+    typedef struct
     {
         USB_Descriptor_Hdr_t Header;
-        u8                   Subtype;
-        u8                   UnitID;
-        u8                   SourceID;
-        u8                   ControlSize;
-        u8                   ChannelControls[2];
-        u8                   FeatureUnitStrIndex;
-    } USB_Audio_Descriptor_FeatureUnit_Mic_t;
+        unsigned char        Subtype;
+        unsigned char        UnitID;
+        unsigned char        SourceID;
+        unsigned char        ControlSize;
+        unsigned char        ChannelControls[3];
+        unsigned char        FeatureUnitStrIndex;
+    } __attribute__((packed)) USB_Audio_Descriptor_FeatureUnit_t;
 
-    typedef struct __attribute__((packed))
-    {
-        u8 Length;
-        u8 DescriptorType;
-        u8 DescriptorSubtype;
-        u8 UnitID;
-        u8 SourceID;
-        u8 ControlSize;
-        u8 MAControls[3];
-        u8 Feature;
-    } USB_Audio_StdDescriptor_FeatureUnit_t;
-
-    typedef struct __attribute__((packed))
+    typedef struct
     {
         USB_Descriptor_Hdr_t Header;
-        u8                   Subtype;
-        u8                   TerminalLink;
-        u8                   FrameDelay;
-        u8                   AudioFormat[2];
-    } USB_Audio_Descriptor_Interface_AS_t;
+        unsigned char        Subtype;
+        unsigned char        UnitID;
+        unsigned char        SourceID;
+        unsigned char        ControlSize;
+        unsigned char        ChannelControls[2];
+        unsigned char        FeatureUnitStrIndex;
+    } __attribute__((packed)) USB_Audio_Descriptor_FeatureUnit_Mic_t;
 
-    typedef struct __attribute__((packed))
+    typedef struct
     {
-        u8  Length;
-        u8  DescriptorType;
-        u8  DescriptorSubtype;
-        u8  TerminalLink;
-        u8  Delay;
-        u16 FormatTag;
-    } USB_Audio_StdDescriptor_Interface_AS_t;
+        unsigned char Length;
+        unsigned char DescriptorType;
+        unsigned char DescriptorSubtype;
+        unsigned char UnitID;
+        unsigned char SourceID;
+        unsigned char ControlSize;
+        unsigned char MAControls[3];
+        unsigned char Feature;
+    } __attribute__((packed)) USB_Audio_StdDescriptor_FeatureUnit_t;
 
-    typedef struct __attribute__((packed))
+    typedef struct
     {
         USB_Descriptor_Hdr_t Header;
-        u8                   Subtype;
-        u8                   FormatType;
-        u8                   Channels;
-        u8                   SubFrameSize;
-        u8                   BitResolution;
-        u8                   TotalDiscreteSampleRates;
-    } USB_Audio_Descriptor_Format_t;
+        unsigned char        Subtype;
+        unsigned char        TerminalLink;
+        unsigned char        FrameDelay;
+        unsigned char        AudioFormat[2];
+    } __attribute__((packed)) USB_Audio_Descriptor_Interface_AS_t;
 
-    typedef struct __attribute__((packed))
+    typedef struct
     {
-        u8 Byte1;
-        u8 Byte2;
-        u8 Byte3;
-    } USB_Audio_SampleFreq_t;
+        unsigned char  Length;
+        unsigned char  DescriptorType;
+        unsigned char  DescriptorSubtype;
+        unsigned char  TerminalLink;
+        unsigned char  Delay;
+        unsigned short FormatTag;
+    } __attribute__((packed)) USB_Audio_StdDescriptor_Interface_AS_t;
 
-    typedef struct __attribute__((packed))
+    typedef struct
     {
-        u8 Length;
-        u8 DescriptorType;
-        u8 DescriptorSubtype;
-        u8 FormatType;
-        u8 NrChannels;
-        u8 SubFrameSize;
-        u8 BitResolution;
-        u8 SampleFrequencyType;
-    } USB_Audio_StdDescriptor_Format_t;
+        USB_Descriptor_Hdr_t Header;
+        unsigned char        Subtype;
+        unsigned char        FormatType;
+        unsigned char        Channels;
+        unsigned char        SubFrameSize;
+        unsigned char        BitResolution;
+        unsigned char        TotalDiscreteSampleRates;
+    } __attribute__((packed)) USB_Audio_Descriptor_Format_t;
 
-    typedef struct __attribute__((packed))
+    typedef struct
+    {
+        unsigned char Byte1;
+        unsigned char Byte2;
+        unsigned char Byte3;
+    } __attribute__((packed)) USB_Audio_SampleFreq_t;
+
+    typedef struct
+    {
+        unsigned char Length;
+        unsigned char DescriptorType;
+        unsigned char DescriptorSubtype;
+        unsigned char FormatType;
+        unsigned char NrChannels;
+        unsigned char SubFrameSize;
+        unsigned char BitResolution;
+        unsigned char SampleFrequencyType;
+    } __attribute__((packed)) USB_Audio_StdDescriptor_Format_t;
+
+    typedef struct
     {
         USB_Descriptor_Endpoint_t Endpoint;
-        u8                        Refresh;
-        u8                        SyncEndpointNumber;
-    } USB_Audio_Descriptor_StreamEndpoint_Std_t;
+        unsigned char             Refresh;            //add todo
+        unsigned char             SyncEndpointNumber; //add todo
+    } __attribute__((packed)) USB_Audio_Descriptor_StreamEndpoint_Std_t;
 
-    typedef struct __attribute__((packed))
+    typedef struct
     {
-        u8  Length;
-        u8  DescriptorType;
-        u8  EndpointAddress;
-        u8  MAttributes;
-        u16 MaxPacketSize;
-        u8  Interval;
-        u8  Refresh;
-        u8  SynchAddress;
-    } USB_Audio_StdDescriptor_StreamEndpoint_Std_t;
+        unsigned char  Length;
+        unsigned char  DescriptorType;
+        unsigned char  EndpointAddress;
+        unsigned char  MAttributes;
+        unsigned short MaxPacketSize;
+        unsigned char  Interval;
+        unsigned char  Refresh;
+        unsigned char  SynchAddress;
+    } __attribute__((packed)) USB_Audio_StdDescriptor_StreamEndpoint_Std_t;
 
-    typedef struct __attribute__((packed))
+    typedef struct
     {
         USB_Descriptor_Hdr_t Header;
-        u8                   Subtype;
-        u8                   Attributes;
-        u8                   LockDelayUnits;
-        u8                   LockDelay[2];
-    } USB_Audio_Descriptor_StreamEndpoint_Spc_t;
+        unsigned char        Subtype;
+        unsigned char        Attributes;
+        unsigned char        LockDelayUnits;
+        unsigned char        LockDelay[2];
+    } __attribute__((packed)) USB_Audio_Descriptor_StreamEndpoint_Spc_t;
 
-    typedef struct __attribute__((packed))
+    typedef struct
     {
-        u8  Length;
-        u8  DescriptorType;
-        u8  DescriptorSubtype;
-        u8  MAttributes;
-        u8  LockDelayUnits;
-        u16 LockDelay;
-    } USB_Audio_StdDescriptor_StreamEndpoint_Spc_t;
+        unsigned char  Length;
+        unsigned char  DescriptorType;
+        unsigned char  DescriptorSubtype;
+        unsigned char  MAttributes;
+        unsigned char  LockDelayUnits;
+        unsigned short LockDelay;
+    } __attribute__((packed)) USB_Audio_StdDescriptor_StreamEndpoint_Spc_t;
 
 /* Disable C linkage for C++ Compilers: */
 #if defined(__cplusplus)

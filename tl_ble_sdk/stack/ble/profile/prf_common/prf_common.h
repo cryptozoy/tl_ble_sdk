@@ -24,12 +24,16 @@
 
 #pragma once
 
+#ifndef BLC_ZEPHYR_BLE_INTEGRATION
+    #include <sys/queue.h>
+#endif
+
 #define BLC_PRF_DBG(en, fmt, ...) tlkapi_printf(en, "[PRF]" fmt "\n", ##__VA_ARGS__)
 
 /* Stack max settings */
-#define STACK_PRF_ACL_CONN_MAX_NUM       8
-#define STACK_PRF_ACL_CENTRAL_MAX_NUM    4
-#define STACK_PRF_ACL_PERIPHERAL_MAX_NUM 4
+#define STACK_PRF_ACL_CONN_MAX_NUM       ACL_CENTRAL_MAX_NUM+ACL_PERIPHR_MAX_NUM //LL_MAX_ACL_CONN_NUM
+#define STACK_PRF_ACL_CENTRAL_MAX_NUM    ACL_CENTRAL_MAX_NUM  //LL_MAX_ACL_CEN_NUM
+#define STACK_PRF_ACL_PERIPHERAL_MAX_NUM ACL_PERIPHR_MAX_NUM  //LL_MAX_ACL_PER_NUM
 
 /**
  * profile bound ACL role enumeration.
@@ -95,6 +99,10 @@ typedef enum
     PRF_HUMAN_INTERFACE_DEVICE_CLIENT_ENC = PRF_HUMAN_INTERFACE_DEVICE_CLIENT_START + 0x03, //used:2 other reserved
     PRF_ELECTRONIC_SHELF_LABEL_CLIENT_START,
     PRF_ELECTRONIC_SHELF_LABEL_CLIENT_END = PRF_ELECTRONIC_SHELF_LABEL_CLIENT_START + 0x08, //used:4 other reserved
+    PRF_OTA_CLIENT_START,
+    PRF_OTA_CLIENT_END = PRF_OTA_CLIENT_START + 0x01,                                       //used:2
+    PRF_SPP_CLIENT_START,
+    PRF_SPP_CLIENT_END = PRF_SPP_CLIENT_START + 0x01,
     PRF_TEST_PROFILE_CLIENT_START         = 0x70,                                           //only user 1
     PRF_USE_DEFINE_CLIENT_START           = 0x71,
     PRF_SERVER_OFFSET                     = 0x80,
@@ -111,6 +119,8 @@ typedef enum
     PRF_EVTID_CHANNEL_SOUNDING_START       = PRF_CHANNEL_SOUNDING_CLIENT_START * PRF_EVENT_ID_SIZE,
     PRF_EVTID_HUMAN_INTERFACE_DEVICE_START = PRF_HUMAN_INTERFACE_DEVICE_CLIENT_START * PRF_EVENT_ID_SIZE,
     PRF_EVTID_ELECTRONIC_SHELF_LABEL_START = PRF_ELECTRONIC_SHELF_LABEL_CLIENT_START * PRF_EVENT_ID_SIZE,
+    PRF_EVTID_OTA_START                    = PRF_OTA_CLIENT_START * PRF_EVENT_ID_SIZE,
+    PRF_EVTID_SPP_START                    = PRF_SPP_CLIENT_START * PRF_EVENT_ID_SIZE,
 } prf_event_id_enum;
 
 typedef enum
@@ -124,7 +134,16 @@ typedef enum
     PRF_EVTID_ACL_CONNECT,
     PRF_EVTID_ACL_DISCONNECT,
     PRF_EVTID_SMP_SECURITY_DONE,
-    PRF_EVTID_ACL_CONNECT_UPDATE
+    PRF_EVTID_ACL_CONNECT_UPDATE,
+    PRF_EVTID_LE_ADVERTISING_REPORT,
+
+    PRF_EVTID_LE_CS_READ_REMOTE_SUPPORTED_CAPABILITIES_COMPLETE,
+    PRF_EVTID_LE_CS_READ_REMOTE_FAE_TABLE_COMPLETE,
+    PRF_EVTID_LE_CS_CONFIG_COMPLETE,
+    PRF_EVTID_LE_CS_SECURITY_ENABLE_COMPLETE,
+    PRF_EVTID_LE_CS_PROCEDURE_ENABLE_COMPLETE,
+    PRF_EVTID_LE_CS_SUBEVENT_RESULT,
+    PRF_EVTID_LE_CS_SUBEVENT_RESULT_CONTINUE,
 } prf_common_event_id_enum;
 
 typedef enum
@@ -170,6 +189,7 @@ typedef struct blc_prf_proc
     int (*loop)(u16 connHandle);
     int (*store)(u16 connHandle, prf_nv_state_enum nvState, prf_nv_param_t *param);
 } blc_prf_proc_t;
+
 
 typedef struct
 {
@@ -257,7 +277,11 @@ typedef struct
     }
 
 void blc_prf_initialModule(prf_evt_cb_t evtCb,void *base, u32 size);
-
+/**
+ * @brief       This function retrieves the ACL connection index.
+ * @param[in]   connHandle - The connection handle.
+ * @return      int - The ACL connection index associated with the given connection handle.
+ */
 int blc_prf_getAclConnectIndex(u16 connHandle);
 
 /**
@@ -275,7 +299,6 @@ void blc_prf_main_loop(void);
  * @return      none.
  */
 void blc_prf_registerServiceModule(prf_bound_acl_role_enum usedAclRole, blc_prf_proc_t *pSvc, const void *param);
-
 /**
  * @brief       This function use read Attribute Value finish callback to high layer.
  * @param[in]   connHandle - ACL Connect.
@@ -377,3 +400,10 @@ void blc_prf_sendServiceDiscoveryFoundEvent(u16 connHandle, int svcId, u16 start
  * @return      none.
  */
 void blc_prf_sendSingleServiceDiscoveryFinishEvent(u16 connHandle, int svcId);
+
+/**
+ * @brief       This function is used for updating storage of parameters in nv. Overwrites an existing entry.
+ * @param[in]   connHandle  - ACL Connect Handle..
+ * @return      none.
+ */
+void blt_prf_updatePairingInfoByAclHandle(u16 connHandle);

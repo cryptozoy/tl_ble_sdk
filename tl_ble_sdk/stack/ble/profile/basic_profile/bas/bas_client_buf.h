@@ -23,20 +23,22 @@
  *******************************************************************************************************/
 #pragma once
 
-struct blc_bas_client{
+struct blc_bas_client
+{
     gattc_sub_ccc_msg_t ntfInput;
     /* Characteristic value handle */
-    u16 batteryLevelHdl;            /* Battery Level */
-    u16 batteryPowerStateHdl;       /* Battery Power State */
+    u16 batteryLevelHdl;      /* Battery Level */
+    u16 batteryPowerStateHdl; /* Battery Power State */
 
-    u8 batteryLevel;
-    u8 batteryPowerState;
+    u8  batteryLevel;
+    u8  batteryPowerState;
     u16 reserved;
 
-}__attribute__((packed));
+} __attribute__((packed));
 
-struct blc_bas_client_ctrl{
-    blc_prf_proc_t process;
+struct blc_bas_client_ctrl
+{
+    blc_prf_proc_t         process;
     struct blc_bas_client *pBasClient[STACK_PRF_ACL_CONN_MAX_NUM];
-}__attribute__((packed));
+} __attribute__((packed));
 

@@ -42,16 +42,16 @@
     #define CR_VOL_DN          0xf1
 
     /**
- *  @brief  Normal keyboard map
- */
+     *  @brief  Normal keyboard map
+     */
     #define KB_MAP_NORMAL {     \
         {BTN_UNPAIR, BTN_PAIR }, \
         {CR_VOL_UP,  CR_VOL_DN}, \
 }
 
     //////////////////// KEY CONFIG (EVK board) ///////////////////////////
-    #define KB_DRIVE_PINS {GPIO_PB3, GPIO_PB5} //GPIO_PD4, GPIO_PD5
-    #define KB_SCAN_PINS  {GPIO_PB6, GPIO_PB7} //GPIO_PD6, GPIO_PD7
+    #define KB_DRIVE_PINS {GPIO_PB3, GPIO_PB5}
+    #define KB_SCAN_PINS  {GPIO_PB6, GPIO_PB7}
 
     //scan pin as gpio
     #define PB3_FUNC AS_GPIO
@@ -84,8 +84,8 @@
  */
 #if UI_LED_ENABLE
     /**
-    *  @brief  Definition gpio for led
-    */
+     *  @brief  Definition gpio for led
+     */
     #define GPIO_LED_WHITE    GPIO_PD0
     #define GPIO_LED_GREEN    GPIO_PB0
     #define GPIO_LED_RED      GPIO_PB1

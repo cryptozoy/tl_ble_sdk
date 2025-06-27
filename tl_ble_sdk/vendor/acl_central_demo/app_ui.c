@@ -43,7 +43,7 @@ u16 central_disconnect_connhandle; //mark the central connection which is in un_
     #define BTN_PAIR        0x01
     #define BTN_UNPAIR      0x02
 
-u32 ctrl_btn[]            = {SW1_GPIO, SW2_GPIO};
+u32 ctrl_btn[]            = {GPIO_PE3, GPIO_PE5};
 u8  btn_map[MAX_BTN_SIZE] = {BTN_PAIR, BTN_UNPAIR};
 
 /**
@@ -327,7 +327,8 @@ void proc_central_role_unpair(void)
 void att_keyboard_media(u16 conn, u8 *p)
 {
     (void)conn;
-    (void)p;
+
+    u16 consumer_key = p[0] | p[1] << 8;
 
 #if (UI_LED_ENABLE) //Demo effect: when peripheral send Vol+/Vol- to central, LED GPIO toggle to show the result
     if (consumer_key == MKEY_VOL_UP) {

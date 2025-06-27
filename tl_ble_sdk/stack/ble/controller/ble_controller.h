@@ -37,10 +37,12 @@
 #include "stack/ble/controller/ll/ll.h"
 #include "stack/ble/controller/ll/ll_pm.h"
 
+#include "stack/ble/controller/ll/fsu/ll_fsu.h"
 #include "stack/ble/controller/ll/acl_conn/acl_conn.h"
 #include "stack/ble/controller/ll/acl_conn/acl_peripheral.h"
 #include "stack/ble/controller/ll/acl_conn/acl_central.h"
 
+#include "stack/ble/controller/ll/past/past.h"
 #include "stack/ble/controller/ll/adv/adv.h"
 #include "stack/ble/controller/ll/adv/leg_adv.h"
 #include "stack/ble/controller/ll/adv/ext_adv.h"
@@ -57,9 +59,9 @@
 
 #include "stack/ble/controller/ll/prdadv/pda.h"
 #include "stack/ble/controller/ll/prdadv/prd_adv.h"
+#include "stack/ble/controller/ll/prdadv/PAwR_adv.h"
 #include "stack/ble/controller/ll/prdadv/pda_sync.h"
-
-#include "stack/ble/controller/ll/chn_sound/cs.h"
+#include "stack/ble/controller/ll/prdadv/PAwR_sync.h"
 
 #include "stack/ble/controller/whitelist/whitelist.h"
 #include "stack/ble/controller/whitelist/resolvelist.h"

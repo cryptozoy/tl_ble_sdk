@@ -726,30 +726,6 @@ void user_init_deepRetn(void)
 {
 }
 
-
-void app_process_power_management(void)
-{
-#if (BLE_APP_PM_ENABLE)
-    //Log needs to be output ASAP, and UART invalid after suspend. So Log disable sleep.
-    //User tasks can go into suspend, but no deep sleep. So we use manual latency.
-    if (tlkapi_debug_isBusy()) {
-        blc_pm_setSleepMask(PM_SLEEP_DISABLE);
-    } else {
-        blc_pm_setSleepMask(PM_SLEEP_LEG_ADV | PM_SLEEP_LEG_SCAN | PM_SLEEP_ACL_PERIPHR | PM_SLEEP_ACL_CENTRAL);
-    }
-
-    if(blc_ll_isBleTaskIdle()&& (clock_time_exceed(blt_soft_timer_get_first_tick(),(clock_time()+ 3 *SYSTEM_TIMER_TICK_1MS))) )
-    {
-        //SUSPEND_MODE is for reference only. Customers can choose the appropriate mode based on their specific applications.
-        cpu_sleep_wakeup(SUSPEND_MODE, PM_WAKEUP_PAD|PM_WAKEUP_TIMER, blt_soft_timer_get_first_tick());
-
-        //It is important to note that if Bluetooth Low Energy (BLE) functionality is required after wakeup,
-        //rf_drv_ble_init must be added.
-        rf_drv_ble_init();
-    }
-#endif
-}
-
 /////////////////////////////////////////////////////////////////////
 // main loop flow
 /////////////////////////////////////////////////////////////////////

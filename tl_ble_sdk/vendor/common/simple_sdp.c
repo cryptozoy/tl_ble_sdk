@@ -84,14 +84,15 @@ void app_service_discovery(void)
     memset(db16, 0, ATT_DB_UUID16_NUM * sizeof(att_db_uuid16_t));
     memset(db128, 0, ATT_DB_UUID128_NUM * sizeof(att_db_uuid128_t));
 
-    if (central_sdp_pending && host_att_discoveryService(central_sdp_pending, db16, ATT_DB_UUID16_NUM, db128, ATT_DB_UUID128_NUM) == BLE_SUCCESS) { // service discovery OK
-        cur_sdp_device.char_handle[2] = blm_att_findHandleOfUuid128(db128, my_OtaUUID);                                                             //OTA
+    if (central_sdp_pending && host_att_discoveryService(central_sdp_pending, db16, ATT_DB_UUID16_NUM, db128, ATT_DB_UUID128_NUM) == BLE_SUCCESS) // service discovery OK
+    {
+        cur_sdp_device.char_handle[2] = blm_att_findHandleOfUuid128(db128, my_OtaUUID);                                                           //OTA
         cur_sdp_device.char_handle[3] = blm_att_findHandleOfUuid16(db16, CHARACTERISTIC_UUID_REPORT,
-                                                                   HID_REPORT_ID_CONSUME_CONTROL_INPUT | (HID_REPORT_TYPE_INPUT << 8));             //consume report(media key report)
+                                                                   HID_REPORT_ID_CONSUME_CONTROL_INPUT | (HID_REPORT_TYPE_INPUT << 8));           //consume report(media key report)
         cur_sdp_device.char_handle[4] = blm_att_findHandleOfUuid16(db16, CHARACTERISTIC_UUID_REPORT,
-                                                                   HID_REPORT_ID_KEYBOARD_INPUT | (HID_REPORT_TYPE_INPUT << 8));                    //normal key report
+                                                                   HID_REPORT_ID_KEYBOARD_INPUT | (HID_REPORT_TYPE_INPUT << 8));                  //normal key report
         cur_sdp_device.char_handle[5] = blm_att_findHandleOfUuid16(db16, CHARACTERISTIC_UUID_REPORT,
-                                                                   HID_REPORT_ID_MOUSE_INPUT | (HID_REPORT_TYPE_INPUT << 8));                       //mouse report
+                                                                   HID_REPORT_ID_MOUSE_INPUT | (HID_REPORT_TYPE_INPUT << 8));                     //mouse report
         //cur_sdp_device.char_handle[6] = blm_att_findHandleOfUuid128 (db128, TelinkSppDataServer2ClientUUID);      //BLE Module, SPP Server to Client
         //cur_sdp_device.char_handle[7] = blm_att_findHandleOfUuid128 (db128, TelinkSppDataClient2ServerUUID);      //BLE Module, SPP Client to Server
 
@@ -244,8 +245,9 @@ ble_sts_t host_att_discoveryService(u16 handle, att_db_uuid16_t *p16, int n16, a
     u16 uuid = DECLARATIONS_UUID_CHARACTERISTIC;
     do {
         dat[6] = ATT_OP_READ_BY_TYPE_REQ;
-        if (app_char_discovery(dat, handle, s, 0xffff, (u8 *)&uuid, 2)) { // 1s
-            return GATT_ERR_SERVICE_DISCOVERY_TIMEOUT;                    //timeout
+        if (app_char_discovery(dat, handle, s, 0xffff, (u8 *)&uuid, 2)) // 1s
+        {
+            return GATT_ERR_SERVICE_DISCOVERY_TIMEOUT;                  //timeout
         }
 
         // process response data
@@ -254,7 +256,8 @@ ble_sts_t host_att_discoveryService(u16 handle, att_db_uuid16_t *p16, int n16, a
             break;
         }
 
-        if (p_rsp->datalen == 21) { //uuid128
+        if (p_rsp->datalen == 21) //uuid128
+        {
             u8 *pd = p_rsp->data;
             while (p_rsp->l2capLen > 21) {
                 s = pd[3] + pd[4] * 256;
@@ -268,7 +271,8 @@ ble_sts_t host_att_discoveryService(u16 handle, att_db_uuid16_t *p16, int n16, a
                 p_rsp->l2capLen -= 21;
                 pd += 21;
             }
-        } else if (p_rsp->datalen == 7) { //uuid16
+        } else if (p_rsp->datalen == 7) //uuid16
+        {
             u8 *pd = p_rsp->data;
             while (p_rsp->l2capLen > 7) {
                 s = pd[3] + pd[4] * 256;
@@ -292,10 +296,12 @@ ble_sts_t host_att_discoveryService(u16 handle, att_db_uuid16_t *p16, int n16, a
     //--------- use att_find_info to find the reference property for hid ----------
     p16 = ps16;
     for (int i = 0; i < i16; i++) {
-        if (p16->uuid == CHARACTERISTIC_UUID_REPORT) {                  //find reference
+        if (p16->uuid == CHARACTERISTIC_UUID_REPORT)                  //find reference
+        {
             dat[6] = ATT_OP_FIND_INFORMATION_REQ;
-            if (app_find_char_info(dat, handle, p16->handle, 0xffff)) { // 1s
-                return GATT_ERR_SERVICE_DISCOVERY_TIMEOUT;              //timeout
+            if (app_find_char_info(dat, handle, p16->handle, 0xffff)) // 1s
+            {
+                return GATT_ERR_SERVICE_DISCOVERY_TIMEOUT;            //timeout
             }
 
             ble_att_findInfoRsp_t *p_rsp = (ble_att_findInfoRsp_t *)dat;
@@ -384,14 +390,14 @@ int dev_char_info_store_peer_att_handle(dev_char_info_t *pdev_char)
             }
     #endif
 
-            // char_handle[0] :  MIC
-            // char_handle[1] :  Speaker
-            // char_handle[2] :  OTA
-            // char_handle[3] :  Consume Report
-            // char_handle[4] :  Key Report
-            // char_handle[5] :  mouse report
-            // char_handle[6] :  BLE Module, SPP Server to Client
-            // char_handle[7] :  BLE Module, SPP Client to Server
+            //           char_handle[0] :  MIC
+            //           char_handle[1] :  Speaker
+            //           char_handle[2] :  OTA
+            //           char_handle[3] :  Consume Report
+            //           char_handle[4] :  Key Report
+            //           char_handle[5] :  mouse report
+            //           char_handle[6] :  BLE Module, SPP Server to Client
+            //           char_handle[7] :  BLE Module, SPP Client to Server
             flash_write_page(current_flash_adr + OFFSETOF(dev_att_t, char_handle) + 2 * 2, 2, (u8 *)&pdev_char->char_handle[2]); //save OTA att_handle
             flash_write_page(current_flash_adr + OFFSETOF(dev_att_t, char_handle) + 3 * 2, 2, (u8 *)&pdev_char->char_handle[3]); //save Consume Report att_handle
             flash_write_page(current_flash_adr + OFFSETOF(dev_att_t, char_handle) + 4 * 2, 2, (u8 *)&pdev_char->char_handle[4]); //save Key Report att_handle

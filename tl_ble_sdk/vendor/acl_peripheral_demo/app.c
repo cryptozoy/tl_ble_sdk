@@ -658,7 +658,7 @@ _attribute_no_inline_ void user_init_normal(void)
 
     rf_set_power_level_index(RF_POWER_P0dBm);
 
-#if (PM_DEEPSLEEP_RETENTION_ENABLE)
+#if (BLE_APP_PM_ENABLE)
     blc_ll_initPowerManagement_module();
     blc_pm_setSleepMask(PM_SLEEP_LEG_ADV | PM_SLEEP_ACL_PERIPHR);
 
@@ -668,13 +668,15 @@ _attribute_no_inline_ void user_init_normal(void)
     blc_pm_setDeepsleepRetentionThreshold(95);
         /*!< early wakeup time with a threshold of approxiamtely 30us. */
         #if (MCU_CORE_TYPE == MCU_CORE_B91)
-    blc_pm_setDeepsleepRetentionEarlyWakeupTiming(580);
+    blc_pm_setDeepsleepRetentionEarlyWakeupTiming(620);
         #elif (MCU_CORE_TYPE == MCU_CORE_B92)
-    blc_pm_setDeepsleepRetentionEarlyWakeupTiming(580);
+    blc_pm_setDeepsleepRetentionEarlyWakeupTiming(655);
         #elif (MCU_CORE_TYPE == MCU_CORE_TL321X)
-    blc_pm_setDeepsleepRetentionEarlyWakeupTiming(510);
+    blc_pm_setDeepsleepRetentionEarlyWakeupTiming(540);
         #elif (MCU_CORE_TYPE == MCU_CORE_TL721X)
-    blc_pm_setDeepsleepRetentionEarlyWakeupTiming(560);
+    blc_pm_setDeepsleepRetentionEarlyWakeupTiming(580);
+       #elif (MCU_CORE_TYPE == MCU_CORE_TL322X)
+    blc_pm_setDeepsleepRetentionEarlyWakeupTiming(920);
         #endif
     #else
     blc_pm_setDeepsleepRetentionEnable(PM_DeepRetn_Disable);
@@ -715,11 +717,6 @@ _attribute_ram_code_ void user_init_deepRetn(void)
 
     blc_ll_recoverDeepRetention();
 
-    /***
-     * TL321X(buteo):
-     *   PLL_192M_CCLK_96M_HCLK_48M_PCLK_24M_MSPI_48M, the time from retention_reset(.s file) to here is 550us.
-     *   PLL_192M_CCLK_32M_HCLK_32M_PCLK_32M_MSPI_48M, the time from retention_reset(.s file) to here is 578us
-     */
     DBG_CHN0_HIGH;
     irq_enable();
 
@@ -799,6 +796,8 @@ int main_idle_loop(void)
 
 #if (UI_KEYBOARD_ENABLE)
     proc_keyboard(0, 0, 0);
+#elif (UI_BUTTON_ENABLE)
+    proc_button();
 #endif
 
     ////////////////////////////////////// PM entry /////////////////////////////////

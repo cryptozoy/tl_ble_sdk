@@ -43,7 +43,7 @@
  *          In USB applications, 1. calling the usb_set_pin(1) interface (equivalent to usb_set_pin_en) will re-enable the dp_through_swire function 2. calling the usb_set_pin(0) interface will disable the dp_through_swire function.
  */
 #ifndef DP_THROUGH_SWIRE_DIS
-#define DP_THROUGH_SWIRE_DIS      1
+#define DP_THROUGH_SWIRE_DIS        1
 #endif
 
 /* If using Andes toolchain, these two Macro are defined in it's toolchain */
@@ -53,6 +53,7 @@
 #define mmisc_ctl  0x7D0
 #define mcache_ctl 0x7CA
 #endif
+
 /**
  * @brief   The A3 chip has a problem (the A4 doesn't) :
             If the hardware board has 1.4V dcdc inductor component and uses 1.8V GPIO,
@@ -60,25 +61,29 @@
             otherwise there will be a voltage pulse in vdd1v2 and vddo3.
  */
 #define CHIP_A3_VERSION_DCDC_1P4_LDO_2P0_EN         0
+
 .extern pm_retention_register_recover
 
 //According to the current internal seal flash model of B91m, the maximum time between the flash awakening and the operating flash is 20us, which leaves some margin and is set to 25us.
 //When adding flash later, if tRES1 is greater than 25us, this waiting time needs to be updated. (flash tRES1, which can be viewed in the comments of the variable flash_support_mid.)
 //(add by weihua.zhang 20230811)
 #define EFUSE_LOAD_AND_FLASH_WAKEUP_LOOP_NUM        320 //25us
+#define FLASH_LOOP_NUM_TEST                         0
 
 //The default driver configuration is 128K to ensure that the default driver configuration can work properly on all models.
 //In actual use, please configure the sram size according to your own model, otherwise the efficiency will be affected.
 //the most efficient use is:
 //IRAM is used to store code, DRAM is used to store data, if the data-related segments are stored in IRAM, the efficiency will be affected.
 //(add by weihua.zhang, confirmed by kaixin.chen and shujuan.chu 20230725)
-#define SRAM_128K      1    //128KSRAM, 128KB-IRAM(96KB-Retention)/0KB-DRAM
+#define SRAM_128K      1    //128KSRAM, 128KB-IRAM(96KB-Retention)/0KB-DRAM
 #define SRAM_256K      2    //256KSRAM, 256KB-IRAM(96KB-Retention)/0KB-DRAM
 #define SRAM_384K      3    //384KSRAM, 256KB-IRAM(96KB-Retention)/128KB-DRAM
 #define SRAM_512K      4    //512KSRAM, 256KB-IRAM(96KB-Retention)/256KB-DRAM
 #if(__CHANNEL_SOUNDING_EN__)
     #define SRAM_SIZE      SRAM_512K
 #elif(__LE_AUDIO_EN__)
+    #define SRAM_SIZE      SRAM_512K
+#elif(__PROJECT_ESLP_AP_DEMO__)
     #define SRAM_SIZE      SRAM_512K
 #else
     #define SRAM_SIZE      SRAM_128K
@@ -99,7 +104,7 @@
     .equ __DRAM_1_EN,   1
     .equ __DRAM_2_EN,   1
     .equ __DRAM_DIS,    0
-#else
+#elif (SRAM_SIZE == SRAM_128K)
     .equ __IRAM_2_EN,   0
     .equ __DRAM_1_EN,   0
     .equ __DRAM_2_EN,   0
@@ -135,7 +140,13 @@
     .align 2
 _RESET_ENTRY:
     j        _START
-
+    //free the 6th ~ 7th byte to store the crc type of the bin file
+    /* This configuration is specifically for RF_Certification and does not need to be enabled for other scenarios */
+#ifdef RF_CERTIFICATION_CGF_EN
+    .org 0x10
+    .word(_RF_CERTIFICATION_CFG_ADDR_OFFSET)
+#endif
+    
 /* used to check flash protection function consistency between the old and new  firmware when OTA upgrading */
 #if APP_FLASH_PROTECTION_ENABLE
     .org 0x15    //correspond to "FIRMWARE_FLASH_PROTECTION_FLAG_ADDR" in mcu_boot.h
@@ -161,8 +172,6 @@ _RESET_ENTRY:
     .word ('T'<<24 | 'L'<<16 | 'N'<<8 | 'K')
 
     .org 0x24
-
-    //channel sounding project need to enable 2-wire mode locally. other projects not care temporally.
     .word (0x3B0097A9)             //DREAD:   cmd:1x, addr:1x, data:2x, dummy:8
     //.word (0xBB0093B9)             //X2READ:  cmd:1x, addr:2x, data:2x, dummy:4
     //.word (0x6B0097AA)             //QREAD:   cmd:1x, addr:1x, data:4x, dummy:8
@@ -172,7 +181,6 @@ _RESET_ENTRY:
     .align 2
 
 _START:
-
 #if 0
     // add debug, PB4 output 1
     lui     t0, 0x80140
@@ -181,7 +189,7 @@ _START:
     sb      t1, 0x30a(t0)        //0x8014030a  PB oen     =  0xef
     sb      t2, 0x30b(t0)        //0x8014030b  PB output  =  0x10
 #endif
-    
+
 #if CHIP_A3_VERSION_DCDC_1P4_LDO_2P0_EN
     /* Set the power supply mode to DCDC_LDO. */
     li      t0, 0x801401e0
@@ -244,7 +252,7 @@ _ANA_TIMEROUT:
     sb      t1, 0x0(t0)     //0x1401ef = 0x20; reboot
 _ANA_TIMEROUT_END:
 #endif
-    
+
     /* Initialize global pointer */
     .option push
     .option norelax
@@ -255,7 +263,7 @@ _ANA_TIMEROUT_END:
     lui     t0, 0x80100
     addi    t0 , t0 , 0x700
     li      t1, 0x00
-    sb      t1, 0x501(t0)  //0x80100c01 -> 0x00  <7>: 0 swire_usb_dis
+    sb      t1, 0x501(t0)  //0x80100c01 -> 0x00  <7>: 0 swire_usb_dis 
 #endif
 
     /* Initialize stack pointer */
@@ -433,12 +441,17 @@ _ISTART:
     sb      t1, 0x30a(t0)        //0x8014030a  PB oen     =  0xef
     sb      t2, 0x30b(t0)        //0x8014030b  PB output  =  0x10
 #endif
-    
-    /* Initialize global pointer */
 
+    /* Initialize global pointer */
     la     gp, __global_pointer$
     .option pop
 
+#if DP_THROUGH_SWIRE_DIS
+    lui     t0, 0x80100
+    addi    t0 , t0 , 0x700
+    li      t1, 0x00
+    sb      t1, 0x501(t0)  //0x80100c01 -> 0x00  <7>: 0 swire_usb_dis 
+#endif
     /* Initialize stack pointer */
     la     t0, _STACK_TOP
     mv     sp, t0
@@ -476,19 +489,12 @@ _ISTART:
     csrw   mcache_ctl,  t0
     fence.i
 
-    /* after retention, digital register will be lost, restore some register values that need to be used */
+ /* after retention, digital register will be lost, restore some register values that need to be used */
     la     t0, pm_retention_register_recover
     jalr   t0
-    /* flash wakeup */
-#if 0
-    /*flash poweron need delay about 150us */
-    li      t0 , 0
-    li      t1 , 2000
-_WAIT_FLASH_POWERON:
-    addi    t0 , t0 , 1
-    bgeu    t1 , t0 , _WAIT_FLASH_POWERON
-#endif
 
+
+    /* flash wakeup */
     lui     t0, 0xA3FFF
     addi    t0, t0, 0x790
     li      t1, 0x0e
@@ -523,20 +529,36 @@ _MSPI_WAIT_2:
     li      t1, 0x0a
     sb      t1, 0x78c(t0)       //xip_enable        :0xA3FFFF1c = 0x0a
 
+#if FLASH_LOOP_NUM_TEST
+    // add debug, PB4 output 1
+    lui     t0, 0x80140
+    li      t1, 0xef
+    li      t2, 0x10
+    sb      t1, 0x30a(t0)        //0x8014030a  PB oen     =  0xef
+    sb      t2, 0x30b(t0)        //0x8014030b  PB output  =  0x10
+#endif
+
     /*flash wakeup need delay about 20us */
     /*efuse load need delay about 0us */
-    li      t0 , 0
-    li      t1 , EFUSE_LOAD_AND_FLASH_WAKEUP_LOOP_NUM
+    li      t0, 0
+    li      t1, EFUSE_LOAD_AND_FLASH_WAKEUP_LOOP_NUM
 _WAIT_EFUSE_LOAD_AND_FLASH_WAKEUP_FINISH:
-    addi    t0 , t0 , 1
-    bgeu    t1 , t0 , _WAIT_EFUSE_LOAD_AND_FLASH_WAKEUP_FINISH
+    addi    t0, t0 , 1
+    bgeu    t1, t0 , _WAIT_EFUSE_LOAD_AND_FLASH_WAKEUP_FINISH
+
+#if FLASH_LOOP_NUM_TEST
+    // add debug, PB4 output 0
+    lui     t0, 0x80140
+    li      t2, 0x00
+    sb      t2, 0x30b(t0)        //0x8014030b  PB output  =  0x00
+#endif
 
 _MULTI_ADDRESS_BEGIN:
-    lui     t0 , 0xA3FFF
-    addi    t0 , t0 , 0x790
-    la      t1 , g_pm_mspi_cfg
-    lw      t2 , 0(t1)
-    sw      t2 , 0x790(t0)      //g_pm_mspi_cfg->0xA3FFFF20
+    lui     t0, 0xA3FFF
+    addi    t0, t0 , 0x790
+    la      t1, g_pm_mspi_cfg
+    lw      t2, 0(t1)
+    sw      t2, 0x790(t0)       //g_pm_mspi_cfg->0xA3FFFF20
 
     /* Zero .bss section in sram */
 _IZERO_BSS:
@@ -573,8 +595,9 @@ _IFILL_STK_BEGIN:
     addi   t2, t2, 4
     j      _IFILL_STK_BEGIN
 #endif
+
     /* Move Data from flash to sram */
-    //Read the flash as late as possible to lengthen the time from the wake up to the operation of the flash.
+//Read the flash as late as possible to lengthen the time from the wake up to the operation of the flash.
 _IDATA_INIT:
     la     t1, _DATA_LMA_START
     la     t2, _DATA_VMA_START

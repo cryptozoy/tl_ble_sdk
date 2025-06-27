@@ -54,6 +54,7 @@
  *          Set to 1: Restore the settings of the previous version's secondary filtering, only as a reserved configuration for testing, and cannot be used in actual scenarios
  *
  */
+// #define RF_RX_SEC_FLT_CONFIG 0
 #define     SW_DCOC_EN                                  1 //enable and verify by lihaojie.
 
 /**
@@ -523,7 +524,7 @@ typedef enum
     RF_CHANNEL_4    = BIT(4), /**< RF channel 4 */
     RF_CHANNEL_5    = BIT(5), /**< RF channel 5 */
     RF_CHANNEL_NONE = 0x00,   /**< none RF channel*/
-    RF_CHANNEL_ALL  = 0x0f,   /**< all RF channel */
+    RF_CHANNEL_ALL  = 0x3f,   /**< all RF channel */
 } rf_channel_e;
 
 /**
@@ -547,7 +548,6 @@ typedef enum
  *                                         RF global constants                                                        *
  *********************************************************************************************************************/
 extern const rf_power_level_e rf_power_Level_list[30];
-
 
 /**********************************************************************************************************************
  *                                         RF function declaration                                                    *

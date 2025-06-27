@@ -23,12 +23,12 @@
  *******************************************************************************************************/
 #pragma once
 
-#ifndef __PROJECT_CS_INITIATOR_DEMO__
-    #define __PROJECT_CS_INITIATOR_DEMO__ 0
+#ifndef __PROJECT_ACL_CONN_DEMO__
+    #define __PROJECT_ACL_CONN_DEMO__ 0
 #endif
 
-#ifndef __PROJECT_CS_REFLECTOR_DEMO__
-    #define __PROJECT_CS_REFLECTOR_DEMO__ 0
+#ifndef __PROJECT_ACL_CEN_DEMO__
+    #define __PROJECT_ACL_CEN_DEMO__ 0
 #endif
 
 #ifndef __PROJECT_ACL_PER_DEMO__
@@ -39,6 +39,18 @@
     #define __PROJECT_FEATURE_TEST__ 0
 #endif
 
+#ifndef __PROJECT_ESLP_ESL_DEMO__
+    #define __PROJECT_ESLP_ESL_DEMO__ 0
+#endif
+
+#ifndef __PROJECT_ESLP_AP_DEMO__
+    #define __PROJECT_AP_ESL_DEMO__ 0
+#endif
+
+#ifndef __PROJECT_BLE_CONTROLLER__
+    #define __PROJECT_BLE_CONTROLLER__ 0
+#endif
+
 #if (__PROJECT_ACL_CONN_DEMO__)
     #include "vendor/acl_connection_demo/app_config.h"
 #elif (__PROJECT_ACL_CEN_DEMO__)
@@ -47,16 +59,18 @@
     #include "vendor/acl_peripheral_demo/app_config.h"
 #elif (__PROJECT_FEATURE_TEST__)
     #include "vendor/feature_test/app_config.h"
+#elif (__PROJECT_ESLP_ESL_DEMO__)
+    #include "vendor/eslp_esl_demo/app_config.h"
+#elif (__PROJECT_ESLP_AP_DEMO__)
+    #include "vendor/eslp_ap_demo/app_config.h"
 #elif (__PROJECT_TPLL_DEMOE__)
     #include <vendor/2p4g_tpll/app_config.h>
 #elif (__PROJECT_GEN_FSK_DEMOE__)
     #include "vendor/2p4g_gen_fsk/app_config.h"
 #elif (__PROJECT_2P4G_FEATURE_DEMOE__)
     #include "vendor/2p4g_feature_test/app_config.h"
-#elif (__PROJECT_CS_INITIATOR_DEMO__)
-    #include "vendor/cs_initiator_demo/app_config.h"
-#elif (__PROJECT_CS_REFLECTOR_DEMO__)
-    #include "vendor/cs_reflector_demo/app_config.h"
+#elif (__PROJECT_BLE_CONTROLLER__)
+    #include "vendor/ble_controller/app_config.h"
 #else
     #include "vendor/common/default_config.h"
 #endif

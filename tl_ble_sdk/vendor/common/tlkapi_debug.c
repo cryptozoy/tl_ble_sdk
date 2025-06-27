@@ -79,7 +79,7 @@ _attribute_ram_code_sec_noinline_ void tlkapi_debug_putchar(uint08 byte)
     uint08 out_level = reg_gpio_out(TLKAPI_DEBUG_GPIO_PIN);
     uint08 bit0      = out_level & ~(TLKAPI_DEBUG_GPIO_PIN);
     uint08 bit1      = out_level | TLKAPI_DEBUG_GPIO_PIN;
-        #elif (MCU_CORE_TYPE == MCU_CORE_TL721X || MCU_CORE_TYPE == MCU_CORE_TL321X)
+        #elif (MCU_CORE_TYPE == MCU_CORE_TL721X || MCU_CORE_TYPE == MCU_CORE_TL321X || MCU_CORE_TYPE == MCU_CORE_TL322X)
     uint16 bits[14] = {0};
     uint16 bit0     = (TLKAPI_DEBUG_GPIO_PIN & 0xff) << 8;
     ;
@@ -111,7 +111,8 @@ _attribute_ram_code_sec_noinline_ void tlkapi_debug_putchar(uint08 byte)
          */
         unsigned char bit_nop = sys_clk.cclk * 250000 / TLKAPI_DEBUG_GSUART_BAUDRATE - 2;
         for (j = 0; j < 14; j++) {
-            for (i = 0; i < bit_nop; i++) { //for:4 nop
+            for (i = 0; i < bit_nop; i++) //for:4 nop
+            {
                 __asm__("nop");
             }
             __asm__("nop");
@@ -148,16 +149,45 @@ _attribute_ram_code_sec_ void tlkapi_uart_irq_handler(void)
         }
     }
 }
+#if (CHIP_TYPE==CHIP_TYPE_TL322X)
+    #if (TLKAPI_DEBUG_UART_PORT   == DBG_UART_PORT0)
+        #if(CLIC_ENABLE == 1)
+            CLIC_ISR_REGISTER(tlkapi_uart_irq_handler, IRQ_UART0)
+        #else
+            PLIC_ISR_REGISTER(tlkapi_uart_irq_handler, IRQ_UART0)
+        #endif
+    #elif (TLKAPI_DEBUG_UART_PORT == DBG_UART_PORT1)
+        #if(CLIC_ENABLE == 1)
+            CLIC_ISR_REGISTER(tlkapi_uart_irq_handler, IRQ_UART1)
+        #else
+            PLIC_ISR_REGISTER(tlkapi_uart_irq_handler, IRQ_UART1)
+        #endif
+    #elif (TLKAPI_DEBUG_UART_PORT == DBG_UART_PORT2)
+        #if(CLIC_ENABLE == 1)
+            CLIC_ISR_REGISTER(tlkapi_uart_irq_handler, IRQ_UART2)
+        #else
+            PLIC_ISR_REGISTER(tlkapi_uart_irq_handler, IRQ_UART2)
+        #endif
+    #elif (TLKAPI_DEBUG_UART_PORT == DBG_UART_PORT3)
+        #if(CLIC_ENABLE == 1)
+            CLIC_ISR_REGISTER(tlkapi_uart_irq_handler, IRQ_IRQ_UART3)
+        #else
+            PLIC_ISR_REGISTER(tlkapi_uart_irq_handler, IRQ_IRQ_UART3)
+        #endif
+    #elif (TLKAPI_DEBUG_UART_PORT == DBG_UART_PORT4)
+        #if(CLIC_ENABLE == 1)
+            CLIC_ISR_REGISTER(tlkapi_uart_irq_handler, IRQ_UART4)
+        #else
+            PLIC_ISR_REGISTER(tlkapi_uart_irq_handler, IRQ_UART4)
+        #endif
+    #endif
+#else
         #if (TLKAPI_DEBUG_UART_PORT == DBG_UART_PORT0)
-            #if (MCU_CORE_N22_ENABLE)
-CLIC_ISR_REGISTER(tlkapi_uart_irq_handler, IRQ_UART0)
-            #else
 PLIC_ISR_REGISTER(tlkapi_uart_irq_handler, IRQ_UART0)
-            #endif
         #elif (TLKAPI_DEBUG_UART_PORT == DBG_UART_PORT1)
 PLIC_ISR_REGISTER(tlkapi_uart_irq_handler, IRQ_UART1)
         #endif
-
+#endif
     #endif
 
 
@@ -186,9 +216,13 @@ int tlkapi_debug_init(void)
     extern my_fifo_t *myudb_print_fifo;
     myudb_print_fifo          = tlkapi_print_fifo;
     tlkDbgCtl.dbg_chn         = TLKAPI_DEBUG_CHANNEL_UDB;
-    tlkDbgCtl.fifo_format_len = 12;
+    tlkDbgCtl.fifo_format_len = 9 + 6;// 9 bytes USB head + 6 bytes g_debug_serial, in tlk_printf func
     myudb_usb_init(tlkDbgCtl.usb_id, NULL);
+#if (MCU_CORE_TYPE != MCU_CORE_TL322X)
     usb_set_pin_en();
+#else
+    usb1_set_pin();
+#endif
     #else
 
         #if (TLKAPI_DEBUG_CHANNEL == TLKAPI_DEBUG_CHANNEL_GSUART)
@@ -261,7 +295,8 @@ _attribute_ram_code_sec_noinline_ void tlkapi_debug_handler(void)
         u32 r = irq_disable();
         if (!tlkDbgCtl.uartSendIsBusy && tlkapi_print_fifo->wptr != tlkapi_print_fifo->rptr) {
             u8 *pData = tlkapi_print_fifo->p + (tlkapi_print_fifo->rptr & (tlkapi_print_fifo->num - 1)) * tlkapi_print_fifo->size;
-            uart_debug_prepare_dma_data(pData + 4, pData[0]);
+            uint16 dataLen = ((uint16)pData[1] << 8) | pData[0];
+            uart_debug_prepare_dma_data(pData + 4, dataLen);
             tlkDbgCtl.uartSendIsBusy = 1;
             tlkapi_print_fifo->rptr++;
         }
@@ -384,7 +419,8 @@ _attribute_ram_code_sec_noinline_ void tlkapi_send_str_data(char *str, u8 *pData
         while (ns--) {
             *pd++ = *str++;
         }
-    } else { // TLKAPI_DEBUG_CHANNEL_GSUART or TLKAPI_DEBUG_CHANNEL_UART
+    } else // TLKAPI_DEBUG_CHANNEL_GSUART or TLKAPI_DEBUG_CHANNEL_UART
+    {
 
     #if (TLKAPI_USE_INTERNAL_SPECIAL_UART_TOOL)
         int len = ns + data_len + 5;
@@ -407,7 +443,7 @@ _attribute_ram_code_sec_noinline_ void tlkapi_send_str_data(char *str, u8 *pData
         }
             //add a '\n' by UART tool
     #else
-        u16 max_len = ((tlkDbgCtl.fifo_data_len - ns) - 3 - 4) / 3;
+        u16 max_len = ((tlkDbgCtl.fifo_data_len - ns) - 3 - 4 - 6) / 3;
         if (data_len > max_len) {
             data_len = max_len;
         }
@@ -545,7 +581,7 @@ int tlk_printf(const char *format, ...)
     int ret;
 
 
-    #if ((MCU_CORE_TYPE == MCU_CORE_B91) || (MCU_CORE_TYPE == MCU_CORE_B92) || (MCU_CORE_TYPE == MCU_CORE_TL721X) || (MCU_CORE_TYPE == MCU_CORE_TL321X))
+    #if ((MCU_CORE_TYPE == MCU_CORE_B91) || (MCU_CORE_TYPE == MCU_CORE_B92) || (MCU_CORE_TYPE == MCU_CORE_TL721X) || (MCU_CORE_TYPE == MCU_CORE_TL321X) || (MCU_CORE_TYPE == MCU_CORE_TL322X))
     va_list args;
     va_start(args, format);
 

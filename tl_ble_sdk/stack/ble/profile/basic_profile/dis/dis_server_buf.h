@@ -23,11 +23,12 @@
  *******************************************************************************************************/
 #pragma once
 
-struct blc_dis_server{
+struct blc_dis_server
+{
 };
 
-struct blc_dis_server_ctrl{
-    blc_prf_proc_t process;
+struct blc_dis_server_ctrl
+{
+    blc_prf_proc_t        process;
     struct blc_dis_server disServer;
-}__attribute__((packed));
-
+} __attribute__((packed));

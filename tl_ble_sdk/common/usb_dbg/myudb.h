@@ -89,8 +89,16 @@ void usb_send_str_u32s(char *str, u32 d0, u32 d1, u32 d2, u32 d3);
 #define my_irq_restore() core_restore_interrupt(rie)
 
 //#define           log_uart(d)             uart_send_byte_dma(0,d)
-#define log_uart(d) (reg_usb_ep8_dat = d)
 
+#if (MCU_CORE_TYPE != CHIP_TYPE_TL322X)
+#define log_uart(d) (reg_usb_ep8_dat = d)
+#else
+#define log_uart(d) (reg_usb1_ep8_dat = d)
+#endif
+
+#define DEBUG_PORT          GPIO_PB2
+#define log_ref_gpio_h()    gpio_set_high_level(DEBUG_PORT)
+#define log_ref_gpio_l()    gpio_set_low_level(DEBUG_PORT)
 
 #define log_hw_ref()          \
     if (VCD_EN) {             \

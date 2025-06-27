@@ -1,12 +1,12 @@
 /********************************************************************************************************
  * @file    usbdesc.c
  *
- * @brief   This is the source file for BLE SDK
+ * @brief   This is the source file for Telink RISC-V MCU
  *
- * @author  BLE GROUP
- * @date    06,2022
+ * @author  Driver Group
+ * @date    2019
  *
- * @par     Copyright (c) 2022, Telink Semiconductor (Shanghai) Co., Ltd. ("TELINK")
+ * @par     Copyright (c) 2019, Telink Semiconductor (Shanghai) Co., Ltd. ("TELINK")
  *
  *          Licensed under the Apache License, Version 2.0 (the "License");
  *          you may not use this file except in compliance with the License.
@@ -21,16 +21,16 @@
  *          limitations under the License.
  *
  *******************************************************************************************************/
-#include <application/usbstd/usbdesc.h>
-#include "tl_common.h"
-#include "drivers.h"
+#include "usbdesc.h"
+
+#include "driver.h"
 
 #if (USB_MOUSE_ENABLE)
-    #include <application/app/usbmouse_i.h>
+    #include "../app/usbmouse_i.h"
 #endif
 
 #if (USB_KEYBOARD_ENABLE)
-    #include <application/app/usbkb_i.h>
+    #include "../app/usbkb_i.h"
 #endif
 
 #if (USB_SOMATIC_ENABLE)
@@ -38,14 +38,13 @@
 #endif
 
 #if (USB_SPEAKER_ENABLE || USB_MIC_ENABLE)
-    #include <application/app/usbaud_i.h>
+    #include "../app/usbaud_i.h"
 #endif
 
 #if (USB_CDC_ENABLE)
-    #include <application/app/usbcdc_i.h>
+    #include "../app/usbcdc_i.h"
 #endif
-
-#include "usb.h"
+//#include "usb.h"
 
 // request parameters
 /** Language descriptor structure. This descriptor, located in FLASH memory, is returned when the host requests
@@ -57,42 +56,7 @@ const USB_Descriptor_String_t language_desc = {
     {LANGUAGE_ID_ENG}
 };
 
-/** Manufacturer descriptor string. This is a Unicode string containing the manufacturer's details in human readable
- *  form, and is read out upon request by the host when the appropriate string ID is requested, listed in the Device
- *  Descriptor.
- */
-const USB_Descriptor_String_t vendor_desc = {
-    {sizeof(USB_Descriptor_Hdr_t) + sizeof(STRING_VENDOR) - 2, DTYPE_String}, // Header
-    STRING_VENDOR
-};
-
-/** Product descriptor string. This is a Unicode string containing the product's details in human readable form,
- *  and is read out upon request by the host when the appropriate string ID is requested, listed in the Device
- *  Descriptor.
- */
-const USB_Descriptor_String_t product_desc = {
-    {sizeof(USB_Descriptor_Hdr_t) + sizeof(STRING_PRODUCT) - 2,
-     DTYPE_String}, // Header
-    STRING_PRODUCT
-};
-
-/** Serial number string. This is a Unicode string containing the device's unique serial number, expressed as a
- *  series of uppercase hexadecimal digits.
- */
-const USB_Descriptor_String_t serial_desc = {
-    {sizeof(USB_Descriptor_Hdr_t) + sizeof(STRING_SERIAL) - 2, DTYPE_String}, // Header
-    STRING_SERIAL
-};
-
-
 #if (MS_OS_DESCRIPTOR_ENABLE)
-const USB_Descriptor_String_t microsoft_OS_desc = {
-    {sizeof(USB_Descriptor_Hdr_t) + sizeof(STRING_MSFT) - 2,
-     DTYPE_String}, // Header
-    STRING_MSFT
-};
-
-
 const unsigned char OSFeatureDescriptor[] = {
     0x26,
     0x01,
@@ -506,22 +470,20 @@ const unsigned char OSFeatureDescriptor_compatID[] = {
 
 
 #ifndef ID_PRODUCT
-    #define ID_PRODUCT ID_PRODUCT_BASE
+#define ID_PRODUCT  (ID_PRODUCT_BASE | (USB_PRINTER_ENABLE?(1<<0):0) | (USB_SPEAKER_ENABLE?(1<<1):0) | (USB_MIC_ENABLE?(1<<2):0)    \
+     | (USB_MOUSE_ENABLE?(1<<3):0) | (USB_KEYBOARD_ENABLE?(1<<4):0) | (USB_SOMATIC_ENABLE?(1<<5):0))
 #endif
+
 
 const USB_Descriptor_Device_t device_desc = {
     {sizeof(USB_Descriptor_Device_t), DTYPE_Device}, // Header
-#if (MS_OS_DESCRIPTOR_ENABLE || DESC_IAD_ENABLE)
+#if (MS_OS_DESCRIPTOR_ENABLE)
     0x0200, // USBSpecification, USB 2.0
 #else
     0x0110, // USBSpecification, USB 1.1
 #endif
-#if (DESC_IAD_ENABLE)
-    USB_CSCP_IADDeviceClass,
-    USB_CSCP_IADDeviceSubclass,
-    USB_CSCP_IADDeviceProtocol,
-#elif (USB_CDC_ENABLE)
-    CDC_CSCP_CDC_Class,        // Class
+#if (USB_CDC_ENABLE)
+    CDC_CSCP_CDCClass, // Class
     USB_CSCP_NoDeviceSubclass, // SubClass
     USB_CSCP_NoDeviceProtocol, // Protocol
 #else
@@ -529,18 +491,16 @@ const USB_Descriptor_Device_t device_desc = {
     USB_CSCP_NoDeviceSubclass, // SubClass
     USB_CSCP_NoDeviceProtocol, // Protocol
 #endif
-    8, // Endpoint0Size, Maximum Packet Size for Zero Endpoint. Valid Sizes are 8, 16, 32, 64
-    ID_VENDOR, // VendorID
 
-#if AUDIO_HOGP
-    0xc080, //ID_PRODUCT, // ProductID
-#else
-    ID_PRODUCT,
-#endif
-    0x0100, // .ReleaseNumber
+    USB_CTR_ENDPOINT_SIZE, // Endpoint0Size, Maximum Packet Size for Zero Endpoint. B91/B92 only support 8, others can be config 8, 16, 32, 64.
+    ID_VENDOR, // VendorID
+    ID_PRODUCT, // ProductID
+
+    ID_VERSION,
+    //0x0100, // .ReleaseNumber
     USB_STRING_VENDOR, // .ManufacturerStrIndex
     USB_STRING_PRODUCT, // .ProductStrIndex
-    3, // .SerialNumStrIndex, iSerialNumber
+    USB_STRING_SERIAL, // .SerialNumStrIndex, iSerialNumber  attention: when HCK test if iSerialNumber not zero need two device for test
     1
 };
 
@@ -548,69 +508,31 @@ const USB_Descriptor_Configuration_t
     configuration_desc = {
         {
          {sizeof(USB_Descriptor_Configuration_Hdr_t),
-             DTYPE_Configuration},                                   // Length, type
-            sizeof(USB_Descriptor_Configuration_t),                  // TotalLength: variable
-            USB_INTF_MAX,                                            // NumInterfaces
-            1,                                                       // Configuration index
-            NO_DESCRIPTOR,                                           // Configuration String
-#if (USB_RESUME_HOST)
+             DTYPE_Configuration},                  // Length, type
+            sizeof(USB_Descriptor_Configuration_t), // TotalLength: variable
+            USB_INTF_MAX,                           // NumInterfaces
+            1,                                      // Configuration index
+            NO_DESCRIPTOR,                          // Configuration String
             USB_CONFIG_ATTR_RESERVED | USB_CONFIG_ATTR_REMOTEWAKEUP, // Attributes
-#else
-            USB_CONFIG_ATTR_RESERVED, //don't support remote wakeup
-#endif
+            // USB_CONFIG_ATTR_RESERVED, //don't support remote wakeup
+            USB_CONFIG_POWER_MA(50)   // MaxPower = 2*50mA
+        },
 
-            USB_CONFIG_POWER_MA(250) // MaxPower = 2*250mA
-        },
-#if AUDIO_HOGP
-        // HID audio hogp interface
-        {{sizeof(USB_Descriptor_Interface_t), DTYPE_Interface},
-         USB_INTF_AUDIO_HOGP,
-         0, // AlternateSetting
-         1, // bNumEndpoints
-         HID_CSCP_HIDClass,
-         HID_CSCP_NonBootSubclass,
-         HID_CSCP_KeyboardBootProtocol,
-         NO_DESCRIPTOR},
-        {
-         // hid des
-            {
-                {sizeof(USB_HID_Descriptor_HID_t), HID_DTYPE_HID},
-                0x0111,                                 // HIDSpec
-                0,
-                1,                                      // TotalReportDescriptors
-                HID_DTYPE_Report,
-                {sizeof(audio_hogp_report_desc), 0x00}, // HIDReportLength
-            },
-         // audio_hogp_in_endpoint
-            {
-                {sizeof(USB_Descriptor_Endpoint_t), DTYPE_Endpoint},
-                ENDPOINT_DIR_IN | USB_EDP_AUDIO_IN,
-                EP_TYPE_INTERRUPT,
-                0x40, // EndpointSize
-                1,    //USB_KEYBOARD_POLL_INTERVAL // PollingIntervalMS
-            },
-         //                  // audio_hogp_out_endpoint
-            //                  {
-            //                      {sizeof(USB_Descriptor_Endpoint_t), DTYPE_Endpoint},
-            //                      ENDPOINT_DIR_OUT | USB_EDP_KEYBOARD_OUT,
-            //                      EP_TYPE_BULK, 0x0010, // EndpointSize
-            //                      1//USB_KEYBOARD_POLL_INTERVAL // PollingIntervalMS
-            //                  },
-        },
-#endif
 #if (USB_CDC_ENABLE)
-    #if DESC_IAD_ENABLE
-        {
-         // iad0
-            {sizeof(USB_Descriptor_Interface_Association_t), DTYPE_InterfaceAssociation}, // Header
-            USB_INTF_CDC_CCI,                                                             // FirstInterfaceIndex
-            2,                                                                            // TotalInterface
-            CDC_CSCP_CDC_Class,                                                           // Class
-            CDC_CSCP_ACM_Subclass,                                                        // Subclass
-            CDC_CSCP_ATCmd_Protocol,                                                      // protocol
-            NO_DESCRIPTOR                                                                 // IADStrIndex
-        },
+    #if 0
+                {
+                    // iad0
+                    {sizeof(USB_Descriptor_Interface_Association_t), DTYPE_InterfaceAssociation}, // Header
+                    0, // FirstInterfaceIndex
+                    2, // TotalInterface
+                    CDC_CSCP_CDCClass, // Class
+                    CDC_CSCP_ACMSubclass, // Subclass
+                    CDC_CSCP_ATCommandProtocol, // protocol
+                    NO_DESCRIPTOR  // IADStrIndex
+                },
     #endif
+
+
         {
          // cdc_interface
 
@@ -618,13 +540,15 @@ const USB_Descriptor_Configuration_t
             USB_INTF_CDC_CCI,                                      // InterfaceNumber
             0,                                                     // AlternateSetting
             1,                                                     // TotalEndpoints
-            CDC_CSCP_CDC_Class,                                    // Class
-            CDC_CSCP_ACM_Subclass,                                 // SubClass
-            CDC_CSCP_ATCmd_Protocol,                               // Protocol
+            CDC_CSCP_CDCClass,                                     // Class
+            CDC_CSCP_ACMSubclass,                                  // SubClass
+            CDC_CSCP_ATCommandProtocol,                            // Protocol
             NO_DESCRIPTOR                                          //InterfaceStrIndex
         },
 
         {
+
+
          // cdc_descriptor
             //CDC_Functional_Header
             {
@@ -657,14 +581,16 @@ const USB_Descriptor_Configuration_t
                 1,                                                                 // SlaveInterfaceNumber
             },
 
+
          // CDC_NotificationEndpoint =
             {
                 {sizeof(USB_Descriptor_Endpoint_t), DTYPE_Endpoint},               // Header
-                (ENDPOINT_DIR_IN | CDC_NOTIFICATION_EPNUM),                        // EndpointAddress
+                (ENDPOINT_DIR_IN | CDC_NOTIFICATION_EPNUM),                        // EndpointAddress 2 in
                 (EP_TYPE_INTERRUPT | ENDPOINT_ATTR_NO_SYNC | ENDPOINT_USAGE_DATA), // Attributes
                 CDC_NOTIFICATION_EPSIZE,                                           // EndpointSize
                 0x40                                                               // PollingIntervalMS
             },
+
 
          // CDC_DCI_Interface =
             {
@@ -672,9 +598,9 @@ const USB_Descriptor_Configuration_t
                 USB_INTF_CDC_DCI,                                      // InterfaceNumber
                 0,                                                     // AlternateSetting
                 2,                                                     // TotalEndpoints
-                CDC_CSCP_CDCData_Class,                                // Class
-                CDC_CSCP_NoData_Subclass,                              // SubClass
-                CDC_CSCP_NoData_Protocol,                              // Protocol
+                CDC_CSCP_CDCDataClass,                                 // Class
+                CDC_CSCP_NoDataSubclass,                               // SubClass
+                CDC_CSCP_NoDataProtocol,                               // Protocol
                 NO_DESCRIPTOR                                          // InterfaceStrIndex
             },
 
@@ -682,22 +608,23 @@ const USB_Descriptor_Configuration_t
          // CDC_DataOutEndpoint =
             {
                 {sizeof(USB_Descriptor_Endpoint_t), DTYPE_Endpoint},          // Header
-                (ENDPOINT_DIR_OUT | CDC_RX_EPNUM),                            // EndpointAddress
+                (ENDPOINT_DIR_OUT | CDC_RX_EPNUM),                            // EndpointAddress 5 out
                 (EP_TYPE_BULK | ENDPOINT_ATTR_NO_SYNC | ENDPOINT_USAGE_DATA), // Attributes
-                CDC_TXRX_EPSIZE,                                              // EndpointSize
+                CDC_TXRX_EPSIZE,                                              // EndpointSize  64
                 0x00                                                          // PollingIntervalMS
             },
 
          // CDC_DataInEndpoint =
             {
                 {sizeof(USB_Descriptor_Endpoint_t), DTYPE_Endpoint},          // Header
-                (ENDPOINT_DIR_IN | CDC_TX_EPNUM),                             // EndpointAddress
+                (ENDPOINT_DIR_IN | CDC_TX_EPNUM),                             // EndpointAddress 4 in
                 (EP_TYPE_BULK | ENDPOINT_ATTR_NO_SYNC | ENDPOINT_USAGE_DATA), // Attributes
-                CDC_TXRX_EPSIZE,                                              // EndpointSize
+                CDC_TXRX_EPSIZE,                                              // EndpointSize  64
                 0x00                                                          // PollingIntervalMS
             },
          },
 #endif
+
 
 #if (USB_PRINTER_ENABLE)
         // printer_interface
@@ -735,18 +662,6 @@ const USB_Descriptor_Configuration_t
     #endif
 #endif
 #if (USB_MIC_ENABLE || USB_SPEAKER_ENABLE)
-    #if DESC_IAD_ENABLE
-        {
-         // iad0
-            {sizeof(USB_Descriptor_Interface_Association_t), DTYPE_InterfaceAssociation}, // Header
-            USB_INTF_AUDIO_CONTROL,                                                       // FirstInterfaceIndex
-            2,                                                                            // TotalInterface
-            AUDIO_CSCP_AudioClass,                                                        // Class
-            AUDIO_CSCP_ControlSubclass,                                                   // Subclass
-            AUDIO_CSCP_ControlProtocol,                                                   // protocol
-            NO_DESCRIPTOR                                                                 // IADStrIndex
-        },
-    #endif
         // audio_control_interface
         {
          {sizeof(USB_Descriptor_Interface_t), DTYPE_Interface},
@@ -770,29 +685,31 @@ const USB_Descriptor_Configuration_t
               sizeof(USB_Audio_Descriptor_OutputTerminal_t) +  /*9*/
               sizeof(USB_Audio_Descriptor_FeatureUnit_Mic_t) + /*9*/
               sizeof(USB_Audio_Descriptor_InputTerminal_t) +   /*12*/
-              sizeof(USB_Audio_Descriptor_OutputTerminal_t) +  /*9*/
-              sizeof(USB_Audio_StdDescriptor_FeatureUnit_t) /*10*/),
+              sizeof(USB_Audio_Descriptor_OutputTerminal_t)    /*9*/
+              + sizeof(USB_Audio_StdDescriptor_FeatureUnit_t)  /*10*/
+              ),
              0},
          2,                                                 // InCollection
             USB_INTF_SPEAKER,
          USB_INTF_MIC
     #else
             {sizeof(USB_Audio_Descriptor_Interface_AC_t), DTYPE_CSInterface},
-            AUDIO_DSUBTYPE_CSInterface_Header,                // Subtype
-            {0x00, 0x01},                                     // ACSpecification, version == 1.0
+            AUDIO_DSUBTYPE_CSInterface_Header,                 // Subtype
+            {0x00, 0x01},                                      //bcdADC:audio Device. Class v1.00
         #if (USB_MIC_ENABLE)
-            {(sizeof(USB_Audio_Descriptor_Interface_AC_t) +   /*9*/
-              sizeof(USB_Audio_Descriptor_InputTerminal_t) +  /*12*/
-              sizeof(USB_Audio_Descriptor_OutputTerminal_t) + /*9*/
-              sizeof(USB_Audio_Descriptor_FeatureUnit_Mic_t) /*9*/),
+            {(sizeof(USB_Audio_Descriptor_Interface_AC_t) +    /*9*/
+              sizeof(USB_Audio_Descriptor_InputTerminal_t) +   /*12*/
+              sizeof(USB_Audio_Descriptor_OutputTerminal_t)    /*9*/
+              + sizeof(USB_Audio_Descriptor_FeatureUnit_Mic_t) /*9*/
+              ),
              0},
             1,
             USB_INTF_MIC
         #else
-            {(sizeof(USB_Audio_Descriptor_Interface_AC_t) +   /*9*/
-              sizeof(USB_Audio_Descriptor_InputTerminal_t) +  /*12*/
-              sizeof(USB_Audio_Descriptor_OutputTerminal_t) + /*9*/
-              sizeof(USB_Audio_StdDescriptor_FeatureUnit_t) /*10*/),
+            {(sizeof(USB_Audio_Descriptor_Interface_AC_t) +                                                       /*9*/
+              sizeof(USB_Audio_Descriptor_InputTerminal_t) +                                                      /*12*/
+              sizeof(USB_Audio_Descriptor_OutputTerminal_t) + /*9*/ sizeof(USB_Audio_StdDescriptor_FeatureUnit_t) /*10*/
+              ),
              0},
 
             1,
@@ -800,12 +717,12 @@ const USB_Descriptor_Configuration_t
         #endif
     #endif
         },
-
 #endif
 #if (USB_SPEAKER_ENABLE)
         // speaker_input_terminal
         {{sizeof(USB_Audio_Descriptor_InputTerminal_t), DTYPE_CSInterface},
          AUDIO_DSUBTYPE_CSInterface_InputTerminal,
+         //0x04, //todo
          USB_SPEAKER_INPUT_TERMINAL_ID,
          AUDIO_TERMINAL_STREAMING,
          0,      // AssociatedOutputTerminal
@@ -820,6 +737,7 @@ const USB_Descriptor_Configuration_t
         // speaker_output_terminal
         {{sizeof(USB_Audio_Descriptor_OutputTerminal_t), DTYPE_CSInterface},
          AUDIO_DSUBTYPE_CSInterface_OutputTerminal,
+         //0x06,//todo
          USB_SPEAKER_OUTPUT_TERMINAL_ID,
          AUDIO_TERMINAL_OUT_SPEAKER,
          0, // AssociatedOutputTerminal
@@ -830,11 +748,13 @@ const USB_Descriptor_Configuration_t
         // mic_input_terminal
         {{sizeof(USB_Audio_Descriptor_InputTerminal_t), DTYPE_CSInterface},
          AUDIO_DSUBTYPE_CSInterface_InputTerminal,
-         USB_MIC_INPUT_TERMINAL_ID,
+         //0x01,
+         USB_MIC_INPUT_TERMINAL_ID, // AssociatedOutputTerminal
          AUDIO_TERMINAL_IN_MIC,
-         0,      // AssociatedOutputTerminal
-         2,      // TotalChannels
-         0x0003, // ChannelConfig
+         0,
+         1,                         // TotalChannels
+         //0x0000,
+         0x0001, // ChannelConfig
          0,      // ChannelStrIndex
          NO_DESCRIPTOR},
         // mic_feature_unit
@@ -850,9 +770,11 @@ const USB_Descriptor_Configuration_t
         // mic_output_terminal
         {{sizeof(USB_Audio_Descriptor_OutputTerminal_t), DTYPE_CSInterface},
          AUDIO_DSUBTYPE_CSInterface_OutputTerminal,
+         //0x03,
          USB_MIC_OUTPUT_TERMINAL_ID,
-         AUDIO_TERMINAL_STREAMING,
-         0, // AssociatedOutputTerminal
+         AUDIO_TERMINAL_STREAMING, // AssociatedOutputTerminal
+         0x00,
+         //0x01,
          USB_MIC_OUTPUT_TERMINAL_SOURCE_ID,
          NO_DESCRIPTOR},
 #endif
@@ -878,32 +800,37 @@ const USB_Descriptor_Configuration_t
         // speaker_audio_stream
         {{sizeof(USB_Audio_Descriptor_Interface_AS_t), DTYPE_CSInterface},
          AUDIO_DSUBTYPE_CSInterface_General,
-         1, // TerminalLink #1 USB Streaming IT
+         USB_SPEAKER_INPUT_TERMINAL_ID,
+         //1, // TerminalLink #1 USB Streaming IT
          1, // FrameDelay
-         {USB_AUDIO_FORMAT_PCM & 0xff, (USB_AUDIO_FORMAT_PCM >> 8) & 0xff}},
+         {USB_AUDIO_FORMAT_PCM & 0xff,
+          (USB_AUDIO_FORMAT_PCM >> 8) & 0xff}},
         // speaker_audio_format
         {
          {sizeof(USB_Audio_Descriptor_Format_t) + sizeof(USB_Audio_SampleFreq_t), DTYPE_CSInterface},
          AUDIO_DSUBTYPE_CSInterface_FormatType,
          USB_AUDIO_FORMAT_PCM,
-         SPK_CHANNEL_COUNT,  // Channels
-            2,                  // SubFrameSize
-            SPK_RESOLUTION_BIT, // BitsResolution
-            1                   // TotalDiscreteSampleRates
+         SPK_CHANNEL_COUNT,      // audio channels
+            SPK_RESOLUTION_BIT / 8, // SubFrameSize.
+            SPK_RESOLUTION_BIT,     // BitsResolution 16 bits per sample.
+            1                       // One sample rate provided
         },
         // speaker_sample_rate AUDIO_SAMPLE_FREQ
-        {(SPK_SAMPLE_RATE & 0xff), (SPK_SAMPLE_RATE >> 8), 0x00},
+        {(SPEAKER_SAMPLE_RATE & 0xff), (SPEAKER_SAMPLE_RATE >> 8), 0x00},
+        //{ 0x00, 0x7d, 0x00},
+        //{ 0x80, 0xbb, 0x00},
         // speaker_stream_endpoint
         {
          {
                 {sizeof(USB_Audio_Descriptor_StreamEndpoint_Std_t), DTYPE_Endpoint},
                 USB_EDP_SPEAKER,
                 EP_TYPE_ISOCHRONOUS | (EP_SYNC_TYPE_ADAPTIVE << 2) | (EP_USAGE_TYPE_DATA << 4), // Attributes ENDPOINT_ATTR_ASYNC
-                USB_SPK_CHANNELS_LEN,                                                           // EndpointSize USB_MIC_CHANNELS_LEN
-                1                                                                               // PollingIntervalMS
+                //0x0100, // EndpointSize USB_MIC_CHANNELS_LEN
+                USB_SPK_CHANNELS_LEN, // EndpointSize USB_SPK_CHANNELS_LEN
+                0x01                  // PollingIntervalMS
             },
-         0,                                                                                  // Refresh
-            0                                                                                   // SyncEndpointNumber
+         0,                        // Refresh
+            0                         // SyncEndpointNumber
         },
         // speaker_stream_endpoint_spc
         {
@@ -911,7 +838,8 @@ const USB_Descriptor_Configuration_t
              DTYPE_CSEndpoint},
          AUDIO_DSUBTYPE_CSInterface_General,
          AUDIO_EP_FULL_PACKETS_ONLY | AUDIO_EP_SAMPLE_FREQ_CONTROL,
-         0,     // LockDelayUnits
+
+         0x00,  // LockDelayUnits
             {0, 0} // LockDelay
         },
     #if (USB_AUDIO_441K_ENABLE)
@@ -940,41 +868,45 @@ const USB_Descriptor_Configuration_t
         // mic_audio_stream
         {{sizeof(USB_Audio_Descriptor_Interface_AS_t), DTYPE_CSInterface},
          AUDIO_DSUBTYPE_CSInterface_General,
-         6, // TerminalLink #6USB USB Streaming OT
+         //0x03,
+         USB_MIC_OUTPUT_TERMINAL_ID,
          1, // FrameDelay
          {USB_AUDIO_FORMAT_PCM & 0xff, (USB_AUDIO_FORMAT_PCM >> 8) & 0xff}},
         // mic_audio_format
         {
          {sizeof(USB_Audio_Descriptor_Format_t) + sizeof(USB_Audio_SampleFreq_t), DTYPE_CSInterface},
          AUDIO_DSUBTYPE_CSInterface_FormatType,
-         USB_AUDIO_FORMAT_PCM, // FormatType
-            MIC_CHANNEL_COUNT,    // Channels
-            2,                    // SubFrameSize
-            MIC_RESOLUTION_BIT,   // BitsResolution
-            1                     // TotalDiscreteSampleRates
+         USB_AUDIO_FORMAT_PCM,   // FormatType
+
+            MIC_CHANNEL_COUNT,      // Channels
+            MIC_RESOLUTION_BIT / 8, // SubFrameSize
+            MIC_RESOLUTION_BIT,     //todo  BitsResolution  driver 16 bit
+            1                       // TotalDiscreteSampleRates
         },
         // mic_sample_rate
-        {(MIC_SAMPLE_RATE & 0xff), (MIC_SAMPLE_RATE >> 8), 0x00},
+        {(MIC_SAMPLE_RATE & 0xff), (MIC_SAMPLE_RATE >> 8) & 0xff, (MIC_SAMPLE_RATE >> 16) & 0xff},
         // mic_stream_endpoint
         {
-         {
-                {sizeof(USB_Audio_Descriptor_StreamEndpoint_Std_t), DTYPE_Endpoint},
-                ENDPOINT_DIR_MASK | USB_EDP_MIC,
-                EP_TYPE_ISOCHRONOUS | (EP_SYNC_TYPE_SYNC << 2) | (EP_USAGE_TYPE_DATA << 4), // Attributes
-                USB_MIC_CHANNELS_LEN,
-                1                                                                           // PollingIntervalMS
+         {{sizeof(USB_Audio_Descriptor_StreamEndpoint_Std_t), DTYPE_Endpoint}, ENDPOINT_DIR_MASK | USB_EDP_MIC,
+             EP_TYPE_ISOCHRONOUS | (EP_SYNC_TYPE_SYNC << 2) | (EP_USAGE_TYPE_DATA << 4), // Attributes
+             //EP_TYPE_ISOCHRONOUS ,
+             //0x0100,
+             USB_MIC_CHANNELS_LEN, // PollingIntervalMS
+             1
+
             },
-         0,                                                                              // Refresh
-            0                                                                               // SyncEndpointNumber
+         0, // Refresh
+            0  // SyncEndpointNumber
         },
         // mic_stream_endpoint_spc
         {
          {sizeof(USB_Audio_Descriptor_StreamEndpoint_Spc_t),
              DTYPE_CSEndpoint},
          AUDIO_DSUBTYPE_CSInterface_General,
-         AUDIO_EP_SAMPLE_FREQ_CONTROL,
-         0,     // LockDelayUnits
-            {0, 0} // LockDelay
+         //0x00,
+            AUDIO_EP_SAMPLE_FREQ_CONTROL,
+         0x00,        // LockDelayUnits todo
+            {0x00, 0x00} // LockDelay
         },
 #endif
 #if (0)
@@ -1007,18 +939,6 @@ const USB_Descriptor_Configuration_t
          }},
 #endif
 #if (USB_KEYBOARD_ENABLE)
-    #if DESC_IAD_ENABLE
-        {
-         // iad0
-            {sizeof(USB_Descriptor_Interface_Association_t), DTYPE_InterfaceAssociation}, // Header
-            USB_INTF_KEYBOARD,                                                            // FirstInterfaceIndex
-            1,                                                                            // TotalInterface
-            HID_CSCP_HIDClass,                                                            // Class
-            HID_CSCP_NonBootSubclass,                                                     // Subclass
-            HID_CSCP_NonBootProtocol,                                                     // protocol
-            1                                                                             // IADStrIndex
-        },
-    #endif
         // keyboardInterface
         {{sizeof(USB_Descriptor_Interface_t), DTYPE_Interface},
          USB_INTF_KEYBOARD,
@@ -1049,18 +969,6 @@ const USB_Descriptor_Configuration_t
          },
 #endif
 #if (USB_MOUSE_ENABLE)
-    #if DESC_IAD_ENABLE
-        {
-         // iad0
-            {sizeof(USB_Descriptor_Interface_Association_t), DTYPE_InterfaceAssociation}, // Header
-            USB_INTF_MOUSE,                                                               // FirstInterfaceIndex
-            1,                                                                            // TotalInterface
-            HID_CSCP_HIDClass,                                                            // Class
-            HID_CSCP_NonBootSubclass,                                                     // Subclass
-            HID_CSCP_NonBootProtocol,                                                     // protocol
-            1                                                                             // IADStrIndex
-        },
-    #endif
         // mouse_interface
         {{sizeof(USB_Descriptor_Interface_t), DTYPE_Interface},
          USB_INTF_MOUSE,
@@ -1070,23 +978,26 @@ const USB_Descriptor_Configuration_t
          HID_CSCP_BootSubclass,
          HID_CSCP_MouseBootProtocol,
          NO_DESCRIPTOR},
-        {                                       // mouse_hid
+        {
+
          {
-             {sizeof(USB_HID_Descriptor_HID_t), HID_DTYPE_HID},
-             0x0111,                            // HIDSpec
-             USB_HID_COUNTRY_US,
-             1,                                 // TotalReportDescriptors
-             HID_DTYPE_Report,
-             {sizeof(mouse_report_desc), 0x00}, // HIDReportLength
-         },
+                // mouse_hid
+                {sizeof(USB_HID_Descriptor_HID_t), HID_DTYPE_HID},
+                0x0111,                            // HIDSpec
+                USB_HID_COUNTRY_US,
+                1,                                 // TotalReportDescriptors
+                HID_DTYPE_Report,
+                {sizeof(mouse_report_desc), 0x00}, // HIDReportLength
+            },
          // mouse_in_endpoint
-         {
-             {sizeof(USB_Descriptor_Endpoint_t), DTYPE_Endpoint},
-             ENDPOINT_DIR_IN | USB_EDP_MOUSE,
-             EP_TYPE_INTERRUPT,
-             0x0008,                 // EndpointSize
-             USB_MOUSE_POLL_INTERVAL // PollingIntervalMS
-         }},
+            {
+                {sizeof(USB_Descriptor_Endpoint_t), DTYPE_Endpoint},
+                ENDPOINT_DIR_IN | USB_EDP_MOUSE,
+                EP_TYPE_INTERRUPT,
+                0x0008,                 // EndpointSize
+                USB_MOUSE_POLL_INTERVAL // PollingIntervalMS
+            },
+         },
 #endif
 #if (USB_SOMATIC_ENABLE)
         // SOMATICInterface
@@ -1118,113 +1029,151 @@ const USB_Descriptor_Configuration_t
             },
          },
 #endif
+
+#if (USB_MASS_STORAGE_ENABLE)
+        {{sizeof(USB_Descriptor_Interface_t), DTYPE_Interface},
+         USB_INTF_MASS_STORAGE,
+         0,
+         2,
+         MS_CSCP_MassStorageClass,
+         MS_CSCP_SCSITransparentSubclass,
+         MS_CSCP_BulkOnlyTransportProtocol,
+         NO_DESCRIPTOR},
+        // MASS_STORAGE_InEndpoint =
+        {
+         {sizeof(USB_Descriptor_Endpoint_t), DTYPE_Endpoint},
+         (ENDPOINT_DIR_IN | MASS_STORAGE_IN_EPNUM),
+         EP_TYPE_BULK,
+         MASS_STORAGE_TXRX_EPSIZE,
+         0 // PollingIntervalMS
+        },
+        //MASS_STORAGE_OutEndpoint =
+        {
+         {sizeof(USB_Descriptor_Endpoint_t), DTYPE_Endpoint},
+         ENDPOINT_DIR_OUT | MASS_STORAGE_OUT_EPNUM,
+         EP_TYPE_BULK,
+         MASS_STORAGE_TXRX_EPSIZE,
+         0 // PollingIntervalMS
+        },
+#endif
 };
 
-u8 *usbdesc_get_language(void)
+static unsigned short usb_desc_str[32 + 1];
+
+/**
+ * @brief     This function servers to get usb string descriptor.
+ * @param[in] src - usb string.
+ * @return    usb string descriptor pointer.
+ */
+static unsigned short *usbdesc_get_str(const char *src)
 {
-    return (u8 *)(u32)(&language_desc);
+    unsigned int char_count;
+
+    char_count             = strlen(src);
+    unsigned int max_count = sizeof(usb_desc_str) / sizeof(usb_desc_str[0]) - 1; // -1 for string type
+    if (char_count > max_count) {
+        char_count = max_count;
+    }
+
+    /* convert ASCII string into UTF-16. */
+    for (unsigned int i = 0; i < char_count; i++) {
+        usb_desc_str[1 + i] = src[i];
+    }
+
+    /* first byte is length (including header), second byte is string type. */
+    usb_desc_str[0] = (unsigned short)((DTYPE_String << 8) | (sizeof(USB_Descriptor_Hdr_t) + char_count * 2));
+
+    return usb_desc_str;
 }
 
-u8 *usbdesc_get_vendor(void)
+unsigned char *usbdesc_get_language(void)
 {
-    return (u8 *)(u32)(&vendor_desc);
+    return (unsigned char *)(unsigned int)(&language_desc);
 }
 
-u8 *usbdesc_get_product(void)
+unsigned char *usbdesc_get_vendor(void)
 {
-    return (u8 *)(u32)(&product_desc);
+    return (unsigned char *)usbdesc_get_str(STRING_VENDOR);
+}
+
+unsigned char *usbdesc_get_product(void)
+{
+    return (unsigned char *)usbdesc_get_str(STRING_PRODUCT);
 }
 
 #if (MS_OS_DESCRIPTOR_ENABLE)
 
-u8 *usbdesc_get_OS_descriptor(void)
+unsigned char *usbdesc_get_OS_descriptor(void)
 {
-    return (u8 *)(&microsoft_OS_desc);
+    return (unsigned char *)usbdesc_get_str(STRING_MSFT);
 }
 
-u8 *usbdesc_get_OSFeature(int *length)
+unsigned char *usbdesc_get_OSFeature(int *length)
 {
     *length = sizeof(OSFeatureDescriptor);
-    return (u8 *)(&OSFeatureDescriptor);
+    return (unsigned char *)(&OSFeatureDescriptor);
 }
 
-u8 *usbdesc_get_compatID(int *length)
+unsigned char *usbdesc_get_compatID(int *length)
 {
     *length = OSFeatureDescriptor_compatID.compatID_Header.dwLength;
 
-    return (u8 *)(&OSFeatureDescriptor_compatID);
+    return (unsigned char *)(&OSFeatureDescriptor_compatID);
 }
 
 #endif
 
-u8 *usbdesc_get_serial(void)
+unsigned char *usbdesc_get_serial(void)
 {
-    return (u8 *)(u32)(&serial_desc);
+    return (unsigned char *)usbdesc_get_str(STRING_SERIAL);
 }
 
-u8 *usbdesc_get_device(void)
+unsigned char *usbdesc_get_device(void)
 {
-#ifdef USB_USE_VENDOR_DESC
-    extern USB_Descriptor_Device_t vendor_device_desc;
-    return (u8 *)(&vendor_device_desc);
-#else
-    return (u8 *)(u32)(&device_desc);
-#endif
+    return (unsigned char *)(unsigned int)(&device_desc);
 }
 
-u8 *usbdesc_get_configuration(void)
+unsigned char *usbdesc_get_configuration(void)
 {
-#ifdef USB_USE_VENDOR_DESC
-    extern USB_Descriptor_Configuration_t vendor_configuration_desc;
-    return (u8 *)(&vendor_configuration_desc);
-#else
-    return (u8 *)(u32)(&configuration_desc);
-#endif
+    return (unsigned char *)(unsigned int)(&configuration_desc);
 }
 
 #if (0)
-u8 *usbdesc_get_audio(void)
+unsigned char *usbdesc_get_audio(void)
 {
-    return (u8 *)(&configuration_desc.audio_descriptor);
+    return (unsigned char *)(&configuration_desc.audio_descriptor);
 }
 #endif
 
 #if (USB_MOUSE_ENABLE)
-u8 *usbdesc_get_mouse(void)
+unsigned char *usbdesc_get_mouse(void)
 {
-    return (u8 *)(&configuration_desc.mouse_descriptor);
+    return (unsigned char *)(unsigned int)(&configuration_desc.mouse_descriptor);
 }
 #endif
 
 #if (USB_KEYBOARD_ENABLE)
-u8 *usbdesc_get_keyboard(void)
+unsigned char *usbdesc_get_keyboard(void)
 {
-    return (u8 *)(&configuration_desc.keyboard_descriptor);
+    return (unsigned char *)(unsigned int)(&configuration_desc.keyboard_descriptor);
 }
 #endif
 
 #if (USB_SOMATIC_ENABLE)
-u8 *usbdesc_get_somatic(void)
+unsigned char *usbdesc_get_somatic(void)
 {
-    return (u8 *)(&configuration_desc.somatic_descriptor);
+    return (unsigned char *)(&configuration_desc.somatic_descriptor);
 }
 #endif
 
 #if (USB_CDC_ENABLE)
-u8 *usbdesc_get_cdc(void)
+unsigned char *usbdesc_get_cdc(void)
 {
-    return (u8 *)(&configuration_desc.cdc_descriptor);
+    return (unsigned char *)(unsigned int)(&configuration_desc.cdc_descriptor);
 }
 
-u8 *usbdesc_get_cdc_inf(void)
+unsigned char *usbdesc_get_cdc_inf(void)
 {
-    return (u8 *)(&configuration_desc.cdc_interface);
-}
-#endif
-
-#if (AUDIO_HOGP)
-u8 *usbdesc_get_audio_hogp(void)
-{
-    return (u8 *)(&configuration_desc.audio_hogp_descriptor);
+    return (unsigned char *)(unsigned int)(&configuration_desc.cdc_interface);
 }
 #endif

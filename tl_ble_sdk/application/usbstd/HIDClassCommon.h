@@ -1,12 +1,12 @@
 /********************************************************************************************************
  * @file    HIDClassCommon.h
  *
- * @brief   This is the header file for BLE SDK
+ * @brief   This is the header file for Telink RISC-V MCU
  *
- * @author  BLE GROUP
- * @date    06,2022
+ * @author  Driver Group
+ * @date    2019
  *
- * @par     Copyright (c) 2022, Telink Semiconductor (Shanghai) Co., Ltd. ("TELINK")
+ * @par     Copyright (c) 2019, Telink Semiconductor (Shanghai) Co., Ltd. ("TELINK")
  *
  *          Licensed under the Apache License, Version 2.0 (the "License");
  *          you may not use this file except in compliance with the License.
@@ -22,16 +22,13 @@
  *
  *******************************************************************************************************/
 #pragma once
-
-/* Includes: */
-#include "application/usbstd/stdDescriptors.h"
-#include "tl_common.h"
-
 /* Enable C linkage for C++ Compilers: */
 #if defined(__cplusplus)
 extern "C"
 {
 #endif
+/* Includes: */
+#include "stdDescriptors.h"
 
 #define HID_KEYBOARD_MODIFIER_LEFTCTRL                    BIT(0)
 #define HID_KEYBOARD_MODIFIER_LEFTSHIFT                   BIT(1)
@@ -406,43 +403,43 @@ extern "C"
         HID_REPORT_CUSTOM,
     };
 
-    typedef struct __attribute__((packed))
+    typedef struct
     {
         USB_Descriptor_Hdr_t Header;
 
-        u16 HIDSpec;
-        u8  CountryCode;
-        u8  TotalReportDescriptors;
-        u8  HIDReportType;
-        u8  HIDReportLength[2];
-    } USB_HID_Descriptor_HID_t;
+        unsigned short HIDSpec;
+        unsigned char  CountryCode;
+        unsigned char  TotalReportDescriptors;
+        unsigned char  HIDReportType;
+        unsigned char  HIDReportLength[2];
+    } __attribute__((packed)) USB_HID_Descriptor_HID_t;
 
-    typedef struct __attribute__((packed))
+    typedef struct
     {
-        u8  Length;
-        u8  DescriptorType;
-        u16 BcdHID;
-        u8  CountryCode;
-        u8  NumDescriptors;
-        u8  DescriptorType2;
-        u8  DescriptorLength[2];
-    } USB_HID_StdDescriptor_HID_t;
+        unsigned char  Length;
+        unsigned char  DescriptorType;
+        unsigned short BcdHID;
+        unsigned char  CountryCode;
+        unsigned char  NumDescriptors;
+        unsigned char  DescriptorType2;
+        unsigned char  DescriptorLength[2];
+    } __attribute__((packed)) USB_HID_StdDescriptor_HID_t;
 
-    typedef struct __attribute__((packed))
+    typedef struct
     {
-        u8 Button;
-        s8 X;
-        s8 Y;
-    } USB_MouseReport_Data_t;
+        unsigned char Button;
+        signed char   X;
+        signed char   Y;
+    } __attribute__((packed)) USB_MouseReport_Data_t;
 
-    typedef struct __attribute__((packed))
+    typedef struct
     {
-        u8 Modifier;
-        u8 Reserved;
-        u8 KeyCode[6];
+        unsigned char Modifier;
+        unsigned char Reserved;
+        unsigned char KeyCode[6];
     } USB_KeyboardReport_Data_t;
 
-    typedef u8 USB_Descriptor_HIDReport_Datatype_t;
+    typedef unsigned char USB_Descriptor_HIDReport_Datatype_t;
 
 /* Disable C linkage for C++ Compilers: */
 #if defined(__cplusplus)

@@ -1,12 +1,12 @@
 /********************************************************************************************************
  * @file    keyboard.c
  *
- * @brief   This is the source file for BLE SDK
+ * @brief   This is the source file for Telink RISC-V MCU
  *
- * @author  BLE GROUP
- * @date    06,2022
+ * @author  Driver Group
+ * @date    2019
  *
- * @par     Copyright (c) 2022, Telink Semiconductor (Shanghai) Co., Ltd. ("TELINK")
+ * @par     Copyright (c) 2019, Telink Semiconductor (Shanghai) Co., Ltd. ("TELINK")
  *
  *          Licensed under the Apache License, Version 2.0 (the "License");
  *          you may not use this file except in compliance with the License.
@@ -22,15 +22,13 @@
  *
  *******************************************************************************************************/
 #include "tl_common.h"
-#include "drivers.h"
 #include "keyboard.h"
-#include "application/usbstd/usbkeycode.h"
-
+#include "../usbstd/usbkeycode.h"
 
 #if (defined(KB_DRIVE_PINS) && defined(KB_SCAN_PINS))
 
-const u32 drive_pins[] = KB_DRIVE_PINS;
-const u32 scan_pins[]  = KB_SCAN_PINS;
+unsigned int drive_pins[] = KB_DRIVE_PINS;
+unsigned int scan_pins[]  = KB_SCAN_PINS;
 
     #if (STUCK_KEY_PROCESS_ENABLE)
 unsigned char stuckKeyPress[ARRAY_SIZE(drive_pins)];
@@ -39,7 +37,7 @@ unsigned char stuckKeyPress[ARRAY_SIZE(drive_pins)];
 _attribute_data_retention_ kb_data_t     kb_event;
 _attribute_data_retention_ kb_data_t     kb_event_cache;
 _attribute_data_retention_ unsigned char deepback_key_state;
-_attribute_data_retention_ u32           deepback_key_tick;
+_attribute_data_retention_ unsigned int  deepback_key_tick;
 
     #ifndef SCAN_PIN_50K_PULLUP_ENABLE
         #define SCAN_PIN_50K_PULLUP_ENABLE 0
@@ -80,7 +78,6 @@ _attribute_data_retention_ u32           deepback_key_tick;
     #ifndef KB_STANDARD_KEYBOARD
         #define KB_STANDARD_KEYBOARD 0
     #endif
-
 
     #if KB_REPEAT_KEY_ENABLE
 
@@ -124,16 +121,15 @@ static const unsigned char kb_map_normal[ARRAY_SIZE(scan_pins)][ARRAY_SIZE(drive
     {VK_PAGE_UP,  VK_RIGHT,     VK_PAGE_DOWN, VKPAD_PERIOD, VKPAD_ASTERIX, VKPAD_MINUS,  VK_PAGE_UP,  VK_PAGE_DOWN  },
     {VKPAD_PLUS,  VK_K107,      VKPAD_ENTER,  VK_UP,        VK_PLAY_PAUSE, VK_LEFT,      VK_HOME,     VK_END        },
     {VK_WAKEUP,   VK_SHIFT,     VK_RSHIFT,    VK_VOL_DN,    VK_VOL_UP,     VK_NEXT_TRK,  VK_PREV_TRK, VK_MEDIA      },
-    {VK_MAIL,     VK_WIN,       VK_W_FORWRD,  VK_W_STOP,    VK_W_BACK,     VK_W_REFRESH, VK_W_MUTE,   VK_W_SRCH     },
+    {VK_MAIL,     VK_WIN,       VK_W_FORWARD, VK_W_STOP,    VK_W_BACK,     VK_W_REFRESH, VK_W_MUTE,   VK_W_SRCH     },
     {VK_KCL,      VK_W_FAV,     VK_RWIN,      VK_MY_COMP,   VK_STOP,       VK_CAL,       VK_WEB,      VK_KCR        },
 };
         #else
 static const unsigned char kb_map_normal[ARRAY_SIZE(scan_pins)][ARRAY_SIZE(drive_pins)] = KB_MAP_NORMAL;
         #endif
 
-
-        #if (KB_STANDARD_KEYBOARD)
-            #ifndef KB_MAP_NUM
+#if KB_STANDARD_KEYBOARD
+        #ifndef KB_MAP_NUM
 static const unsigned char kb_map_num[ARRAY_SIZE(scan_pins)][ARRAY_SIZE(drive_pins)] = {
     {VK_PAUSE,    VK_POWER,     VK_EURO,      VK_SLEEP,     VK_RCTRL,      VK_WAKEUP,    VK_CTRL,     VK_F5         },
     {VK_Q,        VK_TAB,       VK_A,         VK_ESC,       VK_Z,          VK_NCHG,      VK_TILDE,    VK_1          },
@@ -151,14 +147,14 @@ static const unsigned char kb_map_num[ARRAY_SIZE(scan_pins)][ARRAY_SIZE(drive_pi
     {VKPAD_9,     VKPAD_6,      VKPAD_3,      VKPAD_PERIOD, VKPAD_ASTERIX, VKPAD_MINUS,  VK_PAGE_UP,  VK_PAGE_DOWN  },
     {VKPAD_PLUS,  VK_K107,      VKPAD_ENTER,  VK_UP,        VK_PLAY_PAUSE, VK_LEFT,      VK_HOME,     VK_END        },
     {VK_WAKEUP,   VK_SHIFT,     VK_RSHIFT,    VK_VOL_DN,    VK_VOL_UP,     VK_NEXT_TRK,  VK_PREV_TRK, VK_MEDIA      },
-    {VK_MAIL,     VK_WIN,       VK_W_FORWRD,  VK_W_STOP,    VK_W_BACK,     VK_W_REFRESH, VK_W_MUTE,   VK_W_SRCH     },
+    {VK_MAIL,     VK_WIN,       VK_W_FORWARD, VK_W_STOP,    VK_W_BACK,     VK_W_REFRESH, VK_W_MUTE,   VK_W_SRCH     },
     {VK_KCL,      VK_W_FAV,     VK_RWIN,      VK_MY_COMP,   VK_STOP,       VK_CAL,       VK_WEB,      VK_KCR        },
 };
-            #else
+        #else
 static const unsigned char kb_map_num[ARRAY_SIZE(scan_pins)][ARRAY_SIZE(drive_pins)] = KB_MAP_NUM;
-            #endif
+        #endif
 
-            #ifndef KB_MAP_FN
+        #ifndef KB_MAP_FN
 static const unsigned char kb_map_fn[ARRAY_SIZE(scan_pins)][ARRAY_SIZE(drive_pins)] = {
     {VK_PAUSE,    VK_POWER,     VK_EURO,      VK_SLEEP,     VK_RCTRL,      VK_WAKEUP,    VK_CTRL,     VK_F5         },
     {VK_Q,        VK_TAB,       VK_A,         VK_ESC,       VK_Z,          VK_NCHG,      VK_TILDE,    VK_1          },
@@ -176,12 +172,12 @@ static const unsigned char kb_map_fn[ARRAY_SIZE(scan_pins)][ARRAY_SIZE(drive_pin
     {VKPAD_9,     VKPAD_6,      VKPAD_3,      VKPAD_PERIOD, VKPAD_ASTERIX, VKPAD_MINUS,  VK_PAGE_UP,  VK_PAGE_DOWN  },
     {VKPAD_PLUS,  VK_K107,      VKPAD_ENTER,  VK_UP,        VK_PLAY_PAUSE, VK_LEFT,      VK_HOME,     VK_END        },
     {VK_WAKEUP,   VK_SHIFT,     VK_RSHIFT,    VK_VOL_DN,    VK_VOL_UP,     VK_NEXT_TRK,  VK_PREV_TRK, VK_MEDIA      },
-    {VK_MAIL,     VK_WIN,       VK_W_FORWRD,  VK_W_STOP,    VK_W_BACK,     VK_W_REFRESH, VK_W_MUTE,   VK_W_SRCH     },
+    {VK_MAIL,     VK_WIN,       VK_W_FORWARD, VK_W_STOP,    VK_W_BACK,     VK_W_REFRESH, VK_W_MUTE,   VK_W_SRCH     },
     {VK_KCL,      VK_W_FAV,     VK_RWIN,      VK_MY_COMP,   VK_STOP,       VK_CAL,       VK_WEB,      VK_KCR        },
 };
-            #else
+        #else
 static const unsigned char kb_map_fn[ARRAY_SIZE(scan_pins)][ARRAY_SIZE(drive_pins)] = KB_MAP_FN;
-            #endif
+        #endif
 
 kb_k_mp_t *kb_p_map[4] = {
     kb_map_normal,
@@ -189,8 +185,7 @@ kb_k_mp_t *kb_p_map[4] = {
     kb_map_fn,
     kb_map_fn,
 };
-        #endif
-
+#endif
 
     ///////////////////////////////////////////////////////////////////////
     //////////// load configuration from flash/OTP ////////////////////////
@@ -199,19 +194,19 @@ kb_k_mp_t *kb_p_map[4] = {
 
     #endif
 
-_attribute_data_retention_ u32 scan_pin_need;
+_attribute_data_retention_ unsigned int scan_pin_need;
 
 static unsigned char kb_is_fn_pressed = 0;
 
 kb_k_mp_t *kb_k_mp;
 
-void kb_rmv_ghost_key(u32 *pressed_matrix)
+void kb_rmv_ghost_key(unsigned int *pressed_matrix)
 {
-    u32 mix_final = 0;
+    unsigned int mix_final = 0;
     foreach_arr(i, drive_pins)
     {
         for (unsigned int j = (i + 1); j < ARRAY_SIZE(drive_pins); ++j) {
-            u32 mix = (pressed_matrix[i] & pressed_matrix[j]);
+            unsigned int mix = (pressed_matrix[i] & pressed_matrix[j]);
             //four or three key at "#" is pressed at the same time, should remove ghost key
             if (mix && (!BIT_IS_POW2(mix) || (pressed_matrix[i] ^ pressed_matrix[j]))) {
                 // remove ghost keys
@@ -228,17 +223,17 @@ void kb_rmv_ghost_key(u32 *pressed_matrix)
 int key_matrix_same_as_last_cnt = 0; //record key matrix no change cnt
     #endif
 
-unsigned int key_debounce_filter(u32 mtrx_cur[], u32 filt_en)
+unsigned int key_debounce_filter(unsigned int mtrx_cur[], unsigned int filt_en)
 {
-    u32 kc = 0;
+    unsigned int kc = 0;
     #if (LONG_PRESS_KEY_POWER_OPTIMIZE)
     unsigned char matrix_differ = 0;
     #endif
-    static u32 mtrx_pre[ARRAY_SIZE(drive_pins)];
-    static u32 mtrx_last[ARRAY_SIZE(drive_pins)];
+    static unsigned int mtrx_pre[ARRAY_SIZE(drive_pins)];
+    static unsigned int mtrx_last[ARRAY_SIZE(drive_pins)];
     foreach_arr(i, drive_pins)
     {
-        u32 mtrx_tmp = mtrx_cur[i];
+        unsigned int mtrx_tmp = mtrx_cur[i];
     #if (STUCK_KEY_PROCESS_ENABLE)
         stuckKeyPress[i] = mtrx_tmp ? 1 : 0;
     #endif
@@ -272,7 +267,7 @@ unsigned int key_debounce_filter(u32 mtrx_cur[], u32 filt_en)
 // input:          pressed_matrix,
 // key_code:   output keys array
 // key_max:    max keys should be returned
-static inline void kb_remap_key_row(int drv_ind, u32 m, int key_max, kb_data_t *kb_data)
+static inline void kb_remap_key_row(int drv_ind, unsigned int m, int key_max, kb_data_t *kb_data)
 {
     foreach_arr(i, scan_pins)
     {
@@ -306,17 +301,18 @@ static inline void kb_remap_key_row(int drv_ind, u32 m, int key_max, kb_data_t *
     }
 }
 
-static inline void kb_remap_key_code(u32 *pressed_matrix, int key_max, kb_data_t *kb_data, int numlock_status)
+static inline void kb_remap_key_code(unsigned int *pressed_matrix, int key_max, kb_data_t *kb_data, int numlock_status)
 {
     (void)numlock_status;
+
     #if (KB_STANDARD_KEYBOARD)
-    kb_k_mp = kb_p_map[(numlock_status & 1) | (kb_is_fn_pressed << 1)];
+        kb_k_mp = kb_p_map[(numlock_status & 1) | (kb_is_fn_pressed << 1)];
     #else
-    kb_k_mp = (kb_k_mp_t *)&kb_map_normal[0];
+        kb_k_mp = (kb_k_mp_t *)&kb_map_normal[0];
     #endif
     foreach_arr(i, drive_pins)
     {
-        u32 m = pressed_matrix[i];
+        unsigned int m = pressed_matrix[i];
         if (!m) {
             continue;
         }
@@ -327,23 +323,27 @@ static inline void kb_remap_key_code(u32 *pressed_matrix, int key_max, kb_data_t
     }
 }
 
-u32 kb_scan_row(int drv_ind, unsigned char *gpio)
+unsigned int kb_scan_row(int drv_ind, unsigned char *gpio)
 {
     /*
      * set as gpio mode if using spi flash pin
      * */
-    u32 sr = irq_disable();
+    unsigned char sr = irq_disable();
     #if (KB_KEY_FLASH_PIN_MULTI_USE)
     MSPI_AS_GPIO;
     #endif
 
     #if (!KB_LINE_MODE)
-    u32 drv_pin = drive_pins[drv_ind];
-    gpio_write(drv_pin, KB_LINE_HIGH_VALID);
-    gpio_set_output_en(drv_pin, 1);
+    unsigned int drv_pin = drive_pins[drv_ind];
+    if (KB_LINE_HIGH_VALID) {
+        gpio_set_high_level(drv_pin);
+    } else {
+        gpio_set_low_level(drv_pin);
+    }
+    gpio_output_en(drv_pin);
     #endif
 
-    u32 matrix = 0;
+    unsigned int matrix = 0;
     foreach_arr(j, scan_pins)
     {
         if (scan_pin_need & BIT(j)) {
@@ -368,30 +368,34 @@ u32 kb_scan_row(int drv_ind, unsigned char *gpio)
     #if (!KB_LINE_MODE)
     ////////        float drive pin ////////////////////////////
     //sleep_us(KB_SCAN_DELAY_TIME);
-    gpio_write(drv_pin, 0);
-    gpio_set_output_en(drv_pin, 0);
+    gpio_set_low_level(drv_pin);
+    gpio_output_dis(drv_pin);
     #endif
 
     irq_restore(sr);
     return matrix;
 }
 
-u32 matrix_buff[4][ARRAY_SIZE(drive_pins)];
-int matrix_wptr, matrix_rptr;
+unsigned int matrix_buff[4][ARRAY_SIZE(drive_pins)];
+int          matrix_wptr, matrix_rptr;
 
-u32 kb_key_pressed(unsigned char *gpio)
+unsigned int kb_key_pressed(unsigned char *gpio)
 {
     foreach_arr(i, drive_pins)
     {
-        gpio_write(drive_pins[i], KB_LINE_HIGH_VALID);
-        gpio_set_output_en(drive_pins[i], 1);
+        if (KB_LINE_HIGH_VALID) {
+            gpio_set_high_level(drive_pins[i]);
+        } else {
+            gpio_set_low_level(drive_pins[i]);
+        }
+        gpio_output_en(drive_pins[i]);
     }
     sleep_us(20);
     gpio_read_all(gpio);
 
-    u32                  ret         = 0;
+    unsigned int         ret         = 0;
     static unsigned char release_cnt = 0;
-    static u32           ret_last    = 0;
+    static unsigned int  ret_last    = 0;
 
     foreach_arr(i, scan_pins)
     {
@@ -400,7 +404,6 @@ u32 kb_key_pressed(unsigned char *gpio)
             release_cnt = 6;
             ret_last    = ret;
         }
-        //ret = ret && gpio_read(scan_pins[i]);
     }
     if (release_cnt) {
         ret = ret_last;
@@ -408,27 +411,28 @@ u32 kb_key_pressed(unsigned char *gpio)
     }
     foreach_arr(i, drive_pins)
     {
-        gpio_write(drive_pins[i], 0);
-        gpio_set_output_en(drive_pins[i], 0);
+        gpio_set_low_level(drive_pins[i]);
+        gpio_output_dis(drive_pins[i]);
     }
     return ret;
 }
 
-u32 kb_scan_key_value(int numlock_status, int read_key, unsigned char *gpio)
+unsigned int kb_scan_key_value(int numlock_status, int read_key, unsigned char *gpio)
 {
     kb_event.cnt      = 0;
     kb_event.ctrl_key = 0;
     kb_is_fn_pressed  = 0;
 
-    u32 pressed_matrix[ARRAY_SIZE(drive_pins)] = {0};
+    unsigned int pressed_matrix[ARRAY_SIZE(drive_pins)] = {0};
     #if (KB_STANDARD_KEYBOARD)
-    kb_k_mp = kb_p_map[0];
+        kb_k_mp = kb_p_map[0];
     #else
-    kb_k_mp = (kb_k_mp_t *)&kb_map_normal[0];
+        kb_k_mp = (kb_k_mp_t *)&kb_map_normal[0];
     #endif
+
     kb_scan_row(0, gpio);
     for (unsigned int i = 0; i <= ARRAY_SIZE(drive_pins); i++) {
-        u32 r = kb_scan_row(i < ARRAY_SIZE(drive_pins) ? i : 0, gpio);
+        unsigned int r = kb_scan_row(i < ARRAY_SIZE(drive_pins) ? i : 0, gpio);
         if (i) {
             pressed_matrix[i - 1] = r;
         }
@@ -438,13 +442,13 @@ u32 kb_scan_key_value(int numlock_status, int read_key, unsigned char *gpio)
     kb_rmv_ghost_key(&pressed_matrix[0]);
     #endif
 
-    u32 key_changed = key_debounce_filter(pressed_matrix,
-                                          (numlock_status & KB_NUMLOCK_STATUS_POWERON) ? 0 : 1);
+    unsigned int key_changed = key_debounce_filter(pressed_matrix,
+                                                   (numlock_status & KB_NUMLOCK_STATUS_POWERON) ? 0 : 1);
 
     #if (KB_REPEAT_KEY_ENABLE)
     if (key_changed) {
         repeat_key.key_change_flg  = KEY_CHANGE;
-        repeat_key.key_change_tick = clock_time();
+        repeat_key.key_change_tick = stimer_get_tick();
     } else {
         if (repeat_key.key_change_flg == KEY_CHANGE) {
             repeat_key.key_change_flg = KEY_SAME;
@@ -452,7 +456,7 @@ u32 kb_scan_key_value(int numlock_status, int read_key, unsigned char *gpio)
 
         if (repeat_key.key_change_flg == KEY_SAME && repeat_key.key_repeat_flg &&
             clock_time_exceed(repeat_key.key_change_tick, (KB_REPEAT_KEY_INTERVAL_MS - 5) * 1000)) {
-            repeat_key.key_change_tick = clock_time();
+            repeat_key.key_change_tick = stimer_get_tick();
             key_changed                = 1;
         }
     }
@@ -462,7 +466,7 @@ u32 kb_scan_key_value(int numlock_status, int read_key, unsigned char *gpio)
     //  insert buffer here
     //       key mapping requires NUMLOCK status
     ///////////////////////////////////////////////////////////////////
-    u32 *pd;
+    unsigned int *pd;
     if (key_changed) {
         /////////// push to matrix buffer /////////////////////////
         pd = matrix_buff[matrix_wptr & 3];

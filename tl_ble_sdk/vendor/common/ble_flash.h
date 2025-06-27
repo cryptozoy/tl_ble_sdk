@@ -91,6 +91,10 @@
     #define CFG_ADR_CALIBRATION_2M_FLASH 0x1FE000
 #endif
 
+/* SMP pairing and key information area */
+#ifndef FLASH_ADR_SMP_PAIRING_2M_FLASH
+    #define FLASH_ADR_SMP_PAIRING_2M_FLASH 0x1EC000 //1EC000 & 1ED000 & 1EE000 & 1EF000
+#endif
 
 /* SMP pairing and key information area */
 #ifndef FLASH_ADR_SMP_PAIRING_2M_FLASH

@@ -24,6 +24,7 @@
 #ifndef BLE_PROFILE_H_
 #define BLE_PROFILE_H_
 
+#include "stack/ble/profile/prf_debug.h"
 
 #include "stack/ble/profile/prf_common/storage/prf_storage.h"
 
@@ -37,7 +38,11 @@
 //////////////////////////Basic Profile///////////////////////////////////
 #include "stack/ble/profile/basic_profile/prf_basic.h"
 
-////////////////////// Channel Sounding Ranging  //////////////////////
-#include "stack/ble/profile/channel_sounding/prf_cs.h"
+////////////////////// Electronic Shelf Label //////////////////////
+#include "stack/ble/profile/esl/prf_esl.h"
+
+#include "stack/ble/profile/ota/prf_ota.h"
+#include "stack/ble/profile/spp/prf_spp.h"
+
 
 #endif /* BLE_PROFILE_H_ */

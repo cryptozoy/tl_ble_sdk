@@ -41,8 +41,8 @@
     #define CR_VOL_DN          0xf1
 
     /**
- *  @brief  Normal keyboard map
- */
+     *  @brief  Normal keyboard map
+     */
     #define KB_MAP_NORMAL {      \
         {CR_VOL_DN, BTN_PAIR  },   \
         {CR_VOL_UP, BTN_UNPAIR}, \
@@ -83,8 +83,8 @@
  */
 #if UI_LED_ENABLE
     /**
-    *  @brief  Definition gpio for led
-    */
+     *  @brief  Definition gpio for led
+     */
     #define GPIO_LED_BLUE     GPIO_PB4
     #define GPIO_LED_GREEN    GPIO_PB5
     #define GPIO_LED_WHITE    GPIO_PB6

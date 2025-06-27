@@ -164,7 +164,8 @@ void blc_readFlashSize_autoConfigCustomFlashSector(void)
     }
 }
 
-#if ((MCU_CORE_TYPE == MCU_CORE_B91) || (MCU_CORE_TYPE == MCU_CORE_B92))
+#if ((MCU_CORE_TYPE == MCU_CORE_B91) || (MCU_CORE_TYPE == MCU_CORE_B92) || \
+    (MCU_CORE_TYPE == MCU_CORE_TL721X) || (MCU_CORE_TYPE == MCU_CORE_TL321X))
 /**
  * @brief      This function serves to update rf frequency offset.
  * @param[in]  velfrom - the calibration value from flash or otp.
@@ -177,7 +178,7 @@ unsigned char user_calib_freq_offset(user_calib_from_e velfrom, unsigned int add
     if (velfrom == USER_CALIB_FROM_FLASH) {
         flash_read_page(addr, 1, &frequency_offset_value);
     }
-    if ((0xff != frequency_offset_value) && (frequency_offset_value <= 63)) {
+    if (0xff != frequency_offset_value) {
         /*<! BLE USED */
         blc_nvParam.cap_frqoffset_en    = 1;
         blc_nvParam.cap_frqoffset_value = frequency_offset_value;
@@ -189,7 +190,9 @@ unsigned char user_calib_freq_offset(user_calib_from_e velfrom, unsigned int add
     tlkapi_printf(APP_FLASH_INIT_LOG_EN, "[FLASH][INI] user_calib_freq_offset value error\r\n");
     return 0;
 }
+#endif
 
+#if ((MCU_CORE_TYPE == MCU_CORE_B91) || (MCU_CORE_TYPE == MCU_CORE_B92))
 /**
  * @brief      This function serves to update the calibration value of rf rx dcoc.
  * @param[in]  velfrom - the calibration value from flash.
@@ -236,7 +239,7 @@ unsigned char user_calib_adc_vref(user_calib_from_e velfrom, unsigned int addr)
     deviation of two-point calibrate  in efuse:-9~24mv.
     deviation of one-point calibrate  in flash:-20~20mv.
     The above statistical results are obtained by testing only 19 9213A chips.
-    ********************************************************************************************/
+********************************************************************************************/
     unsigned char  adc_vref_calib_value[7] = {0};
     unsigned short gpio_calib_value        = 0;
     signed char    gpio_calib_value_offset = 0;
@@ -298,16 +301,17 @@ void blc_app_loadCustomizedParameters_normal(void)
 {
     // Check if flash sector for calibration is valid
     if (flash_sector_calibration) {
+#if ((MCU_CORE_TYPE == MCU_CORE_B91) || (MCU_CORE_TYPE == MCU_CORE_B92) || \
+    (MCU_CORE_TYPE == MCU_CORE_TL721X) || (MCU_CORE_TYPE == MCU_CORE_TL321X))
+        // Load RF frequency offset calibration
+        user_calib_freq_offset(USER_CALIB_FROM_FLASH, (flash_sector_calibration + CALIB_OFFSET_CAP_INFO));
+#endif
 #if (MCU_CORE_TYPE == MCU_CORE_B91)
         // Load ADC VREF calibration
         user_calib_adc_vref(USER_CALIB_FROM_FLASH, (flash_sector_calibration + CALIB_OFFSET_ADC_VREF));
-        // Load RF frequency offset calibration
-        user_calib_freq_offset(USER_CALIB_FROM_FLASH, (flash_sector_calibration + CALIB_OFFSET_CAP_INFO));
         // Load RF RX DCOC calibration
         user_calib_rf_rx_dcoc(USER_CALIB_FROM_FLASH, (flash_sector_calibration + CALIB_OFFSET_RF_RX_DCOC_CALI_VALUE));
 #elif (MCU_CORE_TYPE == MCU_CORE_B92)
-        // Load RF frequency offset calibration
-        user_calib_freq_offset(USER_CALIB_FROM_FLASH, (flash_sector_calibration + CALIB_OFFSET_CAP_INFO));
         // Load RF RX DCOC calibration
         user_calib_rf_rx_dcoc(USER_CALIB_FROM_FLASH, (flash_sector_calibration + CALIB_OFFSET_RF_RX_DCOC_CALI_VALUE));
 #endif
@@ -350,7 +354,9 @@ _attribute_no_inline_ void blc_initMacAddress(int flash_addr, u8 *mac_public, u8
     }
 
     int rand_mac_byte3_4_read_OK = 0;
+
     u8  mac_read[8];
+
     flash_read_page(flash_addr, 8, mac_read);
 
     u8 value_rand[5];
@@ -365,11 +371,12 @@ _attribute_no_inline_ void blc_initMacAddress(int flash_addr, u8 *mac_public, u8
             mac_random_static[4]     = mac_read[7];
             rand_mac_byte3_4_read_OK = 1;
         }
-    } else {                                       //no MAC address on flash
+    } else {                                    //no MAC address on flash
 
 #if (BUILT_IN_MAC_ON_DEVICE)
-        if (get_device_mac_address(mac_read, 8)) { //read device MAC address
-            memcpy(mac_public, mac_read, 6);       //copy public address from device
+        if (get_device_mac_address(mac_read, 8)) //read device MAC address
+        {
+            memcpy(mac_public, mac_read, 6);    //copy public address from device
 
             mac_random_static[3]     = mac_read[6];
             mac_random_static[4]     = mac_read[7];

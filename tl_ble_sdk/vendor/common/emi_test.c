@@ -194,9 +194,9 @@ static inline void cmd_operation(pa_setting_cmd_t cmd)
 }
 
     /**
-* @note The pin status of the BY PASS mode varies according to the PA chip.
-*       You need to change the pin status according to the actual situation
-*/
+ * @note The pin status of the BY PASS mode varies according to the PA chip.
+ *       You need to change the pin status according to the actual situation
+ */
     #define PA_BYPASS 0
 
 /**
@@ -255,21 +255,21 @@ void pa_operation(pa_setting_state_e state)
 }
 
     /*
-* @brief   this macro definition serve to open the setting to deal with problem of zigbee mode 2480Mhz
-*          band edge can't pass the spec.only use it at the time of certification.
-* */
+ * @brief   this macro definition serve to open the setting to deal with problem of zigbee mode 2480Mhz
+ *          band edge can't pass the spec.only use it at the time of certification.
+ * */
     #define FIX_ZIGBEE_BANDEDGE_EN 0
 
     #if !APP_EMI_TEST_ENABLE
 
         /*
-    * @brief   this macro definition serve to close internal cap.
-    * */
+ * @brief   this macro definition serve to close internal cap.
+ * */
         #define CLOSE_INTERNAL_CAP_EN 0 //0:Internal capacitance,1:External capacitance
 
         /*
-    * @brief   this macro definition serve to enable function of swire-through-usb.
-    * */
+ * @brief   this macro definition serve to enable function of swire-through-usb.
+ * */
         #define SWIRE_THROUGH_USB_EN 0 //0:disable swire-through-usb,1:enable swire-through-usb.
 
     #endif

@@ -35,15 +35,18 @@
 #ifndef ID_PRODUCT_BASE
     #define ID_PRODUCT_BASE 0x8800
 #endif
+
+#define ID_VERSION              0x0100
+
 #ifndef STRING_VENDOR
-    #define STRING_VENDOR L"Telink"
+    #define STRING_VENDOR "Telink"
 #endif
 #ifndef STRING_PRODUCT
-    #define STRING_PRODUCT L"BLE 6.0"
+    #define STRING_PRODUCT "BLE 6.0"
 #endif
 
 #ifndef STRING_SERIAL
-    #define STRING_SERIAL L"TLSR95XX"
+    #define STRING_SERIAL "TL_BLE_SDK"
 #endif
 
 
@@ -171,6 +174,37 @@
 
 
 ///////////////////  USB   /////////////////////////////////
+#define USB_ENUM_IN_INTERRUPT 0                   /* 1: usb enumeration in interrupt, 0: usb enumeration in main_loop. */
+
+#if (MCU_CORE_TYPE == MCU_CORE_B91) || (MCU_CORE_TYPE == MCU_CORE_B92)
+    #define USB_PHYSICAL_EDP_CDC_IN  USB_EDP4_IN  /* physical in endpoint */
+    #define USB_PHYSICAL_EDP_CDC_OUT USB_EDP5_OUT /* physical out endpoint */
+    #define USB_CTR_ENDPOINT_SIZE 8
+#else
+    /* control endpoint size config. */
+    #define USB_CTR_ENDPOINT_SIZE 64              /* 8/16/32/64 */
+    #define USB_CTR_SIZE          (USB_CTR_ENDPOINT_SIZE == 64) ? SIZE_64_BYTE :                                                                   \
+                                                                  ((USB_CTR_ENDPOINT_SIZE == 32) ? SIZE_32_BYTE :                                  \
+                                                                                                   ((USB_CTR_ENDPOINT_SIZE == 16) ? SIZE_16_BYTE : \
+                                                                                                                                    ((USB_CTR_ENDPOINT_SIZE == 8) ? SIZE_8_BYTE : SIZE_64_BYTE)))
+
+    #define USB_MAP_EN               0                /* 1:usb map function enable, 0:usb map function disable. */
+
+    #if (MCU_CORE_TYPE != MCU_CORE_TL322X)
+        #define USB_PHYSICAL_EDP_CDC_IN  USB_EDP4_IN      /* physical in endpoint */
+        #define USB_PHYSICAL_EDP_CDC_OUT USB_EDP5_OUT     /* physical out endpoint */
+    #endif
+
+    #if (USB_MAP_EN == 1)
+        #define CDC_RX_EPNUM USB_EDP5_OUT             /* logical in endpoint */
+        #define CDC_TX_EPNUM USB_EDP5_OUT             /* logical out endpoint */
+    #else
+        #define CDC_RX_EPNUM USB_PHYSICAL_EDP_CDC_OUT /* USB_MAP_EN = 0, logical endpoint is the same as the physical endpoint */
+        #define CDC_TX_EPNUM USB_PHYSICAL_EDP_CDC_IN  /* USB_MAP_EN = 0, logical endpoint is the same as the physical endpoint*/
+    #endif
+
+#endif
+
 #ifndef IRQ_USB_PWDN_ENABLE
     #define IRQ_USB_PWDN_ENABLE 0
 #endif
@@ -288,6 +322,10 @@
         #define BOARD_SELECT BOARD_721X_EVK_C1T315A20
     #elif (MCU_CORE_TYPE == MCU_CORE_TL321X)
         #define BOARD_SELECT BOARD_321X_EVK_C1T335A20
+    #elif (MCU_CORE_TYPE == MCU_CORE_TL322X)
+//       #define BOARD_SELECT BOARD_322X_EVK_C1T371A20
+       #define BOARD_SELECT BOARD_322X_EVK_C1T382A20
+       //#define BOARD_SELECT BOARD_322X_EVK_C1T382A102
     #else
         #error "SDK do not support this MCU!"
     #endif
@@ -315,25 +353,25 @@
     #define DEBUG_GPIO_ENABLE 0
 #endif
 
-#ifndef DEBUG_CS_GPIO_ENABLE
-    #define DEBUG_CS_GPIO_ENABLE 0
-#endif
 #if (BOARD_SELECT == BOARD_951X_EVK_C1T213A20)
     #include "boards/B91_C1T213A20.h"
 #elif (BOARD_SELECT == BOARD_952X_EVK_C1T266A20)
     #include "boards/B92_C1T266A20.h"
-#elif (BOARD_SELECT == BOARD_952X_EVK_C1T266A102)
-    #include "boards/B92_C1T266A102.h"
-#elif (BOARD_SELECT == BOARD_721X_EVK_C1T315A20)
-    #include "boards/TL721X_C1T315A20.h"
 #elif (BOARD_SELECT == BOARD_321X_EVK_C1T331A20)
     #include "boards/TL321X_C1T331A20.h"
 #elif (BOARD_SELECT == BOARD_321X_EVK_C1T335A20)
     #include "boards/TL321X_C1T335A20.h"
 #elif (BOARD_SELECT == BOARD_321X_EVK_C1T335A78)
     #include "boards/TL321X_C1T335A78.h"
-#elif (BOARD_SELECT == BOARD_322X_FPGA_KU115_SOLO)
-    #include "boards/TL322X_C1T311155.h"
+#elif (BOARD_SELECT == BOARD_322X_EVK_C1T382A20)
+    #include "boards/TL322X_C1T382A20.h"
+#elif (BOARD_SELECT == BOARD_721X_EVK_C1T315A20)
+    #include "boards/TL721X_C1T315A20.h"
+#elif (BOARD_SELECT == BOARD_721X_AIOT_DK1_ML7218D1)
+    #include "boards/TL721X_ML7218D1.h"
+#elif (BOARD_SELECT == BOARD_721X_AIOT_DK1_ML7218A)
+    #include "boards/TL721X_ML7218A.h"
+
 #endif
 
 

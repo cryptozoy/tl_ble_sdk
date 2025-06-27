@@ -50,8 +50,8 @@
 
 #if (TLKAPI_DEBUG_CHANNEL == TLKAPI_DEBUG_CHANNEL_GSUART)
     /**
-    * @brief   some default setting for "GPIO simulate UART" log channel
-    */
+     * @brief   some default setting for "GPIO simulate UART" log channel
+     */
     /* default GPIO, user can change it in app_config.h */
     #ifndef TLKAPI_DEBUG_GPIO_PIN
         #define TLKAPI_DEBUG_GPIO_PIN GPIO_PD4
@@ -61,10 +61,20 @@
     #ifndef TLKAPI_DEBUG_GSUART_BAUDRATE
         #define TLKAPI_DEBUG_GSUART_BAUDRATE 1000000
     #endif
+
+    /**
+     * @brief   Compilation constraint for minimum baud rate
+     * @note    Compilation will fail if baud rate is set below 200K.
+     *          This is due to scheduler's maximum interrupt disable time (50¦Ìs).
+     */
+    #if TLKAPI_DEBUG_GSUART_BAUDRATE < 200000
+        #error "Baud rate must be at least 200K."
+    #endif
+
 #elif (TLKAPI_DEBUG_CHANNEL == TLKAPI_DEBUG_CHANNEL_UART)
     /**
-    * attention: default setting for UART log channel are written in ext_uart.h, because hardware UART maybe different for different IC
-    */
+     * attention: default setting for UART log channel are written in ext_uart.h, because hardware UART maybe different for different IC
+     */
 #endif
 
 

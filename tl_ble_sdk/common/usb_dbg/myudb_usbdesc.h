@@ -870,12 +870,17 @@ typedef struct
 
     ////////////////////////////////////////////////////////////////////////////////////////////////
     #if 1
-
+      #if (MCU_CORE_TYPE != CHIP_TYPE_TL322X)
         #define MYUDB_EDP_IN_HCI  USB_EDP3_IN
         #define MYUDB_EDP_OUT_HCI USB_EDP5_OUT
         #define MYUDB_EDP_IN_VCD  USB_EDP8_IN
         #define MYUDB_EDP_OUT_VCD USB_EDP6_OUT
-
+      #else
+        #define MYUDB_EDP_IN_HCI  USB1_EDP3_IN
+        #define MYUDB_EDP_OUT_HCI USB1_EDP5_OUT
+        #define MYUDB_EDP_IN_VCD  USB1_EDP8_IN
+        #define MYUDB_EDP_OUT_VCD USB1_EDP6_OUT
+     #endif
     #else
 
         #define MYUDB_EDP_IN_HCI  8

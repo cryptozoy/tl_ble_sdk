@@ -1,12 +1,12 @@
 /********************************************************************************************************
  * @file    HIDClassDevice.h
  *
- * @brief   This is the header file for BLE SDK
+ * @brief   This is the header file for Telink RISC-V MCU
  *
- * @author  BLE GROUP
- * @date    06,2022
+ * @author  Driver Group
+ * @date    2019
  *
- * @par     Copyright (c) 2022, Telink Semiconductor (Shanghai) Co., Ltd. ("TELINK")
+ * @par     Copyright (c) 2019, Telink Semiconductor (Shanghai) Co., Ltd. ("TELINK")
  *
  *          Licensed under the Apache License, Version 2.0 (the "License");
  *          you may not use this file except in compliance with the License.
@@ -24,7 +24,7 @@
 #pragma once
 
 /* Includes: */
-#include "../common/types.h"
+
 
 /* Enable C linkage for C++ Compilers: */
 #if defined(__cplusplus)
@@ -32,23 +32,23 @@ extern "C"
 {
 #endif
 
-    typedef struct __attribute__((packed))
+    typedef struct
     {
-        u8    InterfaceNumber;
-        u8    ReportINEndpointNumber;
-        u16   ReportINEndpointSize;
-        bool  ReportINEndpointDoubleBank;
-        void *PrevReportINBuffer;
-        u8    PrevReportINBufferSize;
-    } usbhid_config_t;
+        unsigned char  InterfaceNumber;
+        unsigned char  ReportINEndpointNumber;
+        unsigned short ReportINEndpointSize;
+        _Bool          ReportINEndpointDoubleBank;
+        void          *PrevReportINBuffer;
+        unsigned char  PrevReportINBufferSize;
+    } __attribute__((packed)) usbhid_config_t;
 
-    typedef struct __attribute__((packed))
+    typedef struct
     {
-        bool UsingReportProtocol;
-        u16  PrevFrameNum;
-        u16  IdleCount;
-        u16  IdleMSRemaining;
-    } usbhid_state_t;
+        _Bool          UsingReportProtocol;
+        unsigned short PrevFrameNum;
+        unsigned short IdleCount;
+        unsigned short IdleMSRemaining;
+    } __attribute__((packed)) usbhid_state_t;
 
 /* Disable C linkage for C++ Compilers: */
 #if defined(__cplusplus)

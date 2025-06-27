@@ -23,15 +23,14 @@
  *******************************************************************************************************/
 #pragma once
 
-struct blc_scps_server{
-    u16 scanIntervalWindowHdl;      //Scan Interval Window
-    u16 scanRefreshHdl;             //Scan Refresh
+struct blc_scps_server
+{
+    u16 scanIntervalWindowHdl; //Scan Interval Window
+    u16 scanRefreshHdl;        //Scan Refresh
 };
 
-
-struct blc_scps_server_ctrl{
-    blc_prf_proc_t process;
+struct blc_scps_server_ctrl
+{
+    blc_prf_proc_t         process;
     struct blc_scps_server scpsServer;
-}__attribute__((packed));
-
-
+} __attribute__((packed));

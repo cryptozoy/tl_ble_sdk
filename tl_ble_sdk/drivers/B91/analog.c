@@ -105,7 +105,8 @@ static _always_inline void analog_wait_txbuf_no_empty(void)
         In order to prevent incorrect data from being emitted due to the slow filling of the FIFO,
         we need to determine whether the FIFO is non-empty before triggering the write action.
     */
-    while (!(reg_ana_buf_cnt & FLD_ANA_TX_BUFCNT));
+    while (!(reg_ana_buf_cnt & FLD_ANA_TX_BUFCNT))
+        ;
 }
 
 /**********************************************************************************************************************
@@ -312,7 +313,8 @@ _attribute_ram_code_sec_noinline_ void analog_read_buff(unsigned char addr, unsi
     reg_ana_addr = addr;
     reg_ana_ctrl = FLD_ANA_CYC;
     for (unsigned int i = 0; i < len; i++) {
-        while (!(reg_ana_buf_cnt & FLD_ANA_RX_BUFCNT));
+        while (!(reg_ana_buf_cnt & FLD_ANA_RX_BUFCNT))
+            ;
         *(buff++) = reg_ana_data(i % 4);
     }
 
@@ -406,7 +408,8 @@ void analog_write_addr_data_dma(dma_chn_e chn, void *pdat, int len)
         it will be mistakenly judged that the write is complete, so a delay is required.
     */
     delay_us(1);
-    while (!(reg_ana_sta & BIT(3)));
+    while (!(reg_ana_sta & BIT(3)))
+        ;
     reg_ana_ctrl    = 0x00;
     reg_ana_dma_ctl = 0;
     core_restore_interrupt(r);

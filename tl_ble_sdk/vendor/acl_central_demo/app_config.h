@@ -48,7 +48,16 @@
  *    be directly used on user's mass production application without any change. User should refer to sample code, understand the
  *    principles and methods, then change and implement a more appropriate mechanism according to their application if needed.
  */
-#define APP_FLASH_PROTECTION_ENABLE 1
+#if (MCU_CORE_TYPE == MCU_CORE_TL322X)
+    #define APP_FLASH_PROTECTION_ENABLE 0
+#else
+    #define APP_FLASH_PROTECTION_ENABLE 1
+#endif
+
+#if MCU_CORE_TYPE == MCU_CORE_TL322X
+    #define PLIC_ENABLE           1
+    #define CLIC_ENABLE           0
+#endif
 
 
 /////////////////////// Board Select Configuration ///////////////////////////////
@@ -59,12 +68,16 @@
 #elif (MCU_CORE_TYPE == MCU_CORE_TL721X)
     #define BOARD_SELECT BOARD_721X_EVK_C1T315A20
 #elif (MCU_CORE_TYPE == MCU_CORE_TL321X)
-    #define BOARD_SELECT BOARD_321X_EVK_C1T331A20 //BOARD_321X_EVK_C1T335A20
+    #define BOARD_SELECT BOARD_321X_EVK_C1T335A20 //BOARD_321X_EVK_C1T331A20
+#elif (MCU_CORE_TYPE == MCU_CORE_TL322X)
+    #define BOARD_SELECT BOARD_322X_EVK_C1T382A20
 #endif
 
 
 ///////////////////////// UI Configuration ////////////////////////////////////////////////////
-
+#define UI_LED_ENABLE      1
+#define UI_KEYBOARD_ENABLE 1
+#define UI_BUTTON_ENABLE   0
 
 ///////////////////////// DEBUG  Configuration ////////////////////////////////////////////////
 #define DEBUG_GPIO_ENABLE     0

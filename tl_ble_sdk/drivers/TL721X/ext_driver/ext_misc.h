@@ -48,8 +48,16 @@
 
 
 /******************************* core_start ******************************************************************/
-#define irq_disable                 core_interrupt_disable
-#define irq_enable                  core_interrupt_enable
+#ifndef BLC_ZEPHYR_BLE_INTEGRATION
+    #define irq_disable                 core_interrupt_disable
+    #define irq_enable                  core_interrupt_enable
+#else
+    #undef irq_disable
+    #undef irq_enable
+    #define irq_disable                 core_interrupt_disable
+    #define irq_enable                  core_interrupt_enable
+#endif
+
 #define irq_restore(en)             core_restore_interrupt(en)
 
 #define start_reboot                sys_reboot   //This function serves to reboot chip.
@@ -64,6 +72,7 @@
  * @param[out] buf  - Pointer to IEEE address buffer(IEEE address is 8bytes)
  * @return     none
  */
+extern void otp_get_ieee_addr(unsigned char *buf);
 
  static inline bool get_device_mac_address(u8* mac_read, int length)
  {
@@ -168,15 +177,6 @@ void rf_set_channel_power_calibration(unsigned char *channel_power);
 void rf_set_channel_power_enable(unsigned char enable);
 #endif
 
-/**
- * @brief    This function serves to enable zb_rt interrupt source initialize
- * the default index value for CS SYNC and the base index for mode2 antenna index.
- * @param[in] antsel0_pin : the first pin of the switch control
- * @param[in] antsel1_pin : the second pin of the switch control
- * @param[in] antsel2_pin : the third pin of the switch control
- * @return  none
- */
-void rf_cs_ant_switch_pin_init(gpio_pin_e antsel0_pin, gpio_pin_e antsel1_pin, gpio_pin_e antsel2_pin);
 /******************************* rf end  **********************************************************************/
 
 
@@ -304,6 +304,25 @@ enum{//todo: SunWei &YeYang
     FLD_IRQ_ZB_RT_EN = 15,
 };
 /******************************* plic_end ********************************************************************/
+
+/******************************* cs_ant_switch_start *********************************************************/
+typedef struct{
+    gpio_pin_e  pin;
+    gpio_func_e  pin_fun;
+}rf_cs_ant_switch_ctrl;
+
+/**
+ * @brief        * This function initializes the GPIO pins used for antenna switching according to the specified configuration.
+ *                 It disables the input and output functions of the GPIO pins, sets the pull-down resistance, and configures
+ *                 the multiplexing function of the pins.
+ *
+ * @param[in]   switch_ctrl    - Pointer to the antenna switch control structure array.
+ * @param[in]   num            - Number of antenna switch pins
+ * @return      none.
+ */
+void rf_cs_ant_switch_pin_init(rf_cs_ant_switch_ctrl *switch_ctrl, u8 num);
+
+/******************************* cs_ant_switch_end **********************************************************/
 
 
 #endif /* DRIVERS_TL721X_EXT_MISC_H_ */

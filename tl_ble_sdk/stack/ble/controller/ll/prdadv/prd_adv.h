@@ -28,8 +28,9 @@
 /* maximum number of periodic advertising this SDK can support */
 #define PERIODIC_ADV_NUMBER_MAX 2
 
-
-#define PERD_ADV_PARAM_LENGTH   508 //user can't modify this value !!! sizeof(st_prd_adv_t)
+#ifndef PERD_ADV_PARAM_LENGTH
+#define PERD_ADV_PARAM_LENGTH   1840 //user can't modify this value !!! sizeof(st_prd_adv_t)
+#endif
 
 
 /**

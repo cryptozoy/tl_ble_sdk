@@ -148,7 +148,7 @@ static const u8 hidInformation[] = {
 // HID Control Point characteristic
 _attribute_ble_data_retention_ static u8 controlPoint;
 
-typedef struct
+typedef struct __attribute__((packed))
 {
     u8  type;
     u8  rf_len;

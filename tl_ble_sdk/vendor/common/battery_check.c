@@ -142,19 +142,22 @@ _attribute_ram_code_ void adc_bat_detect_init(void)
         #if VBAT_CHANNEL_EN //vbat mode, vbat channel
     adc_vbat_sample_init(ADC_M_CHANNEL);
         #else               //base mode, gpio channel
-    adc_gpio_cfg_t adc_gpio_cfg_m = {
-        .v_ref = ADC_VREF_1P2V,
+    adc_gpio_cfg_t adc_gpio_cfg_m =
+        {
             #if (MCU_CORE_TYPE == MCU_CORE_TL721X)
-        .pre_scale = ADC_PRESCALE_1F8,
+            .v_ref = ADC_VREF_GPIO_1P2V,
+            .pre_scale = ADC_PRESCALE_1F4,
             #elif (MCU_CORE_TYPE == MCU_CORE_TL321X)
-        .pre_scale = ADC_PRESCALE_1F4,
+            .v_ref = ADC_VREF_1P2V,
+            .pre_scale = ADC_PRESCALE_1F4,
             #endif
-        .sample_freq = ADC_SAMPLE_FREQ_96K,
-        .pin         = ADC_INPUT_PIN_CHN,
-    };
+            .sample_freq = ADC_SAMPLE_FREQ_96K,
+            .pin         = ADC_INPUT_PIN_CHN,
+        };
     adc_gpio_sample_init(ADC_M_CHANNEL, adc_gpio_cfg_m);
         #endif /*!< END OF VBAT_CHANNEL_EN */
-
+    #elif (MCU_CORE_TYPE == MCU_CORE_TL322X)
+        #error "battery check function is not support for now!"
     #endif
     /******power on sar adc********/
     //note: this setting must be set after all other settings
@@ -269,7 +272,7 @@ _attribute_ram_code_ int app_battery_power_check(u16 alarm_vol_mv)
         if (adc_get_rxfifo_cnt() <= 0) {
             continue;
         }
-        channel_buffers[cnt] = adc_get_code();
+        channel_buffers[cnt] = adc_get_raw_code();
         if (channel_buffers[cnt] & BIT(11)) { //12 bit resolution, BIT(11) is sign bit, 1 means negative voltage in differential_mode
             channel_buffers[cnt] = 0;
         } else {

@@ -1,12 +1,12 @@
 /********************************************************************************************************
  * @file    StdRequestType.h
  *
- * @brief   This is the header file for BLE SDK
+ * @brief   This is the header file for Telink RISC-V MCU
  *
- * @author  BLE GROUP
- * @date    06,2022
+ * @author  Driver Group
+ * @date    2019
  *
- * @par     Copyright (c) 2022, Telink Semiconductor (Shanghai) Co., Ltd. ("TELINK")
+ * @par     Copyright (c) 2019, Telink Semiconductor (Shanghai) Co., Ltd. ("TELINK")
  *
  *          Licensed under the Apache License, Version 2.0 (the "License");
  *          you may not use this file except in compliance with the License.
@@ -23,7 +23,7 @@
  *******************************************************************************************************/
 #pragma once
 /* Includes: */
-#include "tl_common.h"
+
 
 /* Enable C linkage for C++ Compilers: */
 #if defined(__cplusplus)
@@ -47,13 +47,13 @@ extern "C"
 #define FEATURE_SELFPOWERED_ENABLED   (1 << 0)
 #define FEATURE_REMOTE_WAKEUP_ENABLED (1 << 1)
 
-    typedef struct __attribute__((packed))
+    typedef struct
     {
-        u8  RequestType;
-        u8  Request;
-        u16 Value;
-        u16 Index;
-        u16 Length;
+        unsigned char  RequestType;
+        unsigned char  Request;
+        unsigned short Value;
+        unsigned short Index;
+        unsigned short Length;
     } USB_Request_Hdr_t;
 
     enum USB_Control_Request_t
