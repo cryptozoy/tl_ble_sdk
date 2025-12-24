@@ -191,6 +191,7 @@ typedef struct tbl_cmd_set_t
 typedef enum
 {
     CHIP_VERSION_A0 = 0x00,
+    CHIP_VERSION_A1 = 0x01,
 } sys_chip_version_e;
 
 extern unsigned int g_chip_version;
@@ -203,7 +204,11 @@ extern unsigned int g_chip_version;
  * @brief      This function reboot mcu.
  * @return     none
  */
+#ifdef BLC_ZEPHYR_BLE_INTEGRATION
+_attribute_text_sec_ void protected_sys_reboot(void);
+#else
 _attribute_text_sec_ void sys_reboot(void);
+#endif
 
 /**
  * @brief      This function reboot mcu.
@@ -247,5 +252,11 @@ void sys_n22_init(unsigned int addr);
  * @return      none
  */
 void sys_n22_start(void);
+
+/**
+ * @brief       This function serves to stop n22 core system.
+ * @return      none
+ */
+void sys_n22_stop(void);
 
 #endif

@@ -21,6 +21,7 @@
  *          limitations under the License.
  *
  *******************************************************************************************************/
+ #include "user_config.h"
 #ifdef MCU_STARTUP_FLASH
 /**
  * @brief   Set "DP_THROUGH_SWIRE_DIS" as "1" to disable the "dp_through_swire" function. Set "DP_THROUGH_SWIRE_DIS" as "0" to enable the "dp_through_swire" function.
@@ -51,24 +52,78 @@
 #define EFUSE_LOAD_AND_FLASH_WAKEUP_LOOP_NUM        320 //25us
 
 
-//D25 ILM, D25 DLM, N22 ILM, N22 DLM made into software sharing, the total size is 384k (32k*12), a total of 12 copies of 32k,
-//which can be divided to d25f/n22, limit: d25f ILM at least 32K
+//D25 ILM, D25 DLM, N22 ILM, N22 DLM made into software sharing, The driver is configured to 384k by default, can choose the corresponding size according to the chip specification.
+//SRAM_384K: the total size is 384k (32k*12), a total of 12 copies of 32k;
+//SRAM_256K: the total size is 256k (32k*8), a total of 8 copies of 32k;
+//which can be divided to d25f/n22, limit: d25f ILM at least 32K.
 //Note: d25f/cstartup_flash.S, d25f/cstartup_ram.S, n22/cstartup_flash.S, n22/cstartup_ram.S configurations are consistent and need to be modified together.
-//    .equ __D25F_IRAM_SIZE,   3 //96KB
-//    .equ __D25F_DRAM_SIZE,   3 //96KB
-//    .equ __N22_IRAM_SIZE,    3 //96KB
-//    .equ __N22_DRAM_SIZE,    3 //96KB
-#ifdef MCU_CORE_D25F_ENABLE
-    .equ __D25F_IRAM_SIZE,   2 //64KB
-    .equ __D25F_DRAM_SIZE,   3 //96KB
-    .equ __N22_IRAM_SIZE,    5 //160KB
-    .equ __N22_DRAM_SIZE,    2 //64KB
+#define SRAM_384K      0 //256K SRAM, all-Retention
+#define SRAM_256K      1 //384K SRAM, all-Retention
+
+#if (__PROJECT_SNIF_SUB_NODE__) || (__PROJECT_SNIF_FOB_NODE__)
+    #define SRAM_SIZE  SRAM_256K
 #else
-    .equ __D25F_IRAM_SIZE,   6 //192KB
-    .equ __D25F_DRAM_SIZE,   6 //192KB
-    .equ __N22_IRAM_SIZE,    0
-    .equ __N22_DRAM_SIZE,    0
+    #define SRAM_SIZE  SRAM_384K
 #endif
+
+#if (SRAM_SIZE == SRAM_256K)
+    #ifdef MCU_CORE_D25F_ENABLE
+        .equ __D25F_IRAM_SIZE,   2 //64KB
+        .equ __D25F_DRAM_SIZE,   1 //32KB
+        .equ __N22_IRAM_SIZE,    4 //128KB
+        .equ __N22_DRAM_SIZE,    1 //32KB
+    #else
+        #if (__PROJECT_SNIF_SUB_NODE__ == 1)
+            .equ __D25F_IRAM_SIZE,   6 //192KB
+            .equ __D25F_DRAM_SIZE,   2 //64KB
+            .equ __N22_IRAM_SIZE,    0
+            .equ __N22_DRAM_SIZE,    0
+        #elif (__PROJECT_SNIF_FOB_NODE__ == 1)
+            .equ __D25F_IRAM_SIZE,   4 //128KB
+            .equ __D25F_DRAM_SIZE,   4 //128KB
+            .equ __N22_IRAM_SIZE,    0
+            .equ __N22_DRAM_SIZE,    0
+        #else
+            .equ __D25F_IRAM_SIZE,   7 //224KB
+            .equ __D25F_DRAM_SIZE,   1 //32KB
+            .equ __N22_IRAM_SIZE,    0
+            .equ __N22_DRAM_SIZE,    0
+        #endif
+    #endif
+#elif (SRAM_SIZE == SRAM_384K)
+     #if defined(MCU_CORE_D25F_ENABLE) && defined(__CHANNEL_SOUNDING_EN__)
+        .equ __D25F_IRAM_SIZE,   7 //224KB
+        .equ __D25F_DRAM_SIZE,   5 //160KB
+        .equ __N22_IRAM_SIZE,    0
+        .equ __N22_DRAM_SIZE,    0
+    #elif defined(MCU_CORE_D25F_ENABLE) && defined(__2P4G_BLE_SC_KMD_EN__)
+        .equ __D25F_IRAM_SIZE,   7 //224KB
+        .equ __D25F_DRAM_SIZE,   5 //160KB
+        .equ __N22_IRAM_SIZE,    0
+        .equ __N22_DRAM_SIZE,    0
+    #elif defined(MCU_CORE_D25F_ENABLE) && defined(__2P4G_BLE_DC_KMD_EN__)
+        .equ __D25F_IRAM_SIZE,   3 //96KB
+        .equ __D25F_DRAM_SIZE,   2 //64KB
+        .equ __N22_IRAM_SIZE,    5 //160KB
+        .equ __N22_DRAM_SIZE,    2 //64KB
+    #elif __PROJECT_SNIF_MAIN_NODE__ || defined(__CHANNEL_SOUNDING_EN__)
+        .equ __D25F_IRAM_SIZE,   7 //224KB
+        .equ __D25F_DRAM_SIZE,   5 //160KB
+        .equ __N22_IRAM_SIZE,    0
+        .equ __N22_DRAM_SIZE,    0
+    #elif !defined(TLK_ONLY_BLE_HOST)
+        .equ __D25F_IRAM_SIZE,   7 //128KB
+        .equ __D25F_DRAM_SIZE,   5 //96KBd
+        .equ __N22_IRAM_SIZE,    0 //96KB
+        .equ __N22_DRAM_SIZE,    0 //64KB
+    #else
+        .equ __D25F_IRAM_SIZE,   2 //128KB
+        .equ __D25F_DRAM_SIZE,   3 //96KBd
+        .equ __N22_IRAM_SIZE,    5 //96KB
+        .equ __N22_DRAM_SIZE,    2 //64KB
+    #endif
+#endif
+
     .equ __D25F_N22_RAM_REG,    ((__N22_DRAM_SIZE+__N22_IRAM_SIZE)<<12)|(__N22_DRAM_SIZE<<8)|(__D25F_DRAM_SIZE)
 
     .section .vectors, "ax"
@@ -93,11 +148,30 @@
 _RESET_ENTRY:
     j        _START
     //free the 6th ~ 7th byte to store the crc type of the bin file
+
+    //2th ~ 5th bytes to store firmware version of the bin file
+#if BLE_OTA_SERVER_ENABLE
+    #ifdef FIRMWARE_VERSION_U16
+        .if FIRMWARE_VERSION_U16 < 0 || FIRMWARE_VERSION_U16 > 0xFFFF
+            .error "FIRMWARE_VERSION_U16 is not a 16-bit unsigned integer!"
+        .endif
+        .org 0x2
+        .half FIRMWARE_VERSION_U16
+    #endif
+#endif
+
     /* This configuration is specifically for RF_Certification and does not need to be enabled for other scenarios */
 #ifdef RF_CERTIFICATION_CGF_EN
     .org 0x10
     .word(_RF_CERTIFICATION_CFG_ADDR_OFFSET)
 #endif
+
+/* used to check flash protection function consistency between the old and new  firmware when OTA upgrading */
+#if APP_FLASH_PROTECTION_ENABLE
+    .org 0x15    //correspond to "FIRMWARE_FLASH_PROTECTION_FLAG_ADDR" in mcu_boot.h
+    .byte (0x5A)
+#endif
+
     .org 0x18
     .word (BIN_SIZE)
 
@@ -105,11 +179,11 @@ _RESET_ENTRY:
     .word ('T'<<24 | 'L'<<16 | 'N'<<8 | 'K')
 
     .org 0x24
-/* in the original configuration, set bit[22] to 1, enable timeout:
+/* set bit[22] to 1, enable timeout:
  * when xip reaches a certain time without fetching instructions, cs will not be pulled down, saving power consumption.
  */
-    .word (0x3B0097A9)           //DREAD:   cmd:1x, addr:1x, data:2x, dummy:8
-//    .word (0xEB0095BA)           //X4READ:  cmd:1x, addr:4x, data:4x, dummy:6
+      .word (0x3B4097A9)           //DREAD:   cmd:1x, addr:1x, data:2x, dummy:8
+//    .word (0xEB4095BA)           //X4READ:  cmd:1x, addr:4x, data:4x, dummy:6
 //    .word (0xEB4493BA)           //X4READ:  cmd:1x, addr:4x, data:4x, token:0x00, dummy:4
 
     .option pop
@@ -132,11 +206,11 @@ _START:
     sb      t2, 0x484(t0)       //0x80140c14  PB output  =  0x10
 #endif
 
-#if 0
+#if 1
     /* timer rst enable. */
     li      t0, 0x80140822 /* reg_rst2 register address. */
-    li      t1, 0x39       /* bit0=1 timer enable(reset velue 0x38). */
-    sb      t1, 0x0(t0)    /* (*(volatile unsigned char*)(0x80140822))= 0x39. */
+    li      t1, 0xb9       /* bit0=1 timer enable(reset velue 0xb8). */
+    sb      t1, 0x0(t0)    /* (*(volatile unsigned char*)(0x80140822))= 0xb9. */
 
     /* timer clk enable. */
     li      t0, 0x80140826 /* tim_ctrl2 register address. */
@@ -151,7 +225,7 @@ _START:
     /* start timer watchdog. */
     li      t0, 0x80140162 /* reg_tmr_wd_en register address. */
     li      t1, 0x01       /* bit0=1 watchdog enable(reset velue 0x00). */
-    sb      t1, 0x0(t0)    /* (*(volatile unsigned char*)(0x80140162))= 0x80. */
+    sb      t1, 0x0(t0)    /* (*(volatile unsigned char*)(0x80140162))= 0x01. */
 #endif
     /* Initialize global pointer */
     .option push
@@ -325,11 +399,11 @@ _ISTART:
     sb      t1, 0x482(t0)       //0x80140c12  PB oen     =  0xef
     sb      t2, 0x484(t0)       //0x80140c14  PB output  =  0x10
 #endif
-#if 0
+#if 1
     /* timer rst enable. */
     li      t0, 0x80140822 /* reg_rst2 register address. */
-    li      t1, 0x39       /* bit0=1 timer enable(reset velue 0x38). */
-    sb      t1, 0x0(t0)    /* (*(volatile unsigned char*)(0x80140822))= 0x39. */
+    li      t1, 0xb9       /* bit0=1 timer enable(reset velue 0xb8). */
+    sb      t1, 0x0(t0)    /* (*(volatile unsigned char*)(0x80140822))= 0xb9. */
 
     /* timer clk enable. */
     li      t0, 0x80140826 /* tim_ctrl2 register address. */
@@ -344,12 +418,19 @@ _ISTART:
     /* start timer watchdog. */
     li      t0, 0x80140162 /* reg_tmr_wd_en register address. */
     li      t1, 0x01       /* bit0=1 watchdog enable(reset velue 0x00). */
-    sb      t1, 0x0(t0)    /* (*(volatile unsigned char*)(0x80140162))= 0x80. */
+    sb      t1, 0x0(t0)    /* (*(volatile unsigned char*)(0x80140162))= 0x01. */
 #endif
     /* Initialize global pointer */
     la     gp, __global_pointer$
     .option pop
 
+
+#if DP_THROUGH_SWIRE_DIS
+    lui     t0, 0x80100
+    addi    t0 , t0 , 0x700
+    li      t1, 0x00
+    sb      t1, 0x501(t0)  //0x80100c01 -> 0x00  <7>: 0 swire_usb_dis 
+#endif
     /* Initialize stack pointer */
     la     t0, _STACK_TOP
     mv     sp, t0

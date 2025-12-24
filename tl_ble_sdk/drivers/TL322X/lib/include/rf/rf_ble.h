@@ -42,7 +42,7 @@
 #define rf_ble_dma_rx_offset_time_stamp(p)  (p[RF_BLE_DMA_RFRX_OFFSET_RFLEN] + 9)  //data len:4
 #define rf_ble_dma_rx_offset_freq_offset(p) (p[RF_BLE_DMA_RFRX_OFFSET_RFLEN] + 13) //data len:2
 #define rf_ble_dma_rx_offset_rssi(p)        (p[RF_BLE_DMA_RFRX_OFFSET_RFLEN] + 15) //data len:1, signed
-#define rf_ble_packet_length_ok(p)          (*((unsigned int *)p) ==(unsigned int)(p[5]+13))    //dma_len must 4 byte aligned
+#define rf_ble_packet_length_ok(p)          (*((unsigned int *)p) == p[5] + 13)    //dma_len must 4 byte aligned
 #define rf_ble_packet_crc_ok(p)             ((p[(p[5] + 5 + 11)] & 0x01) == 0x0)
 
 #define rf_set_ble_crc_value(crc)           rf_set_crc_init_value(crc)
@@ -88,27 +88,27 @@ void rf_set_ble_500K_mode(void);
  * @note      TODO:This function interface is not available at this time, and will be updated in subsequent releases.(unverified)
  */
 void rf_set_ble_125K_mode(void);
-#if 0
+
 /**
  * @brief     This function serves to  set ble_4M_NO_PN  mode of RF.
  * @return    none.
  * @note      TODO:This function interface is not available at this time, and will be updated in subsequent releases.(unverified)
  */
 void rf_set_ble_4M_NO_PN_mode(void);
-#endif
+
 /**
  * @brief     This function serves to  set ble_6M_NO_PN  mode of RF.
  * @return    none.
  */
 void rf_set_ble_6M_NO_PN_mode(void);
-#if 0
+
 /**
  * @brief     This function serves to  set ble_4M_NO_PN  mode of RF.
  * @return    none.
  * @note      TODO:This function interface is not available at this time, and will be updated in subsequent releases.(unverified)
  */
 void rf_set_ble_4M_mode(void);
-#endif
+
 /**
  * @brief     This function serves to  set ble_6M_NO_PN  mode of RF.
  * @return    none.
@@ -156,5 +156,11 @@ _attribute_ram_code_sec_noinline_ void rf_start_brx(void *addr, unsigned int tic
  */
 _attribute_ram_code_sec_noinline_ void rf_start_btx(void *addr, unsigned int tick);
 
-
+/**
+ *@brief      This function is primarily used to set the threshold value for modem sync in BLE HP mode.
+ *@param[in]  byte_len   - Specify the synchronization word length to be set for the modem, measured in bytes.
+ *@return     none.
+ *@note       byte_len:range 0~6.
+ */
+void rf_ble_hp_set_modem_sync_byte_len(unsigned char byte_len);
 #endif

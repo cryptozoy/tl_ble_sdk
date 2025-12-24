@@ -24,6 +24,7 @@
 #ifndef REGISTER_H
 #define REGISTER_H
 
+
 #include "gpio_reg.h"
 #include "soc.h"
 #include "analog_reg.h"
@@ -44,7 +45,6 @@
 #include "plmt_reg.h"
 #include "uart_reg.h"
 #include "stimer_reg.h"
-#include "adc_reg.h"
 #include "swire_reg.h"
 #include "qdec_reg.h"
 #include "plic_sw_reg.h"

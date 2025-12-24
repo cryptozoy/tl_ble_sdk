@@ -24,6 +24,15 @@
 #ifndef ANALOG_AFE3V_REG_H
 #define ANALOG_AFE3V_REG_H
 #include "soc.h"
+#define areg_aon_0x00 0x00
+
+enum
+{
+    FLD_FC_BG_HV   = BIT(0),        //Force start for bandgap
+    FLD_BG_TRIM_3V = BIT_RNG(1, 3), //Bandgap voltage trimming
+    FLD_BUF        = BIT(4),
+    FLD_DCDC_BPO   = BIT_RNG(5, 7), //change the on time of PMOS switch, and it will be prolonged as the value of control bit increases
+};
 
 #define areg_aon_0x05 0x05
 
@@ -39,7 +48,7 @@ enum
     FLD_ANA_LDO_PD_3V     = BIT(7), //power down ana LDO
 };
 
-#define areg_aon_0x06 0x06
+#define areg_aon_0x06 0x06   //When using, please remember to update the variable g_areg_aon_06.
 
 enum
 {
@@ -61,7 +70,7 @@ enum
 };
 
 #define areg_aon_0x09 0x09
-#define areg_aon_0x0a 0x0a
+#define areg_aon_0x0a 0x0a  //When using, please remember to update the variable g_areg_aon_0a.
 #define areg_aon_0x0b 0x0b
 
 enum
@@ -72,6 +81,11 @@ enum
 };
 
 #define areg_aon_0x0c 0x0c
+enum
+{
+    FLD_DCDC_1V35_EN  = BIT(4),
+} ;
+
 #define areg_aon_0x0e 0x0e
 #define areg_aon_0x0f 0x0f
 
@@ -81,6 +95,20 @@ enum
     FLD_DIG_LDO_TRIM    = BIT_RNG(0, 3),
     FLD_DIG_LDO_1V1_EN  = BIT(4),
 } ;
+
+#define areg_aon_0x28 0x28
+enum
+{
+    FLD_LDO_TRIM_1V25 = BIT_RNG(0, 3),
+    FLD_LDO_1V35_EN  = BIT(4),
+} ;
+
+#define areg_aon_0x29 0x29
+enum
+{
+    FLD_DCDC_TRIM_1V25 = BIT_RNG(0, 3),
+} ;
+
 /**
  * Customers cannot use analog register 0x35 because driver and chip functions are occupied, details are as follows:
  * [Bit0]: If this bit is 1, it means that reboot or power on has occurred. If this bit is 0, it means that sleep has occurred.
@@ -116,6 +144,8 @@ typedef enum
     XTAL_UNSTABLE            = 0x01,
     PM_CLR_PLIC_REQUEST_FAIL = 0x02,
     WAIT_TIMEOUT             = 0x03,
+    PLL_DONE                 = 0x04,
+    DEEP_AFTER_POWERON       = 0x05,
 } pm_sw_reboot_reason_e;
 
 #define areg_aon_0x3d 0x3d
@@ -186,9 +216,18 @@ typedef enum
     FLD_WAKEUP_STATUS_INUSE_ALL  = 0x0f,
 } pm_wakeup_status_e;
 
-#define areg_aon_0x65 0x65 //read only
+#define areg_aon_0x65                0x65
+enum {
+    //RSVD
+    FLD_RESET_XTAL_QICK_START        = BIT(6),
+    FLD_RESET_32K_TIMER_CNT          = BIT(7),
+};
 
-#define areg_aon_0x69 0x69
+#define areg_aon_0x69                0x69
+enum
+{
+    FLD_32K_WD_OVERFLOW_STATUS       = BIT(7),
+};
 
 #define areg_aon_0x70 0x70
 
@@ -209,7 +248,7 @@ typedef enum
 
 #define areg_aon_0x7e 0x7e
 
-#define areg_aon_0x7f 0x7f
+#define areg_aon_0x7f 0x7f  //When using, please remember to update the variable g_areg_aon_7f.
 
 enum
 {

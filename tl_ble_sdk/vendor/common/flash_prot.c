@@ -85,7 +85,7 @@ void flash_protection_init(void)
         break;
     #endif
 
-    #if (FLASH_GD25LE80E_SUPPORT_EN)
+    #if (FLASH_GD25LE80E_SUPPORT_EN || FLASH_GD25LQ80E_SUPPORT_EN)
     case MID1460C8:
         flash_lock_mid            = flash_lock_mid1460c8;
         flash_unlock_mid          = flash_unlock_mid1460c8;
@@ -185,7 +185,7 @@ u16 flash_change_app_lock_block_to_flash_lock_block(flash_app_lock_e app_lock_bl
         break;
     #endif
 
-    #if (FLASH_GD25LE80E_SUPPORT_EN) //1M capacity
+    #if (FLASH_GD25LE80E_SUPPORT_EN || FLASH_GD25LQ80E_SUPPORT_EN) //1M capacity
     case MID1460C8:
         if (app_lock_block == FLASH_LOCK_FW_LOW_256K) {
             flash_lock_block_size = FLASH_LOCK_LOW_256K_MID1460C8;

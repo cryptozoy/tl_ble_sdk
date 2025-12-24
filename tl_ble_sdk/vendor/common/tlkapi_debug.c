@@ -79,7 +79,9 @@ _attribute_ram_code_sec_noinline_ void tlkapi_debug_putchar(uint08 byte)
     uint08 out_level = reg_gpio_out(TLKAPI_DEBUG_GPIO_PIN);
     uint08 bit0      = out_level & ~(TLKAPI_DEBUG_GPIO_PIN);
     uint08 bit1      = out_level | TLKAPI_DEBUG_GPIO_PIN;
-        #elif (MCU_CORE_TYPE == MCU_CORE_TL721X || MCU_CORE_TYPE == MCU_CORE_TL321X || MCU_CORE_TYPE == MCU_CORE_TL322X)
+        #elif (MCU_CORE_TYPE == MCU_CORE_TL721X || MCU_CORE_TYPE == MCU_CORE_TL321X || MCU_CORE_TYPE == MCU_CORE_TL322X \
+            || MCU_CORE_TYPE == MCU_CORE_TL323X \
+            )
     uint16 bits[14] = {0};
     uint16 bit0     = (TLKAPI_DEBUG_GPIO_PIN & 0xff) << 8;
     ;
@@ -580,8 +582,9 @@ int tlk_printf(const char *format, ...)
     u8 *pd = tlkapi_print_fifo->p + (tlkapi_print_fifo->wptr & (tlkapi_print_fifo->num - 1)) * tlkapi_print_fifo->size;
     int ret;
 
-
-    #if ((MCU_CORE_TYPE == MCU_CORE_B91) || (MCU_CORE_TYPE == MCU_CORE_B92) || (MCU_CORE_TYPE == MCU_CORE_TL721X) || (MCU_CORE_TYPE == MCU_CORE_TL321X) || (MCU_CORE_TYPE == MCU_CORE_TL322X))
+    #if ((MCU_CORE_TYPE == MCU_CORE_B91) || (MCU_CORE_TYPE == MCU_CORE_B92)  || (MCU_CORE_TYPE == MCU_CORE_TL721X) ||  (MCU_CORE_TYPE == MCU_CORE_TL321X) || (MCU_CORE_TYPE == MCU_CORE_TL322X)\
+            || (MCU_CORE_TYPE == MCU_CORE_TL323X)\
+        )
     va_list args;
     va_start(args, format);
 

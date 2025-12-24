@@ -1,3 +1,556 @@
+## V4.0.4.5(PR)
+
+### Version
+
+* SDK Version: tl_ble_sdk V4.0.4.5
+* Chip Version: 
+    - TLSR921X(B91):           A2
+    - TLSR922X/TLSR952X(B92):  A3/A4
+    - TL721X:                  A2/A3
+    - TL321X:                  A1/A2/A3
+    - TL322X:                  A1
+    - TL323X:                  A0
+* Hardware EVK Version:
+    - TLSR921X:                C1T213A20_V1.3
+    - TLSR952X:                C1T266A20_V1.3
+    - TL721X:                  C1T315A20_V1.2/AIOT_DK1:ML7218D1/ML7218A
+    - TL321X:                  C1T331A20_V1.0/C1T335A20_V1.3
+    - TL322X:                  C1T382A20_V1.2
+    - TL323X:                  C1T388A20_V1.1
+* Platform Version: 
+    - TLSR921X:                tl_platform_sdk V3.7.0
+    - TLSR922X/TLSR952X:       tl_platform_sdk V3.7.0
+    - TL721X:                  tl_platform_sdk V3.8.0
+    - TL321X:                  tl_platform_sdk V3.8.0
+    - TL322X:                  tl_platform_sdk V3.9.0
+    - TL323X:                  tl_platform_sdk V3.9.0
+* Toolchain Version:
+    - TLSR921X:                TL32 ELF MCULIB V5F GCC7.4  (IDE: [TelinkIoTStudio](https://www.telink-semi.com/development-tools))
+    - TLSR922X/TLSR952X:       TL32 ELF MCULIB V5F GCC12.2  (IDE: [TelinkIoTStudio](https://www.telink-semi.com/development-tools))
+    - TL721X                   TL32 ELF MCULIB V5F GCC12.2  (IDE: [TelinkIoTStudio](https://www.telink-semi.com/development-tools))
+    - TL321X:                  TL32 ELF MCULIB V5 GCC12.2  (IDE: [TelinkIoTStudio](https://www.telink-semi.com/development-tools))
+    - TL322X:                  TL32 ELF MCULIB V5F GCC12.2  (IDE: [TelinkIoTStudio](https://www.telink-semi.com/development-tools))
+    - TL323X:                  TL32 ELF MCULIB V5F GCC12.2  (IDE: [TelinkIoTStudio](https://www.telink-semi.com/development-tools))
+
+### Note
+
+   * N/A
+
+
+### Bug Fixes
+
+* **Drivers**
+    * For TL321X and TL322X, fixed the issue of occasional chip resets caused by the prolonged PLL stabilization time:
+        * Detailed Description: Increased the PLL charge pump current to reduce PLL startup time; performed PLL LDO trimming to improve PLL startup success rate.
+        * After Fix: The chip stability issue caused by excessively long PLL stabilization time has not recurred during two weeks of stability testing after the fix.
+        * Update Recommendation: Mandatory update.
+    * For TL322X, fixed overshoot at the end of data packets during RF TX transmission :
+        * Detailed description: During RF TX transmission, due to the ramp down time being greater than the end time of the state machine, there may be energy overshoot at the end of the data packet, and the end time of the TX state machine needs to be appropriately delayed.
+        * After Fix: There is no energy overshoot at the end of the data packet during RF TX transmission.
+        * Update Recommendation: Evaluate if needed.
+    * For TL322X, fixed the issue of occasional RF packet reception failure in HP mode:
+        * Detailed description: Fixed the issue where RF occasionally fails to receive packets when rf_modem_hp_path(1) is called after rf_mode_init().
+        * After Fix: The RF packet reception function works normally, and the issue of failed packet reception has not been reproduced.
+        * Update Recommendation: Mandatory update.
+    * For TL322X, fixed the issue where ADC did not report sampled data:
+        * Detailed Description：The ADC module is not functioning properly and is unable to collect any data.
+        * After Fix：The ADC is able to collect data normally.
+        * Update Recommendation：When using ADC, updates must be performed.
+    * For TL322X, fixed potential abnormal timeout issue in the spi_master_write_read_full_duplex interface:
+        * Detailed description:When the length parameter exceeds the chunk_size, data transmission is divided into packets. Between each packet, the FIFO is incorrectly cleared. If the FIFO is empty, the while loop in spi_rxfifo_is_empty continues indefinitely, triggering a timeout.
+        * Impact Scope：Using this interface may trigger a timeout.
+        * Update Recommendation:Mandatory update.
+    * For TL322X, fixed an issue where SPI modules behaved abnormally after waking from suspend when SPI was combined with suspend:
+        * Detailed description:
+        * After Fix: When the SPI source is set to PLL, the SPI frequency divider loses lock upon wake-up from suspend, causing SPI functionality to become abnormal.
+        * Update Recommendation:Mandatory update.
+    * For TL322X, fixed the issue where the corresponding interface configurations for rz_set_polarity, rz_set_msb_lsb_mode, rz_set_big_little_endian_mode, rz_set_data_align_mode, rz_set_global_data_mode, rz_set_tx_data_mode, rz_jitter_range_config, and rz_set_fifo_lvl were incorrect:
+        - Detailed description: The configurations for the above interface registers were incorrect, causing functional abnormalities.
+        - Impact Scope: Configurations are now correct, and functionality is normal.
+        - Update recommendation: Mandatory update.
+
+### BREAKING CHANGES
+
+* For TL321X, synchronized tl_platform_sdk V3.8.0 and supported the A3 version chips;
+* For TL721X, synchronized tl_platform_sdk V3.8.0;
+* For TL322X, synchronized tl_platform_sdk V3.9.0 and supported the A1 version chips.
+* For TL323X, synchronized tl_platform_sdk V3.9.0 and supported the A0 version chips.
+* Updated the early wake-up time for TL322X and TL323X in deep retention mode.
+
+### Features
+
+* **BLE general function** 
+    - N/A
+* **2.4G general function** 
+    - N/A
+* **Drivers**
+    * N/A
+
+* **Others**
+    * N/A
+
+
+### Refactoring
+
+   * N/A
+
+### Performance Improvements
+
+   * N/A
+
+### Known issues
+
+* N/A
+
+### CodeSize
+
+* TLSR921X
+    - Compiling acl_central_demo
+        - Flash bin size: 105.52 KB
+        - IRAM size: 54.29 KB
+        - DRAM size: 0.65 KB
+    - Compiling acl_connection_demo
+        - Flash bin size: 128.02 KB
+        - IRAM size: 65.77 KB
+        - DRAM size: 0.84 KB
+    - Compiling acl_peripheral_demo
+        - Flash bin size: 110.83 KB
+        - IRAM size: 55.75 KB
+        - DRAM size: 0.77 KB
+    - Compiling eslp_ap_dmeo
+        - Flash bin size: 249.14 KB
+        - IRAM size: 93.77 KB
+        - DRAM size: 24.02 KB
+* TLSR922X/TLSR952X
+    - Compiling acl_central_demo
+        - Flash bin size: 105.42 KB
+        - IRAM size: 54.60 KB
+        - DRAM size: 0.70 KB
+    - Compiling acl_connection_demo
+        - Flash bin size: 127.75 KB
+        - IRAM size: 65.86 KB
+        - DRAM size: 0.94 KB
+    - Compiling acl_peripheral_demo
+        - Flash bin size: 111.58 KB
+        - IRAM size: 56.10 KB
+        - DRAM size: 0.87 KB
+    - Compiling eslp_ap_dmeo
+        - Flash bin size: 257.20 KB
+        - IRAM size: 93.61 KB
+        - DRAM size: 24.09 KB
+
+* TL721X
+    - Compiling acl_central_demo
+        - Flash bin size:  110.96 KB
+        - IRAM size: 58.23 KB
+        - DRAM size: 0.74 KB
+    - Compiling acl_connection_demo
+        - Flash bin size: 133.00 KB
+        - IRAM size: 69.50 KB
+        - DRAM size: 0.98 KB
+    - Compiling acl_peripheral_demo
+        - Flash bin size: 117.30 KB
+        - IRAM size: 59.98 KB
+        - DRAM size: 0.91 KB
+    - Compiling eslp_ap_dmeo
+        - Flash bin size: 268.51 KB
+        - IRAM size: 98.24 KB
+        - DRAM size: 21.62 KB
+    - Compiling eslp_esl_dmeo
+        - Flash bin size: 203.16 KB
+        - IRAM size: 69.83 KB
+        - DRAM size: 5.36 KB
+
+* TL321X
+    - Compiling acl_central_demo
+        - Flash bin size: 113.16 KB
+        - IRAM size: 55.36 KB
+        - DRAM size: 0.71 KB
+    - Compiling acl_connection_demo
+        - Flash bin size: 135.22 KB
+        - IRAM size: 66.63 KB
+        - DRAM size: 0.96 KB
+    - Compiling acl_peripheral_demo
+        - Flash bin size:  119.45 KB
+        - IRAM size: 57.11 KB
+        - DRAM size: 0.88 KB
+    - Compiling eslp_ap_dmeo
+        - Flash bin size: 258.54 KB
+        - IRAM size: 90.60 KB
+        - DRAM size: 21.60 KB
+    - Compiling eslp_esl_dmeo
+        - Flash bin size: 204.53 KB
+        - IRAM size: 66.45 KB
+        - DRAM size: 5.33 KB
+* TL322X
+    - Compiling acl_central_demo
+        - Flash bin size: 116.69 KB
+        - IRAM size: 61.36 KB
+        - DRAM size: 0.70 KB
+    - Compiling acl_connection_demo
+        - Flash bin size: 139.84 KB
+        - IRAM size: 73.18 KB
+        - DRAM size: 0.68 KB
+    - Compiling acl_peripheral_demo
+        - Flash bin size:  123.85 KB
+        - IRAM size: 63.15 KB
+        - DRAM size: 0.61 KB
+* TL323X
+    - Compiling acl_central_demo
+        - Flash bin size: 106.45 KB
+        - IRAM size: 55.56 KB
+        - DRAM size: 0.66 KB
+    - Compiling acl_connection_demo
+        - Flash bin size: 128.88. KB
+        - IRAM size: 66.33 KB
+        - DRAM size: 0.64 KB
+    - Compiling acl_peripheral_demo
+        - Flash bin size:  112.71 KB
+        - IRAM size: 56.55 KB
+        - DRAM size: 0.57 KB
+
+**Note:** The above IRAM usage includes the FIFO buffer required for the debug logging functionality. Disabling the `TLKAPI_DEBUG_ENABLE` macro can save approximately 4.76 KB of IRAM.
+
+
+
+### 版本
+
+* SDK Version: tl_ble_sdk V4.0.4.5
+* Chip Version: 
+    - TLSR921X(B91):           A2
+    - TLSR922X/TLSR952X(B92):  A3/A4
+    - TL721X:                  A2/A3
+    - TL321X:                  A1/A2/A3
+    - TL322X:                  A1
+    - TL323X:                  A0
+* Hardware EVK Version:
+    - TLSR921X:                C1T213A20_V1.3
+    - TLSR952X:                C1T266A20_V1.3
+    - TL721X:                  C1T315A20_V1.2/AIOT_DK1:ML7218D1/ML7218A
+    - TL321X:                  C1T331A20_V1.0/C1T335A20_V1.3
+    - TL322X:                  C1T382A20_V1.2
+    - TL323X:                  C1T388A20_V1.1
+* Platform Version: 
+    - TLSR921X:                tl_platform_sdk V3.7.0
+    - TLSR922X/TLSR952X:       tl_platform_sdk V3.7.0
+    - TL721X:                  tl_platform_sdk V3.8.0
+    - TL321X:                  tl_platform_sdk V3.8.0
+    - TL322X:                  tl_platform_sdk V3.9.0
+    - TL323X:                  tl_platform_sdk V3.9.0
+* Toolchain Version:
+    - TLSR921X:                TL32 ELF MCULIB V5F GCC7.4  (IDE: [TelinkIoTStudio](https://www.telink-semi.com/development-tools))
+    - TLSR922X/TLSR952X:       TL32 ELF MCULIB V5F GCC12.2  (IDE: [TelinkIoTStudio](https://www.telink-semi.com/development-tools))
+    - TL721X                   TL32 ELF MCULIB V5F GCC12.2  (IDE: [TelinkIoTStudio](https://www.telink-semi.com/development-tools))
+    - TL321X:                  TL32 ELF MCULIB V5 GCC12.2  (IDE: [TelinkIoTStudio](https://www.telink-semi.com/development-tools))
+    - TL322X:                  TL32 ELF MCULIB V5F GCC12.2  (IDE: [TelinkIoTStudio](https://www.telink-semi.com/development-tools))
+    - TL323X:                  TL32 ELF MCULIB V5F GCC12.2  (IDE: [TelinkIoTStudio](https://www.telink-semi.com/development-tools))
+
+
+### Note
+
+   * N/A
+
+### Bug Fixes
+
+* **Drivers**
+    * 对于 TL321X 和 TL322X，修复了个别芯片偶尔出现因为PLL稳定时间过长导致复位的问题：
+        * 详细描述：增加pll的chargepump电流，减小pll启动时间；pll ldo trim，增加pll启动机会。
+        * 修复效果：因为PLL稳定时间过长导致复位问题的芯片稳定性测试两周没再复现问题。
+        * 更新建议：必须更新。
+    * 对于 TL322X，修复RF TX传输期间数据包末尾的能量过冲现象：
+        * 详细描述：RF TX 传输期间由于ramp down时间大于状态机结束的时间，会导致数据包末尾有能量过冲现象，需要将tx 状态机结束时间适当延后。
+        * 修复效果：RF TX 传输期间数据包末尾的能量无过冲现象。
+        * 更新建议：客户自行评估。
+    * 对于 TL322X，修复 hp 模式下概率性出现 rf 收不到包的问题：
+        * 详细描述：在rf_mode_init()后调用rf_modem_hp_path(1);概率性出现rf收不到包的问题。
+        * 修复效果：RF收包功能正常，未复现到收不到包的问题。
+        * 更新建议：必须更新。
+    * 对于 TL322X，修复了 adc 无采样数据上报的问题：
+        * 详细描述：adc 模块无法正常工作，未能采集到任何数据。
+        * 修复效果：adc 可以正常采集数据。
+        * 更新建议：使用 adc 时必须更新。
+    * 对于 TL322X，修复 spi_master_write_read_full_duplex 接口可能异常超时问题：
+        * 详细描述：length长度参数大于chunk_size时，会分包收发，每包之间会误清fifo，fifo为空时一直while在spi_rxfifo_is_empty从而触发超时。
+        * 修复效果：使用该接口都可能触发超时。
+        * 更新建议：必须更新。
+    * 对于 TL322X，修复了 spi 结合 suspend 使用，唤醒后 spi 模块功能异常的问题：
+        * 详细描述：当 spi 源被设置为 PLL 时，suspend 唤醒后，spi 的分频器失锁，导致 spi 功能异常。
+        * 修复效果：spi 从 suspend 唤醒后功能正常。
+        * 更新建议：必须更新。
+    * 对于 TL322X，修复了 rz_set_polarity/rz_set_msb_lsb_mode/rz_set_big_little_endian_mode/rz_set_data_align_mode/rz_set_global_data_mode/rz_set_tx_data_mode/rz_jitter_range_config/rz_set_fifo_lvl 对应接口配置错误的问题：
+        * 详细描述：以上的接口寄存器配置错误，导致功能异常。
+        * 修复效果：修复后配置正确，功能正常。
+        * 更新建议：必须更新。
+
+### BREAKING CHANGES
+
+* 对于 TL321X，同步 tl_platform_sdk V3.8.0，并添加对 A3 版本芯片的支持；
+* 对于 TL721X，同步 tl_platform_sdk V3.8.0；
+* 对于 TL322X，同步 tl_platform_sdk V3.9.0，并添加对 A0 版本芯片的支持；
+* 对于 TL323X，同步 tl_platform_sdk V3.9.0，并添加对 A1 版本芯片的支持；
+* 更新 TL322X 和 TL323X deep retention 模式下的提前唤醒时间。
+
+### Features
+
+* **BLE通用功能**
+    - N/A
+* **2.4G通用功能**
+    - N/A
+* **Drivers**
+    * N/A
+
+* **Others**
+    * N/A
+
+
+### Refactoring
+
+* N/A
+
+
+### Performance Improvements
+
+   * N/A
+
+### Known issues
+
+* N/A
+
+### CodeSize
+
+* TLSR921X
+    - Compiling acl_central_demo
+        - Flash bin size: 105.52 KB
+        - IRAM size: 54.29 KB
+        - DRAM size: 0.65 KB
+    - Compiling acl_connection_demo
+        - Flash bin size: 128.02 KB
+        - IRAM size: 65.77 KB
+        - DRAM size: 0.84 KB
+    - Compiling acl_peripheral_demo
+        - Flash bin size: 110.83 KB
+        - IRAM size: 55.75 KB
+        - DRAM size: 0.77 KB
+    - Compiling eslp_ap_dmeo
+        - Flash bin size: 249.14 KB
+        - IRAM size: 93.77 KB
+        - DRAM size: 24.02 KB
+* TLSR922X/TLSR952X
+    - Compiling acl_central_demo
+        - Flash bin size: 105.42 KB
+        - IRAM size: 54.60 KB
+        - DRAM size: 0.70 KB
+    - Compiling acl_connection_demo
+        - Flash bin size: 127.75 KB
+        - IRAM size: 65.86 KB
+        - DRAM size: 0.94 KB
+    - Compiling acl_peripheral_demo
+        - Flash bin size: 111.58 KB
+        - IRAM size: 56.10 KB
+        - DRAM size: 0.87 KB
+    - Compiling eslp_ap_dmeo
+        - Flash bin size: 257.20 KB
+        - IRAM size: 93.61 KB
+        - DRAM size: 24.09 KB
+
+* TL721X
+    - Compiling acl_central_demo
+        - Flash bin size:  110.21 KB
+        - IRAM size: 58.21 KB
+        - DRAM size: 0.74 KB
+    - Compiling acl_connection_demo
+        - Flash bin size: 132.50 KB
+        - IRAM size: 69.47 KB
+        - DRAM size: 0.98 KB
+    - Compiling acl_peripheral_demo
+        - Flash bin size: 116.53 KB
+        - IRAM size: 59.96 KB
+        - DRAM size: 0.91 KB
+    - Compiling eslp_ap_dmeo
+        - Flash bin size: 268.19 KB
+        - IRAM size: 98.24 KB
+        - DRAM size: 21.62 KB
+    - Compiling eslp_esl_dmeo
+        - Flash bin size: 202.61 KB
+        - IRAM size: 69.58 KB
+        - DRAM size: 5.36 KB
+
+* TL321X
+    - Compiling acl_central_demo
+        - Flash bin size: 112.09 KB
+        - IRAM size: 55.34 KB
+        - DRAM size: 0.71 KB
+    - Compiling acl_connection_demo
+        - Flash bin size: 134.40 KB
+        - IRAM size: 66.61 KB
+        - DRAM size: 0.96 KB
+    - Compiling acl_peripheral_demo
+        - Flash bin size:  118.11 KB
+        - IRAM size: 56.84 KB
+        - DRAM size: 0.88 KB
+    - Compiling eslp_ap_dmeo
+        - Flash bin size: 258.20 KB
+        - IRAM size: 90.60 KB
+        - DRAM size: 21.60 KB
+    - Compiling eslp_esl_dmeo
+        - Flash bin size: 204.21 KB
+        - IRAM size: 66.45 KB
+        - DRAM size: 5.33 KB
+* TL321X
+    - Compiling acl_central_demo
+        - Flash bin size: 106.20 KB
+        - IRAM size: 56.49 KB
+        - DRAM size: 0.71 KB
+    - Compiling acl_connection_demo
+        - Flash bin size: 128.51 KB
+        - IRAM size: 67.80 KB
+        - DRAM size: 0.95 KB
+    - Compiling acl_peripheral_demo
+        - Flash bin size:  112.54 KB
+        - IRAM size: 58.28 KB
+        - DRAM size: 0.88 KB
+
+**Note:** 上述 IRAM 统计包含了打印功能所需的 FIFO，关闭宏 TLKAPI_DEBUG_ENABLE，可以节省约 4.76 KB 的 IRAM。
+
+## V4.0.4.4_Patch_0002(PR)
+
+### Bug Fixes
+
+* **Drivers**
+  
+  * For TL321X:
+  
+    * Fixed communication failure caused by RF occasional frequency lock issues:
+        * Detailed Description: Due to the LDO trim voltage previously being at a critical threshold, the RF frequency occasionally failed to lock to the intended target frequency.
+        * After Fix: After adjusting the LDO trim voltage, frequency locking is normal and RF TX/RX functions are operating correctly.
+        * Update Recommendation: Mandatory update.
+    * Fixed the issue that different parameter configurations in `rf_rx_performance_mode` caused inaccurate RSSI detection:
+        * Detailed Description: Configurations under different parameters of `rf_rx_performance_mode` affect RSSI detection.
+        * Impact Scope:  After modification, RSSI calculations are accurate under all parameters of `rf_rx_performance_mode`.
+        * Update Recommendation:  Evaluate if needed.
+    * Fixed the issue that RX Sensitivity occasionally decreased:
+        * Detailed Description: Resolved RX performance degradation caused by probabilistic inaccuracies in certain parameter estimates.
+        * After Fix: Modified the valuation algorithm implementation, and the RF performance returned to normal after the modification.
+        * Update Recommendation: Mandatory update.
+    * Fixed the issue that the RF module occasionally lacks a clock signal, causing TX/RX abnormalities:
+        * Detailed Description: Due to incorrect power-up sequence, the RF module may experience a lack of clock input, resulting in the inability to transmit and receive packets normally.
+        * After Fix: After modifying the power-up sequence, the RF module clock works normally, and transmit/receive works properly.
+        * Update Recommendation: Mandatory update.
+  * For TL721X:
+      * Fixed the issue of  occasional packet loss in BLE coded PHY S2/S8 RX:
+          * Detailed Description: During BLE coded PHY S2/S8 communication, when the TX energy is sufficiently high, a low-probability packet loss issue (0.1%–0.2%) still occurs at the receiver.
+          * After Fix: Modified the RX-related configurations to achieve zero packet loss on the receiver when energy is sufficiently high.
+          * Update Recommendation:  Evaluate if needed.
+      * Fixed the issue where power cycling the ADC module caused inaccurate ADC sampling values:
+          * Detailed Description: Power cycling the ADC module causes the ref voltage to drop slightly, leading to progressively inaccurate sampling.
+          * Update Recommendation: Mandatory update.
+  * For TL322X：
+      * Fixed low-probability failure to detect PLL stable flag during power-up：
+          * Detailed Description: Rare cases might miss PLL stable flag detection after power-up, potentially causing chip malfunction.
+          * After Fix: Optimized PLL configuration to ensure stable flag detection.
+          * Update Recommendation: Mandatory update.
+
+
+### Features
+
+* **Drivers**
+    * For TL321X and TL721X, synchronized driver tl_platform_sdk V3.8.0.
+    * For TL321X, added support for the A3 version chips.
+* **BLE general function**
+    * For TL321X/TL721X/TL322X, optimized the `blc_pm_setWfiMask` API to support enabling WFI for reducing power consumption.
+
+### BREAKING CHANGES
+
+   * For TL321X, currently, CCLK only supports up to 48 MHz. When CCLK > 48 MHz is required, to enhance high-frequency robustness, flash power-down protection must be added. Refer to the limitations in `clock.h`. After confirming no impact on your application, please contact Telink FAE support.
+   * For TL721X,  all functionality of the PD4 pin has been removed and is not accessible to users. The datasheet has been updated accordingly:
+     * In the design of TL7218X_C1T315A20_V1_5 and earlier versions, the PD4 pin originally used for KEY1 had been replaced with PB7 pin to ensure proper operation.
+     * The assignments for `TLKAPI_DEBUG_UART_TX_PIN` and `TLKAPI_DEBUG_UART_RX_PIN` had been updated to `GPIO_FC_PB5` and `GPIO_FC_PB4`.
+     * The assignments for `TLKAPI_DEBUG_GPIO_PIN` had been updated to `GPIO_PB6`.
+
+### Bug Fixes
+
+* **Drivers**
+    * 对于 TL321X：
+        * 修复 RF 概率性频率不锁定导致的通信失败问题：
+            * 详细描述：由于之前 LDO Trim 电压处于临界值，导致 RF 会概率性出现频率未按照预期锁定到对应的频点。
+            * 修复效果：修改 LDO Trim 电压后频率锁定正常，RF TX/RX 功能正常。
+            * 更新建议：必须更新。
+        * 修复 `rf_rx_performance_mode` 不同参数配置导致 RSSI 检测不准问题：
+            * 详细描述：由于 `rf_rx_performance_mode` 不同参数下的配置对 RSSI 的检测产生了影响。
+            * 修复效果：修改后 `rf_rx_performance_mode` 所有参数下 RSSI 计算均准确。
+            * 更新建议：自行评估。
+        * 修复 RX Sensitivity 概率性下降问题：
+            * 详细描述：修复 RX 部分参数估计值概率性不准确导致 RX 性能下降。
+            * 修复效果：修改估值算法方案，修改后 RF 性能恢复正常。
+            * 更新建议：必须更新。
+        * 修复 RF 模块概率性无 clock 输入导致 TX/RX 异常问题：
+            * 详细描述：由于上电顺序错误，导致 RF 模块概率出现无 clock 输入从而引发无法正常进行收发包。
+            * 修复效果：修改上电顺序后，RF 模块 clock 正常，收发功能正常。
+            * 更新建议：必须更新。
+    * 对于 TL721X：
+        * 修复 BLE Coded PHY S2/S8 模式 RX 存在低概率丢包的问题：
+            * 详细描述：BLE coded PHY S2/S8 通信时，当 TX 端能量足够大时，RX 端仍存在少量丢包的问题（0.1%~0.2%）。
+            * 修复效果：修改 RX 相关配置，当能量足够大时 RX 端丢包率为 0。
+            * 更新建议：自行评估。
+        * 修复 ADC 模块上下电导致 ADC 采样值不准确的问题：
+            * 详细描述：ADC 模块上下电，会导致 `Vref` 下降一点，导致采样越来越不准确。
+            * 更新建议：必须更新。
+    * 对于 TL322X，修复低概率检测不到PLL稳定标志位的问题：
+        * 详细描述：低概率检测不到PLL稳定标志位的问题，这个问题可能会发生预期以外的一次或多次复位甚至不能正常运行。
+        * 修复效果：优化PLL配置，确保PLL稳定标志位可以稳定的检测到。
+        * 影响范围：个别情况下会检测不到。
+        * 更新建议：必须更新，否则会导致运行异常。
+
+### Features
+
+* **Drivers**
+    * 对于 TL321X 和 TL721X，同步 driver tl_platform_sdk 3.8.0。
+    * 对于 TL321X，增加对 A3 版本芯片的支持。
+* **BLE general function**
+    * 对于 TL321X/TL721X/TL322X，完善 `blc_pm_setWfiMask` API，使能 WFI 来节省功耗。
+
+### BREAKING CHANGES
+
+   * 对于 TL321X，目前 CCLK 只支持到最高为 48 MHz，当需要支持 CCLK > 48 MHz 时，为了提高高频的鲁棒性，需要添加flash下电保护功能，请参考 `clock.h` 中的限制，确认对应用无影响后，请联系 Telink FAE 支持。
+   * 对于 TL721X，删除了PD4引脚的所有功能，与datasheet同步：
+     * 在 TL7218X_C1T315A20_V1_5 及之前版本的硬件设计中，原本分配给 KEY1 的 PD4 引脚已更换为 PB7 引脚以确保正常工作。
+     * 分配给 `TLKAPI_DEBUG_UART_TX_PIN` 和 `TLKAPI_DEBUG_UART_RX_PIN` 更新为 `GPIO_FC_PB5` 和 `GPIO_FC_PB4`。
+     * 分配给 `TLKAPI_DEBUG_GPIO_PIN` 的引脚更新为 `GPIO_PB6`。
+
+
+
+## V4.0.4.4_Patch_0001(PR)
+
+### Bug Fixes
+* **Drivers**
+  * For TL321X, fixed RF power on sequence error, which may potentially cause abnormal operation of RF module.
+* **APP**
+  * For TL721X, corrected the ADC reference voltage configuration, changing it from ADC_VREF_GPIO_1P2V to ADC_VREF_1P2V to ensure the module works properly.
+
+
+### Features
+* **Drivers**
+  * For TL321X, call the efuse_calib_adc_vref() interface in blc_app_loadCustomizedParameters_normal() to calibrate adc gpio mode and vbat mode.
+  * For TL721X, call the otp_calib_adc_vref() interface in blc_app_loadCustomizedParameters_normal() to calibrate adc gpio mode and vbat mode.
+  
+### BREAKING CHANGES
+   * N/A
+
+### Bug Fixes
+* **Drivers**
+  * 对于 TL321X，修复了RF错误的上电顺序，概率性的导致RF 模块工作状态异常。
+* **APP**
+  * 对于 TL321X，修正 ADC 参考电压配置，由ADC_VREF_GPIO_1P2V改为ADC_VREF_1P2V，确保模块正常工作。
+  
+### Features
+* **Drivers**
+  * 对于 TL321X，在blc_app_loadCustomizedParameters_normal()中调用efuse_calib_adc_vref()接口校准adc gpio模式和vbat模式。
+  * 对于 TL721X，在blc_app_loadCustomizedParameters_normal()中调用otp_calib_adc_vref()接口校准adc gpio模式和vbat模式。
+
+### BREAKING CHANGES
+   * N/A
+
+
 ## V4.0.4.4(PR)
 
 ### Version

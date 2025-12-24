@@ -21,6 +21,65 @@
  *          limitations under the License.
  *
  *******************************************************************************************************/
+ /**
+ * @page RF RF Module Configuration Guide
+ * 
+ * @brief This page provides detailed usage notes, power configuration instructions, and key precautions for the RF module.
+ * 
+ * @par Header File
+ *      rf_common.h
+ * 
+ * @section rf_pm_precautions RF and PM Usage Precautions
+ * When using RF and Power Management (PM) functions in combination, note the following requirements for different low-power modes:
+ * 
+ * - <b>Suspend mode</b>:
+ *   RF-related digital registers will be lost. After waking up from suspend mode, re-invoke all RF-related function interfaces to restore functionality.
+ *   <br>
+ *   If you don't want to re-invoke RF-related function interfaces after waking up, you can use the <code>pm_set_suspend_power_cfg</code> function 
+ *   to set <code>PM_POWER_BASEBAND</code> to maintain power during suspend sleep. 
+ *   <b>Note:</b> This will increase power consumption during suspend.
+ * 
+ * - <b>Deep retention mode</b>:
+ *   RF-related digital registers will be lost. After waking up from deep retention mode, re-invoke all RF-related function interfaces to restore functionality.
+ * 
+ * - <b>Deep mode</b>:
+ *   RF-related digital registers will be lost. After waking up from deep mode, re-invoke all RF-related function interfaces to restore functionality.
+ * 
+ * @section rf_power_explanation RF Transmit Power Configuration
+ * 
+ * @subsection rf_power_supply Power Supply Modes of RF PA Module
+ * The RF Power Amplifier (PA) module supports two power supply modes, with key characteristics as follows:
+ * 
+ * | Power Supply Mode | Power Source                          | Output Power Characteristics                                                                 | Advantage                                  |
+ * |-------------------|---------------------------------------|------------------------------------------------------------------------------------------------|-------------------------------------------|
+ * | VBAT mode         | Directly powered by VBAT              | Maximum output power varies with VBAT voltage (higher VBAT → higher available power)          | Simple power path, suitable for high-power scenarios |
+ * | VANT mode         | Powered by embedded DCDC + LDO        | Output power is stable (independent of VBAT voltage)                                          | Lower power consumption at the same transmit power |
+ * 
+ * @subsection rf_power_table TX Power Table (Driver-Provided)
+ * - The default <code>rf_power_level_e</code> enumeration is tested based on the largest package, providing typical reference values for both VBAT and VANT modes.
+ * - Power levels exceeding the maximum VANT power are automatically mapped to VBAT mode (driver handles mode switching internally).
+ * 
+ * @subsection rf_power_adjust Power Level Adjustment Instructions
+ * #### 3.1 Basic Configuration Rules
+ * - Both VBAT and VANT modes support 64 configurable power levels (range: 0 ~ 63).
+ * - The mapping relationship between level numbers and hardware registers is fixed (package-independent); only the actual transmit power differs by package.
+ * 
+ * #### 3.2 Configuration Methods (via <code>rf_set_power_level</code> Interface)
+ * Two configuration approaches are supported:
+ * a) Use predefined values from the <code>rf_power_level_e</code> enumeration (recommended for most scenarios).
+ * b) Write custom level values (for scenario-specific power optimization), following mode-specific formatting rules.
+ * 
+ * #### 3.3 Mode-Specific Level Format
+ * | Mode       | Level Format                          | Valid Range |
+ * |------------|---------------------------------------|-------------|
+ * | VBAT mode  | <code>level = power_level</code>      | 0 ~ 63      |
+ * | VANT mode  | <code>level = BIT(7) \| power_level</code> | 0 ~ 63      |
+ * 
+ * @subsection rf_power_notes Supplementary Notes
+ * 1. For package-specific detailed power data (e.g., actual power values corresponding to each level), refer to the <cite>[Chip Model] RF Test Report</cite>.
+ * 2. Actual transmit power is affected by antenna matching, PCB layout, and hardware design. Mandatory hardware calibration is required for mass production or high-precision applications.
+ */
+
 #ifndef RF_COMMON_H
 #define RF_COMMON_H
 
@@ -34,6 +93,19 @@
 /**********************************************************************************************************************
  *                                         RF  global macro                                                           *
  *********************************************************************************************************************/
+/*
+ * This macro is defined to enable RX DCOC software calibration.
+ * After enabling this macro, RF initialization functions for different modes will utilize DCOC software calibration to minimize chip DC offset,
+ * thereby enhancing out-of-band interference immunity (including DC offset rejection). 
+ * Attention :
+ * (1) When RF_RX_DCOC_SOFTWARE_CAL_EN is set to 1, the initial execution time 
+ *     of RF mode initialization functions (e.g. rf_set_ble_1M_mode, rf_set_ble_2M_mode) 
+ *     increases significantly during their first invocation.
+ * (2) After the first execution, the calibration value is retained in the variable g_rf_dcoc1m_iq_code and g_rf_dcoc2m_iq_code
+ * */
+#ifndef RF_RX_DCOC_SOFTWARE_CAL_EN
+    #define RF_RX_DCOC_SOFTWARE_CAL_EN     1
+#endif /* RF_RX_DCOC_SOFTWARE_C */
 
 /**
  * @brief       This define for ble debug the effect of rx_dly.
@@ -45,20 +117,18 @@
  */
 #define rf_tx_packet_dma_len(rf_data_len) (((rf_data_len) + 3) / 4) | (((rf_data_len) % 4) << 22)
 
-/*
- * This macro is defined to enable RX DCOC software calibration.
- * After opening this macro, the rf_mode_init() function uses DCOC software calibration to minimize the DC offset of the chip, thereby improving its out of band anti-interference ability (including DC offset).
- * This operation can restore the sensitivity performance of chips with larger DC offsets to the normal range. But it will increase the execution time of the rf_mode_init() function
- * Attention :
- * (1) When the macro definition RF_RX_DCOC_SOFTWARE_CAL_EN is set to 1, the execution time of rf_mode_init becomes longer.
- * */
-#define RF_RX_DCOC_SOFTWARE_CAL_EN     0 //BLE SDK move the macro here
-
+/**
+ *  @brief This macro provides an alternative name for the rf_get_latched_rssi() function to be compatible with older versions of code
+ */
+#define rf_get_rssi rf_get_latched_rssi
 /**********************************************************************************************************************
  *                                       RF global data type                                                          *
  *********************************************************************************************************************/
 
-#define FCAL_BASE_CHANNEL       6// 0~9 BLE SDK USE
+
+#ifndef FCAL_BASE_CHANNEL
+   #define FCAL_BASE_CHANNEL       4// 0~9 BLE SDK USE
+#endif
 /**
  *  @brief  RX fast settle time
  *  @note 
@@ -189,7 +259,7 @@ typedef struct
 
 typedef struct
 {
-    unsigned short cal_tbl[8];
+    unsigned short cal_tbl[81];
     rf_ldo_trim_t  ldo_trim;
     rf_dcoc_cal_t  dcoc_cal;
     rf_rccal_cal_t rccal_cal;
@@ -282,6 +352,11 @@ typedef enum
     RF_POWER_N19p40dBm = BIT(7) | 2,  /**<  -19.4 dbm */
     RF_POWER_N25p20dBm = BIT(7) | 1,  /**<  -25.2 dbm */
     RF_POWER_N40p00dBm = BIT(7) | 0,  /**<  -40.0 dbm */
+
+    RF_VANT_POWER_P6p40 = BIT(7)| 63, /**<   6.4 dbm */
+    RF_VANT_POWER_P6p00 = BIT(7)| 52, /**<   6.0 dbm */
+    RF_VANT_POWER_P5p50 = BIT(7)| 43, /**<   5.5 dbm */
+    RF_VANT_POWER_P5p00 = BIT(7)| 36, /**<   5.0 dbm */
 } rf_power_level_e;
 
 /**
@@ -339,6 +414,11 @@ typedef enum
     RF_POWER_INDEX_N19p40dBm,  /**<  -19.4 dbm */
     RF_POWER_INDEX_N25p20dBm,  /**<  -25.2 dbm */
     RF_POWER_INDEX_N40p00dBm,  /**<  -40.0 dbm */
+
+    RF_VANT_POWER_INDEX_P6p40dBm, /**<  6.4 dbm */
+    RF_VANT_POWER_INDEX_P6p00dBm, /**<  6.0 dbm */
+    RF_VANT_POWER_INDEX_P5p50dBm, /**<  5.5 dbm */
+    RF_VANT_POWER_INDEX_P5p00dBm, /**<  5.0 dbm */
 } rf_power_level_index_e;
 
 /**
@@ -424,13 +504,25 @@ typedef enum
     RF_48M_MODEM_RATE = 1,
 } rf_modem_rate_e;
 
+/**
+ * @brief Define RF Vant mode power trim level, RF_VANT_NORMAL_POWER and RF_VANT_HIGH_POWER
+ */
+typedef enum
+{
+    RF_VANT_NORMAL_POWER = 0,
+    RF_VANT_HIGH_POWER   = 1,
+}rf_vant_power_trim_e;
+
 /**********************************************************************************************************************
  *                                         RF global constants                                                        *
  *********************************************************************************************************************/
-extern volatile rf_power_level_e rf_power_Level_list[60]; //BLE SDK use: in IRQ
+extern const rf_power_level_e rf_power_Level_list[60];
 extern rf_mode_e              g_rfmode;
 extern rf_crc_config_t        rf_crc_config[3];
 
+extern _attribute_data_retention_sec_ unsigned short g_rf_dcoc1m_iq_code;
+extern _attribute_data_retention_sec_ unsigned short g_rf_dcoc2m_iq_code;
+extern _attribute_data_retention_sec_ unsigned char  g_rf_hp_mode;
 /**********************************************************************************************************************
  *                                         RF function declaration                                                    *
  *********************************************************************************************************************/
@@ -717,7 +809,7 @@ static inline void rf_set_crc_byte_order(unsigned char order)
  * @param[in]   config - crc config address pointer
  * @return      none.
  */
-static _attribute_ram_code_sec_ inline  void rf_set_crc_config(const rf_crc_config_t *config)
+static _attribute_ram_code_sec_ inline  void rf_set_crc_config(const rf_crc_config_t *config) // BLE SDK USE 
 {
     rf_set_crc_init_value(config->init_value);
     rf_set_crc_poly(config->poly);
@@ -825,6 +917,85 @@ static inline unsigned char rf_get_rx_wptr(void)
     return reg_rf_dma_rx_wptr;
 }
 
+
+/**
+ * @brief        This function is used to set whether or not to use the rx DCOC software calibration in all of RF mode initialization functions (e.g. rf_set_ble_1M_mode, rf_set_ble_2M_mode) ;
+ * @param[in]    en:This value is used to set whether or not rx DCOC software calibration is performed.
+ *                -#1:enable the DCOC software calibration;
+ *                -#0:disable the DCOC software calibration;
+ * @return        none.
+ * @note        Attention:
+ *                 1.Driver default enable to solve the problem of poor receiver sensitivity performance of some chips with large DC offset
+ *                 2.The following conditions should be noted when using this function:
+ *                   If you use the RX function, it must be enabled, otherwise it will result in a decrease in RX sensitivity.
+ *                   If you only use tx and not rx, and want to save code execution time for rf_mode_init(), you can disable it
+ */
+void rf_set_rx_dcoc_cali_by_sw(unsigned char en);
+
+/**
+ * @brief        This function is used to determine whether to calibrate using rx DCOC software
+ * @return        Calibration status indicator
+ *                1 Software DCOC calibration is enabled
+ *                0 Software DCOC calibration is disabled
+ */
+unsigned char rf_get_rx_dcoc_cali_by_sw(void);
+
+/**
+ * @brief        This function is used to update the 1M PHY rx DCOC calibration value.
+ * @param[in]   calib1m_code  - Value of iq_code after 1M calibration.
+ *                 (The code is a combination value,you need to fill in the combined iq value)
+ *                 <0> is used to control the switch of bypass dcoc calibration iq code, the value should be 1;
+ *                 <7-1>:the value of I code, the range of value is 0~127;
+ *                 <14-8>:the value of Q code, the range of value is 0~127.
+ * @return         none.
+ */
+void rf_update_rx_dcoc1m_calib_code(unsigned short calib1m_code);
+
+/**
+ * @brief        This function is used to update the 2M PHY rx DCOC calibration value.
+ * @param[in]     calib2m_code  - Value of iq_code after 2M calibration.
+ *                 (The code is a combination value,you need to fill in the combined iq value)
+ *                 <0> is used to control the switch of bypass dcoc calibration iq code, the value should be 1;
+ *                 <7-1>:the value of I code, the range of value is 0~127;
+ *                 <14-8>:the value of Q code, the range of value is 0~127.
+ * @return         none.
+ */
+void rf_update_rx_dcoc2m_calib_code(unsigned short calib2m_code);
+
+/**
+ * @brief        This function is mainly used to set the overwrite value of iq code and bypass dcoc calibration iq code.
+ * @param[in]    iq_code:Value of iq_code after calibration.(The code is a combination value,you need to fill in the combined iq value)
+ *                 <0> is used to control the switch of bypass dcoc calibration iq code, the value should be 1;
+ *                 <7-1>:the value of I code, the range of value is 0~127;
+ *                 <14-8>:the value of Q code, the range of value is 0~127.
+ * @return       none.
+ * @note
+ */
+_attribute_ram_code_sec_ void rf_set_dcoc_iq_code(unsigned short iq_code);
+
+/**
+ * @brief        This function is mainly used to set the overwrite value of iq offset and bypass dcoc calibration iq offset.
+ * @param[in]    iq_offset:Value of iq_offset after calibration.(The code is a combination value,you need to fill in the combined iq offset value)
+ *                 <0> is used to control the switch of bypass dcoc calibration iq offset, the value should be 1;
+ *                 <7-1>:the value of I offset, the range of value is -64~63;
+ *                 <14-8>:the value of Q offset, the range of value is -64~63.
+ * @return       none.
+ */
+_attribute_ram_code_sec_ void rf_set_dcoc_iq_offset(signed short iq_offset);
+
+
+/**
+ * @brief    This function is mainly used for dcoc 1m phy calibration by the software.
+ * @return   none.
+ */
+_attribute_ram_code_sec_noinline_ void rf_rx_dcoc1m_cali_by_sw(void);
+
+/**
+ * @brief    This function is mainly used for dcoc 2m phy calibration by the software.
+ * @return   none.
+ */
+_attribute_ram_code_sec_noinline_ void rf_rx_dcoc2m_cali_by_sw(void);
+
 /**
  * @brief     This function is used to select the RF modulation and demodulation rate.
  * @param[in] modem_rate - RF modulation and demodulation rate.
@@ -895,10 +1066,16 @@ void rf_start_srx(unsigned int tick);
 
 
 /**
- * @brief       This function serves to get rssi.
+ * @brief       This function serves to get latched rssi.
  * @return      rssi value.
  */
-signed char rf_get_rssi(void);
+signed char rf_get_latched_rssi(void);
+
+/**
+ * @brief       This function serves to get the real time rssi.
+ * @return      rssi value.
+ */
+signed char rf_get_real_time_rssi(void);
 
 /**
  * @brief       This function serves to set RF Tx mode.
@@ -969,6 +1146,12 @@ int rf_set_trx_state(rf_status_e rf_status, signed char rf_channel);
  * @return      none.
  */
 void rf_update_internal_cap(unsigned char value);
+
+/**
+ * @brief       This function serves to close internal cap;
+ * @return      none.
+ */
+void rf_turn_off_internal_cap(void);
 
 /**
  * @brief       This function serve to change the length of preamble.
@@ -1115,6 +1298,7 @@ void rf_rx_fast_settle_en(void);
  *  @brief      This function serve to disable the rx timing sequence adjusted.
  *  @param[in]  none
  *  @return     none
+ *  @note        This interface needs to be called after rf mode initialization (e.g. after rf_set_ble_1M_NO_PN_mode)
 */
 void rf_rx_fast_settle_dis(void);
 
@@ -1259,9 +1443,59 @@ _attribute_ram_code_sec_noinline_ void rf_reset_register_value(void);
 void rf_set_power_level_singletone(rf_power_level_e level);
 
 /**
- * @brief       This function is used to set the MODEM side to hp mode.
+ * @brief       This function is used to set the MODEM side to high-performance mode for rx.
  * @param[in]   hp_en - hp mode enable. 1  hp mode enable;0 hp mode disable(aura path);
  * @return      none.
+ * @note        Attention:
+ *              (1)Must be called before rf mode initialization(e.g. before rf_set_ble_1M_mode)
+ *              (2)Zigbee related modes cannot use high-performance mode
  */
 void rf_modem_hp_path(unsigned char hp_en);
+
+/**
+ * @brief       This function is used to set the power trim level in rf vant mode.
+ * @param[in]   power_trim -  When set to RF_VANT_HIGH_POWER mode the energy under
+ *              Vant can be up to 6.4dbm. when using RF_VANT_NORMAL_POWER mode the
+ *              energy is up to 4.5dbm.
+ * @return      none
+ * @note        When using energy values above 4.5db in Vant mode the level needs
+ *              to be set to RF_VANT_HIGH_POWER before the tx and RF_VANT_NORMAL_POWER
+ *              at the end of the tx to reduce unnecessary power consumption.
+ */
+void rf_set_vant_power_trim_level(rf_vant_power_trim_e max_power );
+
+
+/**
+ * @brief      This function serves to optimize RF performance
+ * @param[in]  none
+ * @return     none
+ * @note       1.Call this function after turning on rx 30us, and the calibration value set by the function
+ *                will take effect after calling rf_ldot_ldo_rxtxlf_bypass_en;if automatic calibration is
+ *                required, you can use rf_ldot_ldo_rxtxlf_bypass_dis to turn off the bypass function; how to
+ *                use it can refer to bqb.c file or rf_emi_rx in emi.c
+ *             2. After using rf_ldot_ldo_rxtxlf_bypass_dis to turn off the bypass function and enter tx/rx
+ *                automatic calibration, to use this function again, you need to call the rf_set_rxpara function
+ *                again after entering rx 30us.
+ *
+ */
+void rf_set_rxpara(void);
+
+/**
+ * @brief       This function is used to enable the ldo rxtxlf bypass function, and the calibration value
+ *              written by the software will take effect after enabling.
+ * @param[in]   none.
+ * @return      none.
+ */
+void rf_ldot_ldo_rxtxlf_bypass_en(void);
+
+
+/**
+ * @brief       This function is used to close the ldo rxtxlf bypass function, and the hardware will
+ *              automatically perform the calibration function after closing.
+ * @param[in]   none.
+ * @return      none.
+ */
+void rf_ldot_ldo_rxtxlf_bypass_dis(void);
+
+
 #endif

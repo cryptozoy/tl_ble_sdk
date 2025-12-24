@@ -47,12 +47,19 @@
 #define PAGE_SIZE     256
 #define PAGE_SIZE_OTP 256
 
+#define FLASH_ADDR_BASE     0x20000000
+#define FLASH_ADDR_MASK     0xf0000000
+
 #ifdef MCU_CORE_TL322X_N22
 typedef struct
 {
     unsigned char preempt_en;
     unsigned char threshold;
 } preempt_config_t;
+#endif
+
+#ifndef STACK_SIZE_FOR_FLASH_DATA
+    #define STACK_SIZE_FOR_FLASH_DATA       256
 #endif
 
 /**

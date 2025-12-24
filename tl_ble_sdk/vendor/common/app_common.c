@@ -34,7 +34,7 @@
  */
 void blc_app_setDeepsleepRetentionSramSize(void)
 {
-    #if  ((MCU_CORE_TYPE == MCU_CORE_TL721X) || (MCU_CORE_TYPE == MCU_CORE_TL321X))
+    #if  ((MCU_CORE_TYPE == MCU_CORE_TL721X) || (MCU_CORE_TYPE == MCU_CORE_TL321X) || (MCU_CORE_TYPE == MCU_CORE_TL323X))
     __asm__ volatile (
         ".option push\n"
         ".option norelax\n"
@@ -47,7 +47,7 @@ void blc_app_setDeepsleepRetentionSramSize(void)
     u32        deepret_end = (u32)&_RAMCODE_VMA_END;
 
     u32 deepret_size = deepret_end - deepret_start;
-    #if  ((MCU_CORE_TYPE == MCU_CORE_TL721X) || (MCU_CORE_TYPE == MCU_CORE_TL321X))
+    #if  ((MCU_CORE_TYPE == MCU_CORE_TL721X) || (MCU_CORE_TYPE == MCU_CORE_TL321X)  || (MCU_CORE_TYPE == MCU_CORE_TL323X))
     __asm__ volatile (
         ".option pop\n"
     );
@@ -55,26 +55,46 @@ void blc_app_setDeepsleepRetentionSramSize(void)
     if (deepret_size <= 0x8000) {
         blc_pm_setDeepsleepRetentionType(DEEPSLEEP_MODE_RET_SRAM_LOW32K);
         tlkapi_printf(APP_LOG_COMMON_EN, "[APP][COMMON] deep retention size 32K\r\n");
-    } else if (deepret_size <= 0x10000) {
+    }
+#if (MCU_CORE_TYPE != MCU_CORE_TL323X)
+    else if (deepret_size <= 0x10000) {
         blc_pm_setDeepsleepRetentionType(DEEPSLEEP_MODE_RET_SRAM_LOW64K);
         tlkapi_printf(APP_LOG_COMMON_EN, "[APP][COMMON] deep retention size 64K\r\n");
     }
-    #if ((MCU_CORE_TYPE == MCU_CORE_B92) || (MCU_CORE_TYPE == MCU_CORE_TL321X))
+#endif /* MCU_CORE_TYPE != MCU_CORE_TL323X */
+    #if ((MCU_CORE_TYPE == MCU_CORE_B92) || (MCU_CORE_TYPE == MCU_CORE_TL321X) || (MCU_CORE_TYPE == MCU_CORE_TL323X))
     else if (deepret_size <= 0x18000) {
         blc_pm_setDeepsleepRetentionType(DEEPSLEEP_MODE_RET_SRAM_LOW96K);
         tlkapi_printf(APP_LOG_COMMON_EN, "[APP][COMMON] deep retention size 96K\r\n");
     }
-    #endif //#if ((MCU_CORE_TYPE == MCU_CORE_B92) || (MCU_CORE_TYPE == MCU_CORE_TL321X) )
+    #endif //#if ((MCU_CORE_TYPE == MCU_CORE_B92) || (MCU_CORE_TYPE == MCU_CORE_TL321X)  || (MCU_CORE_TYPE == MCU_CORE_TL323X) )
 
-    #if (MCU_CORE_TYPE == MCU_CORE_TL721X)
+    #if (MCU_CORE_TYPE == MCU_CORE_TL721X) || (MCU_CORE_TYPE == MCU_CORE_TL322X)
     else if (deepret_size <= 0x20000) {
         blc_pm_setDeepsleepRetentionType(DEEPSLEEP_MODE_RET_SRAM_LOW128K);
         tlkapi_printf(APP_LOG_COMMON_EN, "[APP][COMMON] deep retention size 128K\r\n");
-    } else if (deepret_size <= 0x40000) {
+    }
+    #endif //#if (MCU_CORE_TYPE == MCU_CORE_TL721X) || (MCU_CORE_TYPE == MCU_CORE_TL322X)
+
+    #if (MCU_CORE_TYPE == MCU_CORE_TL323X)
+    else if (deepret_size <= 0x28000) {
+        blc_pm_setDeepsleepRetentionType(DEEPSLEEP_MODE_RET_SRAM_LOW160K);
+        tlkapi_printf(APP_LOG_COMMON_EN, "[APP][COMMON] deep retention size 160K\r\n");
+    }
+    #endif
+
+    #if (MCU_CORE_TYPE == MCU_CORE_TL721X) || (MCU_CORE_TYPE == MCU_CORE_TL322X)
+    else if (deepret_size <= 0x40000) {
         blc_pm_setDeepsleepRetentionType(DEEPSLEEP_MODE_RET_SRAM_LOW256K);
         tlkapi_printf(APP_LOG_COMMON_EN, "[APP][COMMON] deep retention size 256K\r\n");
     }
-    #endif //#if (MCU_CORE_TYPE == MCU_CORE_TL721X)
+    #endif //#if (MCU_CORE_TYPE == MCU_CORE_TL721X) || (MCU_CORE_TYPE == MCU_CORE_TL322X)
+    #if (MCU_CORE_TYPE == MCU_CORE_TL322X)
+    else if (deepret_size <= 0x60000) {
+        blc_pm_setDeepsleepRetentionType(DEEPSLEEP_MODE_RET_SRAM_LOW384K);
+        tlkapi_printf(APP_LOG_COMMON_EN, "[APP][COMMON] deep retention size 384K\r\n");
+    }
+    #endif //#if (MCU_CORE_TYPE == MCU_CORE_TL322X)
     else {
         /* retention size too large, overflow. deep retention size setting err*/
         tlkapi_printf(APP_LOG_COMMON_EN, "[APP][COMMON] deep retention size setting err");

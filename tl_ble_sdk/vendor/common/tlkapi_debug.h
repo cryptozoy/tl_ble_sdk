@@ -65,7 +65,7 @@
     /**
      * @brief   Compilation constraint for minimum baud rate
      * @note    Compilation will fail if baud rate is set below 200K.
-     *          This is due to scheduler's maximum interrupt disable time (50¦Ìs).
+     *          This is due to scheduler's maximum interrupt disable time (50Î¼s).
      */
     #if TLKAPI_DEBUG_GSUART_BAUDRATE < 200000
         #error "Baud rate must be at least 200K."
