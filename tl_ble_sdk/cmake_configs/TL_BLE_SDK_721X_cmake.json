@@ -621,7 +621,7 @@
       ]
     },
     {
-      "name": "eslp_ap_dmeo",
+      "name": "eslp_ap_demo",
       "path": "./",
       "toolchain": "RISC-V Cross GCC",
       "toolchainVersionName": "TL32 ELF MCULIB V5F GCC12.2",
@@ -745,7 +745,7 @@
       "pre_build": [],
       "post_build": [
         "chmod +x ${CMAKE_CURRENT_SOURCE_DIR}/build/TL721X/../../tl_check_fw.sh",
-        " ${CMAKE_CURRENT_SOURCE_DIR}/build/TL721X/../../tl_check_fw.sh   eslp_ap_dmeo"
+        " ${CMAKE_CURRENT_SOURCE_DIR}/build/TL721X/../../tl_check_fw.sh   eslp_ap_demo"
       ],
       "print_size": [
         "-t"
